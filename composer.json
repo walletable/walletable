@@ -1,0 +1,40 @@
+{
+    "name": "mane-olawale/walletable",
+    "description": "A Laravel package that makes finacial operations a breeze in your application.",
+    "type": "library",
+    "license": "MIT",
+    "homepage": "https://github.com/mane-olawale/walletable",
+    "support": {
+        "issues": "https://github.com/mane-olawale/walletable/issues",
+        "source": "https://github.com/mane-olawale/walletable"
+    },
+    "minimum-stability": "dev",
+    "authors": [
+        {
+            "name": "Ilesanmi Olawale Adedotun",
+            "homepage": "https://twitter.com/mane_olawale",
+            "email": "horlwaley001@gmail.com"
+        }
+    ],
+	"require": {
+		"php": ">=7.1",
+        "laravel/framework": "^7.0"
+	},
+    "autoload": {
+        "psr-4": {
+            "ManeOlawale\\Walletable\\": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "ManeOlawale\\Walletable\\WalletableServiceProvider"
+            ]
+        }
+    }
+}
