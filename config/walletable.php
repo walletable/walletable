@@ -22,4 +22,10 @@ return [
         'wallet' => ManeOlawale\Walletable\Models\Wallet::class,
     ],
 
+    'generation' => [
+        'tries' => 5,
+        'label' => 'wallet',
+        'name' => 'Wallet',
+    ],
+
 ];
