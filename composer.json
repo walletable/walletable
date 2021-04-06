@@ -3,10 +3,10 @@
     "description": "A Laravel package that makes finacial operations a breeze in your application.",
     "type": "library",
     "license": "MIT",
-    "homepage": "https://github.com/mane-olawale/walletable",
+    "homepage": "https://github.com/walletable/walletable",
     "support": {
-        "issues": "https://github.com/mane-olawale/walletable/issues",
-        "source": "https://github.com/mane-olawale/walletable"
+        "issues": "https://github.com/walletable/walletable/issues",
+        "source": "https://github.com/walletable/walletable"
     },
     "authors": [
         {
