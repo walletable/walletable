@@ -8,7 +8,7 @@ use Walletable\Walletable\Models\Walletable;
 use Money\Money;
 use Money\Currency;
 
-class UnknownProvider extends ProviderAbstract
+class UnknownProvider extends ProviderRepository
 {
     /**
      * This function is used to add funds to a wallet

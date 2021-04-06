@@ -3,7 +3,7 @@
 namespace Walletable\Walletable;
 use Illuminate\Database\Eloquent\Model;
 
-class WalletRepository
+class WalletManager
 {
     private $app;
 
@@ -37,7 +37,7 @@ class WalletRepository
 
     public function provider(string $class)
     {
-        if ( !(class_exists($class) && is_subclass_of($class, Providers\ProviderAbstract::class)) ) throw new \Exception("Invalid Provider class [$class]");
+        if ( !(class_exists($class) && is_subclass_of($class, Providers\ProviderRepository::class)) ) throw new \Exception("Invalid Provider class [$class]");
         
         $this->providers[$class::signature()] = $class;
     }

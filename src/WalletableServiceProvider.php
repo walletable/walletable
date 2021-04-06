@@ -3,7 +3,7 @@
 namespace Walletable\Walletable;
 
 use Illuminate\Support\ServiceProvider;
-use Walletable\Walletable\WalletRepository;
+use Walletable\Walletable\WalletManager;
 use Walletable\Walletable\Commands\InstallCommand;
 
 class WalletableServiceProvider extends ServiceProvider
@@ -16,9 +16,9 @@ class WalletableServiceProvider extends ServiceProvider
     public function register()
     {
 
-        $this->app->singleton( WalletRepository::class, function (){
+        $this->app->singleton( WalletManager::class, function (){
 
-            return new WalletRepository;
+            return new WalletManager;
 
         });
 

@@ -8,7 +8,7 @@ use Walletable\Walletable\Models\Walletable;
 use App\Models\WalletHold;
 use DB;
 
-abstract class ProviderAbstract implements ProviderInterface 
+abstract class ProviderRepository implements ProviderInterface 
 {
     protected $wallet;
 
