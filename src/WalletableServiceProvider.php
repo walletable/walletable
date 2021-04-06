@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Providers;
+namespace Walletable\Walletable;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
