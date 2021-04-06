@@ -1,9 +1,9 @@
 <?php
 
-namespace ManeOlawale\Walletable\Facades;
+namespace Walletable\Walletable\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use ManeOlawale\Walletable\WalletRepository;
+use Walletable\Walletable\WalletRepository;
 
 /**
  * @method static \Intervention\Image\Image make(mixed $data)

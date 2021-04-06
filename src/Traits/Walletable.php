@@ -1,6 +1,6 @@
 <?php
 
-namespace ManeOlawale\Walletable\Traits;
+namespace Walletable\Walletable\Traits;
 use Wallet;
 use App\Models\Wallet as Model;
 

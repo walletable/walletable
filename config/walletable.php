@@ -19,7 +19,7 @@ return [
 
 
     'models' => [
-        'wallet' => ManeOlawale\Walletable\Models\Wallet::class,
+        'wallet' => Walletable\Walletable\Models\Wallet::class,
     ],
 
     'generation' => [

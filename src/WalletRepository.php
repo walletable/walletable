@@ -1,6 +1,6 @@
 <?php
 
-namespace ManeOlawale\Walletable;
+namespace Walletable\Walletable;
 use Illuminate\Database\Eloquent\Model;
 
 class WalletRepository

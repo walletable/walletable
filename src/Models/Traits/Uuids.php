@@ -1,6 +1,6 @@
 <?php
 
-namespace ManeOlawale\Walletable\Models\Traits;
+namespace Walletable\Walletable\Models\Traits;
 
 
 use Illuminate\Support\Str;

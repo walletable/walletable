@@ -1,10 +1,10 @@
 <?php
 
-namespace ManeOlawale\Walletable\Providers;
+namespace Walletable\Walletable\Providers;
 
-use ManeOlawale\Walletable\Models\WalletInterface;
+use Walletable\Walletable\Models\WalletInterface;
 use Illuminate\Database\Eloquent\Model;
-use ManeOlawale\Walletable\Models\Walletable;
+use Walletable\Walletable\Models\Walletable;
 
 interface ProviderInterface 
 {

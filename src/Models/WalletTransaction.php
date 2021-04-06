@@ -1,6 +1,6 @@
 <?php
 
-namespace ManeOlawale\Walletable\Models;
+namespace Walletable\Walletable\Models;
 
 use App\Lib\Traits\Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

@@ -8,7 +8,7 @@ use Money\Currencies\ISOCurrencies;
 use Money\Formatter\IntlMoneyFormatter;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Database\Schema\Blueprint;
-use ManeOlawale\Walletable\WalletRepository;
+use Walletable\Walletable\WalletRepository;
 
 class WalletableServiceProvider extends ServiceProvider
 {

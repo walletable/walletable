@@ -1,6 +1,6 @@
 <?php
 
-namespace ManeOlawale\Walletable\Models;
+namespace Walletable\Walletable\Models;
 
 interface WalletInterface
 {

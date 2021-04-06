@@ -22,7 +22,7 @@
 	},
     "autoload": {
         "psr-4": {
-            "ManeOlawale\\Walletable\\": "src/"
+            "Walletable\\Walletable\\": "src/"
         },
         "files": [
             "src/helpers.php"
@@ -33,7 +33,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "ManeOlawale\\Walletable\\WalletableServiceProvider"
+                "Walletable\\Walletable\\WalletableServiceProvider"
             ]
         }
     }
