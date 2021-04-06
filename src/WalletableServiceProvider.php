@@ -3,12 +3,8 @@
 namespace Walletable\Walletable;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Schema;
-use Money\Currencies\ISOCurrencies;
-use Money\Formatter\IntlMoneyFormatter;
-use Illuminate\Pagination\Paginator;
-use Illuminate\Database\Schema\Blueprint;
 use Walletable\Walletable\WalletRepository;
+use Walletable\Walletable\Commands\InstallCommand;
 
 class WalletableServiceProvider extends ServiceProvider
 {
@@ -36,6 +32,36 @@ class WalletableServiceProvider extends ServiceProvider
     public function boot()
     {
 
+        $this->addPublishes();
+
+        $this->addCommands();
+
+    }
+
+
+    public function addPublishes()
+    {
+
+        $this->publishes([
+
+            __DIR__.'/../config/walletable.php' => config_path('walletable.php')
+
+        ], 'walletable.config');
+
+    }
+
+
+    protected function addCommands()
+    {
+        if ($this->app->runningInConsole()) {
+
+            $this->commands([
+
+                InstallCommand::class,
+
+            ]);
+
+        }
     }
 
 
