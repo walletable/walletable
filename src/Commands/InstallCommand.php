@@ -1,6 +1,6 @@
 <?php 
 
-namespace Walletable\Walletable\Commands;
+namespace Walletable\Commands;
 
 use Illuminate\Console\Command;
 

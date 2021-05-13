@@ -1,9 +1,9 @@
 <?php
 
-namespace Walletable\Walletable\Facades;
+namespace Walletable\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Walletable\Walletable\WalletManager;
+use Walletable\WalletManager;
 
 /**
  * @method static \Intervention\Image\Image make(mixed $data)

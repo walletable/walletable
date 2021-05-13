@@ -1,6 +1,6 @@
 {
     "name": "walletable/walletable",
-    "description": "A Laravel package that makes finacial operations a breeze in your application.",
+    "description": "A package to create e-wallets for managing and analysing digital financial assets per entity in your laravel application.",
     "type": "library",
     "license": "MIT",
     "homepage": "https://github.com/walletable/walletable",
@@ -17,11 +17,15 @@
     ],
 	"require": {
 		"php": ">=7.1",
-        "laravel/framework": ">=7.0"
+        "laravel/framework": "^7.0|^8.0"
 	},
+    "require-dev": {
+        "mockery/mockery": "^1.0",
+        "phpunit/phpunit": "^7.0|^8.0|^9.3"
+    },
     "autoload": {
         "psr-4": {
-            "Walletable\\Walletable\\": "src/"
+            "Walletable\\": "src/"
         },
         "files": [
             "src/helpers.php"
@@ -32,7 +36,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Walletable\\Walletable\\WalletableServiceProvider"
+                "Walletable\\WalletableServiceProvider"
             ]
         }
     }

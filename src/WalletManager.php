@@ -1,20 +1,20 @@
 <?php
 
-namespace Walletable\Walletable;
+namespace Walletable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Application;
 
 class WalletManager
 {
     private $app;
 
     private $providers;
-    
-    public function __construct()
+
+    public function __construct( Application $app )
     {
-        $this->app = app();
+        $this->app = $app;
         $this->registerBaseProviders();
     }
-
 
     public function make( Models\WalletInterface $wallet)
     {

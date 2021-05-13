@@ -19,7 +19,9 @@ return [
 
 
     'models' => [
-        'wallet' => Walletable\Walletable\Models\Wallet::class,
+        'wallet' => Walletable\Models\Wallet::class,
+        'hold' => Walletable\Models\WalletHold::class,
+        'transaction' => Walletable\Models\WalletTransaction::class,
     ],
 
     'generation' => [

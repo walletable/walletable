@@ -1,10 +1,10 @@
 <?php
 
 
-namespace Walletable\Walletable\Providers;
-use Walletable\Walletable\Models\WalletInterface;
+namespace Walletable\Providers;
+use Walletable\Models\WalletInterface;
 use Illuminate\Database\Eloquent\Model;
-use Walletable\Walletable\Models\Walletable;
+use Walletable\Models\Walletable;
 use App\Models\WalletHold;
 use DB;
 

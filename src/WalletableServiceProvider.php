@@ -1,10 +1,10 @@
 <?php
 
-namespace Walletable\Walletable;
+namespace Walletable;
 
 use Illuminate\Support\ServiceProvider;
-use Walletable\Walletable\WalletManager;
-use Walletable\Walletable\Commands\InstallCommand;
+use Walletable\WalletManager;
+use Walletable\Commands\InstallCommand;
 
 class WalletableServiceProvider extends ServiceProvider
 {
@@ -38,7 +38,6 @@ class WalletableServiceProvider extends ServiceProvider
 
     }
 
-
     public function addPublishes()
     {
 
@@ -49,7 +48,6 @@ class WalletableServiceProvider extends ServiceProvider
         ], 'walletable.config');
 
     }
-
 
     protected function addCommands()
     {

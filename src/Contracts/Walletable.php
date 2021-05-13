@@ -1,14 +1,9 @@
 <?php
 
-namespace Walletable\Walletable\Models;
+namespace Walletable\Models;
 
 interface Walletable
 {
-    /**
-     * This method provides the account name of the wallet as specified by the wallet
-     * @return string
-     */
-    public function account_name():string;
 
 
     /**
