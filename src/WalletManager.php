@@ -1,20 +1,20 @@
 <?php
 
-namespace Walletable\Walletable;
+namespace Walletable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Application;
 
-class WalletRepository
+class WalletManager
 {
     private $app;
 
     private $providers;
-    
-    public function __construct()
+
+    public function __construct( Application $app )
     {
-        $this->app = app();
+        $this->app = $app;
         $this->registerBaseProviders();
     }
-
 
     public function make( Models\WalletInterface $wallet)
     {
@@ -37,7 +37,7 @@ class WalletRepository
 
     public function provider(string $class)
     {
-        if ( !(class_exists($class) && is_subclass_of($class, Providers\ProviderAbstract::class)) ) throw new \Exception("Invalid Provider class [$class]");
+        if ( !(class_exists($class) && is_subclass_of($class, Providers\ProviderRepository::class)) ) throw new \Exception("Invalid Provider class [$class]");
         
         $this->providers[$class::signature()] = $class;
     }

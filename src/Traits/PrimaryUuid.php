@@ -1,12 +1,12 @@
 <?php
 
-namespace Walletable\Walletable\Models\Traits;
+namespace Walletable\Models\Traits;
 
 
 use Illuminate\Support\Str;
 
 
-trait Uuids
+trait PrimaryUuid
 {
 
     /**

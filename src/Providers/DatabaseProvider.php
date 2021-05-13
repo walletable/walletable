@@ -1,13 +1,13 @@
 <?php
 
 
-namespace Walletable\Walletable\Providers;
-use Walletable\Walletable\Models\WalletInterface;
-use Walletable\Walletable\Models\Walletable;
+namespace Walletable\Providers;
+use Walletable\Models\WalletInterface;
+use Walletable\Models\Walletable;
 use Money\Money;
 use Money\Currency;
 
-class DatabaseProvider extends ProviderAbstract 
+class DatabaseProvider extends ProviderRepository 
 {
     /**
      * This function is used to add funds to a wallet

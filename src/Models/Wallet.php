@@ -1,13 +1,14 @@
 <?php
 
-namespace Walletable\Walletable\Models;
+namespace Walletable\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Walletable\Traits\PrimaryUuid;
 
 class Wallet extends Model implements WalletInterface
 {
-    use HasFactory, Traits\Uuids;
+    use HasFactory, PrimaryUuid;
 
     /**
      * The attributes that are mass assignable.

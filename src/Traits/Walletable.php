@@ -1,8 +1,7 @@
 <?php
 
-namespace Walletable\Walletable\Traits;
+namespace Walletable\Traits;
 use Wallet;
-use App\Models\Wallet as Model;
 
 trait Walletable
 {
@@ -20,9 +19,13 @@ trait Walletable
      * @return string
      */
     public function getWallet(string $provider = null, bool $catchError = false){
+
         if (!$provider) $provider = config('wallet.default');
+
         try {
-            $wallet = Model::where('owner_id', $this->{$this->getKeyName()})->where('owner_type', static::class)->where('provider', $provider)->firstOrFail();
+
+            $wallet = app(config('walletable.models.wallet'))->where('owner_id', $this->{$this->getKeyName()})->where('owner_type', static::class)->where('provider', $provider)->firstOrFail();
+            
         } catch (\Throwable $th) {
 
             if ($catchError) throw $th;
