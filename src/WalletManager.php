@@ -42,21 +42,17 @@ class WalletManager
         $this->providers[$class::signature()] = $class;
     }
 
-    public function generate(string $provider, Models\Walletable $owner, string $label = null, string $name = null)
+    public function generateForModel( string $label, string $tag, string $currency, Contracts\ProviderInterface $provider, Contracts\Walletable $walletable)
     {
-        if (!$label) $label = config('wallet.generation.label', 'wallet');
-        if (!$name) $name = config('wallet.generation.name', 'Wallet');
-        $owner_id = $owner->{$owner->getKeyName()};
-        $owner_type = get_class($owner);
-        $providerClass = (isset($this->providers[$provider])) ? $this->providers[$provider]: $this->providers['unknown'];
-        $model = config('walletable.models.wallet');
-        $wallet = (new $model)->fill(
+        $owner_id = $owner->{$walletable->getKeyName()};
+        $owner_type = get_class($walletable);
+        $wallet = app(config('walletable.models.wallet'))->fill(
             [
-                'owner_id' => $owner_id,
-                'owner_type' => $owner_type,
+                'walletable_id' => $owner_id,
+                'walletable_type' => $owner_type,
                 'label' => $label,
                 'name' => $name,
-                'provider' => $providerClass::signature(),
+                'provider' => $provider->signature(),
                 'balance' => 0,
                 'data' => '{}',
             ]
@@ -65,7 +61,7 @@ class WalletManager
         $i = 1;
         while ($i <= config('wallet.generation.tries', 5)) {
 
-            $result = $providerClass::generate($owner, $wallet);
+            $result = $providerClass::generate( $wallet, $walletable);
 
             if ($result['success']) {
                 break;

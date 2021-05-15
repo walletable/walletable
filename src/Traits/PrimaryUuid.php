@@ -1,6 +1,6 @@
 <?php
 
-namespace Walletable\Models\Traits;
+namespace Walletable\Traits;
 
 
 use Illuminate\Support\Str;

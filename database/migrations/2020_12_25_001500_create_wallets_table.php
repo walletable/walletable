@@ -21,7 +21,7 @@ class CreateWalletsTable extends Migration
     public function up()
     {
         Schema::create($this->tableName, function (Blueprint $table) {
-            $table->primaryUuid();
+            $table->id();
             $table->indexedUuidMorphs('walletable');
             $table->string('label', 45);
             $table->string('name', 45);
