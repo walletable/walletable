@@ -21,9 +21,9 @@ class CreateWalletHoldsTable extends Migration
     public function up()
     {
         Schema::create($this->tableName, function (Blueprint $table) {
-            $table->primaryUuid();
-            $table->uuid('wallet_id')->index();
-            $table->nullableIndexedUuidMorphs('for');
+            $table->id();
+            $table->unsignedBigInteger('wallet_id')->index();
+            $table->nullableMorphs('for');
             $table->unsignedBigInteger('amount');
             $table->char('currency', 10);
             $table->char('label', 45)->index();

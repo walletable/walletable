@@ -10,7 +10,7 @@ class CreateWalletTransactionsTable extends Migration
      * Schema table name to migrate
      * @var string
      */
-    public $tableName = 'transactions';
+    public $tableName = 'wallet_transactions';
 
     /**
      * Run the migrations.
@@ -21,34 +21,19 @@ class CreateWalletTransactionsTable extends Migration
     public function up()
     {
         Schema::create($this->tableName, function (Blueprint $table) {
-            $table->primaryUuid();
-            $table->uuid('wallet_id');
-            $table->enum('type', ['credit', 'debit']);
-            $table->string('session', 100);
-            $table->enum('action', ['wallet_transfer', 'bank_transfer', 'purchase']);
-            $table->uuid('to_wallet')->nullable();
+            $table->id();
+            $table->unsignedBigInteger('wallet_id')->index();
+            $table->string('session', 100)->index(); 
+            $table->enum('type', ['credit', 'debit'])->index();
+            $table->enum('action', ['transfer', 'hold', 'inbound', 'outbound', 'other'])->index();
+            $table->unsignedBigInteger('amount');
+            $table->nullableMolphs('method');
+            $table->enum('status', ['approved', 'successful', 'unsuccessful', 'pending'])->index();
             $table->json('data')->nullable();
-            $table->enum('status', ['approved', 'successful', 'unsuccessful', 'pending']);
-            $table->string('driver', 45)->nullable();
             $table->timestamp('created_at')->nullable();
-
-            $table->index("session");
-
-            $table->index("to_wallet");
-
-            $table->index("status");
-
-            $table->index("type");
-
-            $table->index("action");
-
-            $table->index("wallet_id");
 
 
             $table->foreign('wallet_id')
-                ->references('id')->on('wallets');
-
-            $table->foreign('to_wallet')
                 ->references('id')->on('wallets');
         });
     }
