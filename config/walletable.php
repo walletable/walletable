@@ -27,7 +27,6 @@ return [
     'generation' => [
         'tries' => 5,
         'label' => 'wallet',
-        'name' => 'Wallet',
     ],
 
 ];

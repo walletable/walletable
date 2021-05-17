@@ -25,7 +25,7 @@ class WalletManager
 
     public function makeProvider( string $provider, Models\WalletInterface $wallet) : Providers\ProviderInterface
     {
-        return (isset($this->prividers[$provider]))? new $this->providers[$provider]($wallet) : new $this->providers[config('wallet.default')]($wallet);
+        return (isset($this->providers[$provider]))? new $this->providers[$provider]($wallet) : new $this->providers[config('wallet.default')]($wallet);
     }
 
     public function registerBaseProviders()
@@ -66,6 +66,8 @@ class WalletManager
             if ($result['success']) {
                 break;
             }
+
+            $i++;
 
         }
 
