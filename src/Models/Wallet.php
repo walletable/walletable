@@ -4,11 +4,11 @@ namespace Walletable\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Walletable\Traits\PrimaryUuid;
+use Walletable\Traits\ConditionalUuid;
 
 class Wallet extends Model implements WalletInterface
 {
-    use HasFactory, PrimaryUuid;
+    use HasFactory, ConditionalUuid;
 
     /**
      * The attributes that are mass assignable.
@@ -18,10 +18,10 @@ class Wallet extends Model implements WalletInterface
     protected $fillable = [
         'walletable_id',
         'walletable_type',
-        'name',
         'label',
+        'tag',
         'amount',
-        'currency_id',
+        'currency',
         'data',
         'provider',
         'status',

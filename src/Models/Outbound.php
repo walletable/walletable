@@ -4,11 +4,11 @@ namespace Walletable\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Walletable\Traits\PrimaryUuid;
+//use Walletable\Traits\ConditionalUuid;
 
-class WalletHold extends Model
+class Outbound extends Model
 {
-    use HasFactory, PrimaryUuid;
+    use HasFactory;
 
     /**
      * The attributes that are mass assignable.

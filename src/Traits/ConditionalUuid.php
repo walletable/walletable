@@ -6,7 +6,7 @@ namespace Walletable\Traits;
 use Illuminate\Support\Str;
 
 
-trait PrimaryUuid
+trait ConditionalUuid
 {
 
     /**
@@ -17,7 +17,7 @@ trait PrimaryUuid
         parent::boot();
 
         static::creating(function ($model) {
-            if (empty($model->{$model->getKeyName()})) {
+            if (config('walletable.uuid.'.$this->getTable()) && empty($model->{$model->getKeyName()})) {
                 $model->{$model->getKeyName()} = Str::Uuid();
             }
         });

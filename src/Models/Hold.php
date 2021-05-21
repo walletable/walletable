@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Models;
+namespace Walletable\Models;
 
-use App\Lib\Traits\Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Walletable\Traits\ConditionalUuid;
 
-class WalletHold extends Model
+class Hold extends Model
 {
-    use HasFactory, Uuids;
+    use HasFactory, ConditionalUuid;
 
     /**
      * The attributes that are mass assignable.
@@ -20,21 +20,22 @@ class WalletHold extends Model
         'amount',
         'for_id',
         'for_type',
+        'currency',
         'label',
         'remarks',
-        'relieved_at',
         'action',
         'status',
+        'relieved_at',
     ];
 
-    /**
+/*     /**
      * The attributes that should be cast to native types.
      *
      * @var array
-     */
+     *
     protected $casts = [
         'status' => \App\Casts\Status::class,
-    ];
+    ]; */
 
 
     protected $attributes = [

@@ -20,13 +20,23 @@ return [
 
     'models' => [
         'wallet' => Walletable\Models\Wallet::class,
-        'hold' => Walletable\Models\WalletHold::class,
-        'transaction' => Walletable\Models\WalletTransaction::class,
+        'hold' => Walletable\Models\Hold::class,
+        'inbound' => Walletable\Models\Inbound::class,
+        'outbound' => Walletable\Models\Outbound::class,
+        'transaction' => Walletable\Models\Transaction::class,
+    ],
+
+    'uiid' => [
+        'wallets' => false,
+        'holds' => false,
+        'inbounds' => false,
+        'outbounds' => false,
+        'transactions' => false
     ],
 
     'generation' => [
         'tries' => 5,
-        'label' => 'wallet',
+        'label' => 'Wallet',
     ],
 
 ];

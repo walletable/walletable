@@ -4,9 +4,9 @@ namespace Walletable\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Walletable\Traits\PrimaryUuid;
+use Walletable\Traits\ConditionalUuid;
 
-class WalletTransaction extends Model
+class Transaction extends Model
 {
-    use HasFactory, PrimaryUuid;
+    use HasFactory, ConditionalUuid;
 }

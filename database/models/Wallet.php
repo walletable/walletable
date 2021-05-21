@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Walletable\Models\WalletInterface;
+use Walletable\Models\Wallet as Model;
 
-class Wallet extends Model implements WalletInterface
+class Wallet extends Model
 {
     
 }

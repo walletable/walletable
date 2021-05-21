@@ -4,13 +4,13 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateWalletHoldsTable extends Migration
+class CreateInboundsTable extends Migration
 {
     /**
      * Schema table name to migrate
      * @var string
      */
-    public $tableName = 'wallet_holds';
+    public $tableName = 'inbounds';
 
     /**
      * Run the migrations.
@@ -23,14 +23,15 @@ class CreateWalletHoldsTable extends Migration
         Schema::create($this->tableName, function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('wallet_id')->index();
-            $table->nullableMorphs('for');
-            $table->unsignedBigInteger('amount');
-            $table->char('currency', 10);
-            $table->char('label', 45)->index();
-            $table->string('remarks', 200)->index();
-            $table->enum('action', ['released', 'resolved'])->nullable()->index();
-            $table->enum('status', ['active', 'inactive'])->index();
-            $table->dateTime('relieved_at')->nullable();
+            $table->string('reference', 100)->index(); 
+            $table->string('currency', 10);
+            $table->string('label', 50);
+            $table->string('identifier', 45);
+            $table->string('service_name', 50);
+            $table->string('service_id', 50)->nullable();
+            $table->enum('status', ['active', 'inactive', 'blocked'])->index();
+            $table->json('data')->nullable();
+            $table->string('driver', 45);
             $table->timestamps();
 
 
