@@ -4,6 +4,8 @@
 namespace Walletable\Providers;
 use Walletable\Models\WalletInterface;
 use Walletable\Models\Walletable;
+use Walletable\Wallet;
+//use Walletable\Exceptions\WalletGenerationException;
 use Money\Money;
 use Money\Currency;
 
@@ -14,7 +16,7 @@ class DatabaseProvider extends ProviderRepository
      *  @param int $amount The value must be in the base unit of the currency
      *  @return bool
      */
-    public function creditWallet(int $amount){
+    public function credit(int $amount){
 
         $this->wallet->update(
             [
@@ -29,7 +31,7 @@ class DatabaseProvider extends ProviderRepository
      *  @param int $amount The value must be in the base unit of the currency
      *  @return bool
      */
-    public function debitWallet(int $amount){
+    public function debit(int $amount){
 
             $this->wallet->update(
                 [
@@ -85,7 +87,7 @@ class DatabaseProvider extends ProviderRepository
      *  This method is used to get the providers signature
      *  @return string
      */
-    static public function signature() : string{
+    public function signature() : string{
 
         return 'database';
     }
@@ -94,10 +96,79 @@ class DatabaseProvider extends ProviderRepository
      *  Generate account details from an external service or return an empty array
      *  @return array
      */
-    public static function generate( Walletable $owner, WalletInterface $wallet ):array{
+    public function generate( Walletable $owner, WalletInterface $wallet ):array
+    {
         return [
-            'success' => true,
             'data' => []
+        ];
+    }
+
+    /**
+     *  Check compatibility between the wallet and the other wallet that is trying to transact with it
+     *  - This is used in making handshakes between wallets
+     * 
+     *  @param Wallet $mainWallet
+     *  @param Wallet $otherWallet
+     *  @return boolean
+     */
+    public function compatible( Wallet $mainWallet,  Wallet $otherWallet ):boolean
+    {
+        return ($this->otherWallet->provider === $this->signature()) || ($this->mainWallet->currency === $this->otherWallet->currency);
+        
+    }
+
+    /**
+     *  Get the currency profiles of supported currencies
+     * 
+     *  @return array
+     */
+    public function currencies(): array
+    {
+        return [
+            'NGN' => [
+                'code' => 'NGN',
+                'symbol' => '₦',
+                'name' => 'Naira',
+                'subunit' => 'Kobo',
+                'per' => 100,
+                'precision' => 2,
+                'number' => 566,
+                'unit_separator' => '.',
+                'thousand_separator' => ',',
+            ],
+            'USD' => [
+                'code' => 'USD',
+                'symbol' => '$',
+                'name' => 'Dollar',
+                'subunit' => 'Cent',
+                'per' => 100,
+                'precision' => 2,
+                'number' => 840,
+                'unit_separator' => '.',
+                'thousand_separator' => ',',
+            ],
+            'GBP' => [
+                'code' => 'GBP',
+                'symbol' => '£',
+                'name' => 'Pound Sterling',
+                'subunit' => 'Pence',
+                'per' => 100,
+                'precision' => 2,
+                'number' => 826,
+                'unit_separator' => '.',
+                'thousand_separator' => ',',
+            ],
+            'CAD' => [
+                'code' => 'CAD',
+                'symbol' => '¢',
+                'name' => 'Pound Sterling',
+                'subunit' => 'Pence',
+                'per' => 100,
+                'precision' => 2,
+                'number' => 124,
+                'unit_separator' => '.',
+                'thousand_separator' => ',',
+            ],
         ];
     }
 
@@ -105,7 +176,7 @@ class DatabaseProvider extends ProviderRepository
      *  Get the name the provider will be addressed with
      *  @return array
      */
-    public function providerName():string{
+    public function providerName() :string {
         return 'Database';
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 namespace Walletable;
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Application;
 
@@ -30,8 +31,12 @@ class WalletManager
 
     public function registerBaseProviders()
     {
-        $this->provider(Providers\DatabaseProvider::class);
-        $this->provider(Providers\UnknownProvider::class);
+        $this->provider('database', function () {
+
+            return new Providers\DatabaseProvider;
+            
+        });
+
         return $this;
     }
 
