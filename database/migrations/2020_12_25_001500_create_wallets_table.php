@@ -22,16 +22,18 @@ class CreateWalletsTable extends Migration
     {
         Schema::create($this->tableName, function (Blueprint $table) {
             $table->id();
-            $table->morphs('walletable');
+            $table->string('walletable_id', 100);
+            $table->string('walletable_type', 45);
             $table->string('label', 45);
-            $table->string('tag', 45);
+            $table->string('tag', 45)->index();
             $table->unsignedBigInteger('amount');
             $table->string('currency', 10);
+            $table->string('driver', 45)->index();
+            $table->enum('status', ['active', 'blocked'])->default('active')->index();
             $table->json('data')->nullable();
-            $table->string('provider', 45);
-            $table->enum('status', ['active', 'blocked'])->index();
             $table->timestamps();
 
+            $table->index(['walletable_id', 'walletable_type']);
         });
     }
 
@@ -40,8 +42,8 @@ class CreateWalletsTable extends Migration
      *
      * @return void
      */
-     public function down()
-     {
-       Schema::dropIfExists($this->tableName);
-     }
+    public function down()
+    {
+        Schema::dropIfExists($this->tableName);
+    }
 }

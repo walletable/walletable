@@ -23,10 +23,11 @@ class CreateHoldsTable extends Migration
         Schema::create($this->tableName, function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('wallet_id')->index();
-            $table->nullableMorphs('for');
+            $table->string('for_id', 100);
+            $table->string('for_type', 45);
             $table->unsignedBigInteger('amount');
             $table->char('currency', 10);
-            $table->char('label', 45)->index();
+            $table->char('tag', 45)->index();
             $table->string('remarks', 200)->index();
             $table->enum('action', ['released', 'resolved'])->nullable()->index();
             $table->enum('status', ['active', 'inactive'])->index();
@@ -44,8 +45,8 @@ class CreateHoldsTable extends Migration
      *
      * @return void
      */
-     public function down()
-     {
-       Schema::dropIfExists($this->tableName);
-     }
+    public function down()
+    {
+        Schema::dropIfExists($this->tableName);
+    }
 }

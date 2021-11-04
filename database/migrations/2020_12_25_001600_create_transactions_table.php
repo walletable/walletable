@@ -24,14 +24,18 @@ class CreateTransactionsTable extends Migration
             $table->id();
             $table->unsignedBigInteger('wallet_id')->index();
             $table->string('session', 100)->index();
-            $table->string('tag')->default('other')->index();
             $table->enum('type', ['credit', 'debit'])->index();
-            $table->enum('action', ['transfer', 'hold', 'inbound', 'outbound', 'other'])->index();
             $table->unsignedBigInteger('amount');
-            $table->nullableMolphs('method');
-            $table->enum('status', ['approved', 'successful', 'unsuccessful', 'pending'])->index();
+            $table->unsignedBigInteger('balance');
+            $table->string('action', 45)->index();
+            $table->string('method_id', 100);
+            $table->string('method_type', 45);
+            $table->string('status', 45)->index();
+            $table->string('driver', 45)->index();
             $table->json('data')->nullable();
             $table->timestamp('created_at')->nullable();
+
+            $table->index(['method_id', 'method_type']);
 
 
             $table->foreign('wallet_id')
@@ -44,8 +48,8 @@ class CreateTransactionsTable extends Migration
      *
      * @return void
      */
-     public function down()
-     {
-       Schema::dropIfExists($this->tableName);
-     }
+    public function down()
+    {
+        Schema::dropIfExists($this->tableName);
+    }
 }
