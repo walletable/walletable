@@ -6,4 +6,5 @@ use Walletable\Models\Transaction as Model;
 
 class Transaction extends Model
 {
+    //
 }

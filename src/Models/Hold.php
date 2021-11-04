@@ -4,11 +4,14 @@ namespace Walletable\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Walletable\Models\Relations\HoldRelations;
 use Walletable\Traits\ConditionalUuid;
 
 class Hold extends Model
 {
-    use HasFactory, ConditionalUuid;
+    use HasFactory;
+    use ConditionalUuid;
+    use HoldRelations;
 
     /**
      * The attributes that are mass assignable.

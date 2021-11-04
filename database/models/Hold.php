@@ -6,4 +6,5 @@ use Walletable\Models\Hold as Model;
 
 class Hold extends Model
 {
+    //
 }

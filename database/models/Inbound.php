@@ -6,4 +6,5 @@ use Walletable\Models\Inbound as Model;
 
 class Inbound extends Model
 {
+    //
 }

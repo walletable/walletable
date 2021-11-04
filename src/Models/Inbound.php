@@ -4,11 +4,12 @@ namespace Walletable\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-//use Walletable\Traits\ConditionalUuid;
+use Walletable\Traits\ConditionalUuid;
 
 class Inbound extends Model
 {
     use HasFactory;
+    use ConditionalUuid;
 
     /**
      * The attributes that are mass assignable.

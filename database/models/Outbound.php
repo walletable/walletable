@@ -6,4 +6,5 @@ use Walletable\Models\Outbound as Model;
 
 class Outbound extends Model
 {
+    //
 }

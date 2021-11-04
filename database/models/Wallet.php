@@ -6,5 +6,5 @@ use Walletable\Models\Wallet as Model;
 
 class Wallet extends Model
 {
-    
+    //
 }
