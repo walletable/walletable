@@ -27,10 +27,11 @@ class CreateTransactionsTable extends Migration
             $table->enum('type', ['credit', 'debit'])->index();
             $table->unsignedBigInteger('amount');
             $table->unsignedBigInteger('balance');
+            $table->string('currency', 10);
             $table->string('action', 45)->index();
-            $table->string('method_id', 100);
-            $table->string('method_type', 45);
-            $table->string('status', 45)->index();
+            $table->string('method_id', 100)->nullable();
+            $table->string('method_type', 45)->nullable();
+            $table->string('remarks', 200)->nullable()->index();
             $table->string('driver', 45)->index();
             $table->json('data')->nullable();
             $table->timestamp('created_at')->nullable();
