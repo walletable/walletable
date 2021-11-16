@@ -9,7 +9,7 @@ trait TransactionRelations
      */
     public function wallet()
     {
-        return $this->hasMany(config('walletable.models.wallet'));
+        return $this->belongsTo(config('walletable.models.wallet'));
     }
 
     /**

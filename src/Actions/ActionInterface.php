@@ -13,4 +13,11 @@ interface ActionInterface
      * @param \Walletable\Actions\ActionDataInterfare $data Data from the Operation
      */
     public function apply(Transaction $transaction, ActionDataInterfare $data);
+
+    /**
+     * Returns the title of the transaction
+     *
+     * @param \Walletable\Models\Transaction $transaction The trasanction
+     */
+    public function title(Transaction $transaction);
 }
