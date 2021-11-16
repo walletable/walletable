@@ -4,7 +4,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Default Wallet Driver Name
+    | Default Wallet Driver
     |--------------------------------------------------------------------------
     |
     | Here you may specify which of the wallet drivers you wish to use
@@ -13,6 +13,17 @@ return [
     |
     */
     'default' => env('WALLETABLE_DRIVER', 'database'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Locker
+    |--------------------------------------------------------------------------
+    |
+    | Here you may specify which of the locking mechanism to us when altering
+    | wallet balance to avoid race condition
+    |
+    */
+    'locker' => env('WALLETABLE_LOCKER', 'optimistic'),
 
     /*
     |--------------------------------------------------------------------------
