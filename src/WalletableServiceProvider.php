@@ -7,6 +7,10 @@ use Walletable\WalletManager;
 use Walletable\Commands\InstallCommand;
 use Walletable\Drivers\DatabaseDriver;
 use Walletable\Facades\Wallet;
+use Walletable\Lockers\OptimisticLocker;
+use Walletable\Money\Formatter\IntlMoneyFormatter;
+use Walletable\Money\Money;
+use Walletable\Services\Transaction\TransferAction;
 
 class WalletableServiceProvider extends ServiceProvider
 {
@@ -28,6 +32,16 @@ class WalletableServiceProvider extends ServiceProvider
     public function boot()
     {
         Wallet::driver('database', DatabaseDriver::class);
+
+        Money::formatter('intl', function () {
+            return new IntlMoneyFormatter(
+                new \NumberFormatter('en_US', \NumberFormatter::CURRENCY)
+            );
+        });
+
+        Wallet::locker('optimistic', OptimisticLocker::class);
+
+        Wallet::action('transfer', TransferAction::class);
 
         $this->addPublishes();
         $this->addCommands();

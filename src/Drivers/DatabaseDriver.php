@@ -5,11 +5,13 @@ namespace Walletable\Drivers;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Walletable\Apis\Balance\Alteration;
 use Walletable\Apis\Wallet\NewWallet;
 use Walletable\Contracts\Walletable;
 use Walletable\Models\Transaction;
 use Walletable\Models\Wallet;
+use Walletable\Money\Currency;
 
 class DatabaseDriver implements DriverInterface
 {
@@ -142,10 +144,7 @@ class DatabaseDriver implements DriverInterface
                 'name' => 'Naira',
                 'subunit' => 'Kobo',
                 'per' => 100,
-                'precision' => 2,
-                'number' => 566,
-                'unit_separator' => '.',
-                'thousand_separator' => ',',
+                'numeric' => 566,
             ],
             'USD' => [
                 'code' => 'USD',
@@ -153,10 +152,7 @@ class DatabaseDriver implements DriverInterface
                 'name' => 'Dollar',
                 'subunit' => 'Cent',
                 'per' => 100,
-                'precision' => 2,
-                'number' => 840,
-                'unit_separator' => '.',
-                'thousand_separator' => ',',
+                'numeric' => 840,
             ],
             'GBP' => [
                 'code' => 'GBP',
@@ -164,10 +160,7 @@ class DatabaseDriver implements DriverInterface
                 'name' => 'Pound Sterling',
                 'subunit' => 'Pence',
                 'per' => 100,
-                'precision' => 2,
-                'number' => 826,
-                'unit_separator' => '.',
-                'thousand_separator' => ',',
+                'numeric' => 826,
             ],
             'CAD' => [
                 'code' => 'CAD',
@@ -175,11 +168,32 @@ class DatabaseDriver implements DriverInterface
                 'name' => 'Pound Sterling',
                 'subunit' => 'Pence',
                 'per' => 100,
-                'precision' => 2,
-                'number' => 124,
-                'unit_separator' => '.',
-                'thousand_separator' => ',',
+                'numeric' => 124,
             ],
         ]);
+    }
+
+    /**
+     *  Get the currency profiles of supported currencies
+     *
+     * @param string $code
+     *  @return array
+     */
+    public function currency(string $code): Currency
+    {
+        $data = $this->currencies();
+
+        if (!($data = $data->get($code))) {
+            throw new InvalidArgumentException("Currency [{$code}] is not supported by this driver", 1);
+        }
+
+        return Currency::new(
+            $code,
+            $data['symbol'],
+            $data['name'],
+            $data['subunit'],
+            $data['per'] ?? null,
+            $data['numeric'] ?? null
+        );
     }
 }

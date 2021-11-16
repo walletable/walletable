@@ -6,15 +6,23 @@ use Closure;
 use Exception;
 use Illuminate\Support\Traits\ForwardsCalls;
 use InvalidArgumentException;
+use Walletable\Actions\ActionDataInterfare;
+use Walletable\Actions\Traits\HasActions;
 use Walletable\Apis\Wallet\Creator;
 use Walletable\Apis\Wallet\NewWallet;
 use Walletable\Contracts\Walletable;
 use Walletable\Drivers\DriverInterface;
+use Walletable\Facades\Wallet as FacadesWallet;
+use Walletable\Lockers\Traits\HasLockers;
+use Walletable\Models\Transaction;
 use Walletable\Models\Wallet;
+use Walletable\Services\Transaction\TransactionBag;
 
 class WalletManager
 {
     use ForwardsCalls;
+    use HasLockers;
+    use HasActions;
 
     /**
      * Unresolved driver arrays
@@ -24,7 +32,7 @@ class WalletManager
     protected $resolvers = [];
 
     /**
-     * Resoved drivers array
+     * Resolved drivers array
      *
      * @var array
      */
@@ -144,6 +152,52 @@ class WalletManager
         return isset($driver->currencies()[$currency]);
     }
 
+    /**
+     * Check if currency is support by the driver
+     *
+     * @param \Walletable\Drivers\DriverInterface
+     * @param string $currency
+     *
+     * @return bool
+     */
+    public function compactible(Wallet $wallet, Wallet $against)
+    {
+        return get_class($wallet->driver) === get_class($against->driver) &&
+            $wallet->currency->getCode() === $against->currency->getCode();
+    }
+
+    /**
+     * Apply action to a transaction model
+     *
+     * @param string $actionName the name of the action
+     * @param \Walletable\Services\Transaction\TransactionBag|\Walletable\Models\Transaction $transactions Transactions
+     * @param \Walletable\Actions\ActionDataInterfare $data
+     */
+    public function applyAction(string $actionName, $transactions, ActionDataInterfare $data)
+    {
+        if (!$transactions instanceof TransactionBag && $transactions instanceof Transaction) {
+            throw new InvalidArgumentException(
+                'Argument 2 can be either an instance of ' .
+                TransactionBag::class . ' or ' . Transaction::class
+            );
+        }
+
+        $action = $this->action($actionName);
+
+        if ($transactions instanceof TransactionBag) {
+            $transactions->each(function ($transaction) use ($data, $action, $actionName) {
+                $action->apply($transaction->forceFill([
+                    'action' => $actionName
+                ]), $data);
+            });
+            return;
+        }
+
+        $action->apply($transactions->forceFill([
+            'action' => $actionName
+        ]), $data);
+    }
+
 /*
     public function generateForModel(
         string $label,
@@ -235,7 +289,7 @@ class WalletManager
     protected function getResolvedDriver(string $name)
     {
         if (!isset($this->resolvers[$name])) {
-            throw new Exception("\"$name\" not found as an wallet driver");
+            throw new Exception("\"$name\" not found as a wallet driver");
         }
 
         if (!isset($this->drivers[$name])) {
