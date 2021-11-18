@@ -55,8 +55,9 @@ class Wallet extends Model implements WalletInterface
      *
      * @param self $wallet
      * @param int|\Walletable\Money\Money $amount
+     * @param string|null $remarks
      */
-    public function transfer(self $wallet, $amount): Transfer
+    public function transfer(self $wallet, $amount, string $remarks = null): Transfer
     {
         if (!is_int($amount) || $amount instanceof Money) {
             throw new InvalidArgumentException('\$amount type must be Money object or Integer');
@@ -66,6 +67,6 @@ class Wallet extends Model implements WalletInterface
             $amount = new Money($amount, $this->currency);
         }
 
-        return (new Transfer($this, $amount, $wallet))->execute();
+        return (new Transfer($this, $amount, $wallet, $remarks))->execute();
     }
 }

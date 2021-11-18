@@ -49,6 +49,13 @@ class Transfer
     protected $successful = false;
 
     /**
+     * Note added to the transfer
+     *
+     * @var string|null
+     */
+    protected $remarks;
+
+    /**
      * The session id of the transfer
      *
      * @var bool
@@ -62,11 +69,12 @@ class Transfer
      */
     protected $locker;
 
-    public function __construct(Wallet $sender, Money $amount, Wallet $receiver)
+    public function __construct(Wallet $sender, Money $amount, Wallet $receiver, string $remarks = null)
     {
         $this->sender = $sender;
         $this->receiver = $receiver;
         $this->amount = $amount;
+        $this->remarks = $remarks;
         $this->session = Str::uuid();
         $this->bag = new TransactionBag();
     }
@@ -87,6 +95,7 @@ class Transfer
                 $transaction = $this->bag->new($this->receiver, [
                     'type' => 'credit',
                     'session' => $this->session,
+                    'remarks' => $this->remarks
                 ]);
 
                 if ($this->locker()->creditLock($this->receiver, $this->amount, $transaction)) {
@@ -121,6 +130,7 @@ class Transfer
         $transaction = $this->bag->new($this->sender, [
             'type' => 'debit',
             'session' => $this->session,
+            'remarks' => $this->remarks
         ]);
 
         if ($this->locker()->debitLock($this->sender, $this->amount, $transaction)) {
