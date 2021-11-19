@@ -7,7 +7,7 @@ trait WorkWithData
     /**
      * Set an item on model data property using dot notation.
      */
-    public function data(string $key = null, array $value = null)
+    public function data(string $key = null, $value = null)
     {
         $data = $this->data;
 
