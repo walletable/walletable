@@ -10,6 +10,7 @@ use Walletable\Facades\Wallet;
 use Walletable\Lockers\OptimisticLocker;
 use Walletable\Money\Formatter\IntlMoneyFormatter;
 use Walletable\Money\Money;
+use Walletable\Services\Transaction\CreditDebitAction;
 use Walletable\Services\Transaction\TransferAction;
 
 class WalletableServiceProvider extends ServiceProvider
@@ -42,6 +43,7 @@ class WalletableServiceProvider extends ServiceProvider
         Wallet::locker('optimistic', OptimisticLocker::class);
 
         Wallet::action('transfer', TransferAction::class);
+        Wallet::action('credit_debit', CreditDebitAction::class);
 
         $this->addPublishes();
         $this->addCommands();

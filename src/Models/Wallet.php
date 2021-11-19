@@ -11,6 +11,7 @@ use Walletable\Facades\Wallet as FacadesWallet;
 use Walletable\Models\Traits\WalletRelations;
 use Walletable\Models\Traits\WorkWithData;
 use Walletable\Money\Money;
+use Walletable\Services\Transaction\CreditDebit;
 use Walletable\Services\Transaction\Transfer;
 use Walletable\Traits\ConditionalUuid;
 use Walletable\WalletManager;
@@ -68,5 +69,45 @@ class Wallet extends Model implements WalletInterface
         }
 
         return (new Transfer($this, $amount, $wallet, $remarks))->execute();
+    }
+
+    /**
+     * Credit the wallet
+     *
+     * @param int|\Walletable\Money\Money $amount
+     * @param string|null $title
+     * @param string|null $remarks
+     */
+    public function credit($amount, string $title = null, string $remarks = null): CreditDebit
+    {
+        if (!is_int($amount) && !($amount instanceof Money)) {
+            throw new InvalidArgumentException('\$amount type must be Money object or Integer');
+        }
+
+        if (is_int($amount)) {
+            $amount = new Money($amount, $this->currency);
+        }
+
+        return (new CreditDebit('credit', $this, $amount, $title, $remarks))->execute();
+    }
+
+    /**
+     * Debit the wallet
+     *
+     * @param int|\Walletable\Money\Money $amount
+     * @param string|null $title
+     * @param string|null $remarks
+     */
+    public function debit($amount, string $title = null, string $remarks = null): CreditDebit
+    {
+        if (!is_int($amount) && !($amount instanceof Money)) {
+            throw new InvalidArgumentException('\$amount type must be Money object or Integer');
+        }
+
+        if (is_int($amount)) {
+            $amount = new Money($amount, $this->currency);
+        }
+
+        return (new CreditDebit('debit', $this, $amount, $title, $remarks))->execute();
     }
 }
