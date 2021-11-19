@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 use Walletable\Exceptions\IncompactibleWalletsException;
 use Walletable\Exceptions\InsufficientBalanceException;
 use Walletable\Facades\Wallet as Manager;
-use Walletable\Lockers\OptimisticLocker;
+use Walletable\Lockers\LockerInterface;
 use Walletable\Models\Wallet;
 use Walletable\Money\Money;
 
@@ -159,7 +159,7 @@ class Transfer
      *
      * @return \Walletable\Services\Transaction\TransactionBag
      */
-    public function getTransactions()
+    public function getTransactions(): TransactionBag
     {
         return $this->bag;
     }
@@ -169,7 +169,7 @@ class Transfer
      *
      * @return \Walletable\Money\Money
      */
-    public function getAmount()
+    public function getAmount(): Money
     {
         return $this->amount;
     }
@@ -177,7 +177,7 @@ class Transfer
     /**
      * Get the locker for the transfer
      */
-    protected function locker(): OptimisticLocker
+    protected function locker(): LockerInterface
     {
         if ($this->locker) {
             return $this->locker;

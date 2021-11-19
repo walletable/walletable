@@ -60,7 +60,7 @@ class Wallet extends Model implements WalletInterface
      */
     public function transfer(self $wallet, $amount, string $remarks = null): Transfer
     {
-        if (!is_int($amount) || $amount instanceof Money) {
+        if (!is_int($amount) && !($amount instanceof Money)) {
             throw new InvalidArgumentException('\$amount type must be Money object or Integer');
         }
 
