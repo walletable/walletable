@@ -1,9 +1,7 @@
 <?php
 
-
 namespace Walletable\Drivers;
 
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Walletable\Apis\Balance\Alteration;
@@ -11,6 +9,7 @@ use Walletable\Apis\Wallet\NewWallet;
 use Walletable\Contracts\Walletable;
 use Walletable\Models\Transaction;
 use Walletable\Models\Wallet;
+use Walletable\Money\Currencies;
 use Walletable\Money\Currency;
 
 class DatabaseDriver implements DriverInterface
@@ -135,42 +134,42 @@ class DatabaseDriver implements DriverInterface
      *
      *  @return array
      */
-    public function currencies(): Collection
+    public function currencies(): Currencies
     {
-        return \collect([
-            'NGN' => [
-                'code' => 'NGN',
-                'symbol' => '₦',
-                'name' => 'Naira',
-                'subunit' => 'Kobo',
-                'per' => 100,
-                'numeric' => 566,
-            ],
-            'USD' => [
-                'code' => 'USD',
-                'symbol' => '$',
-                'name' => 'Dollar',
-                'subunit' => 'Cent',
-                'per' => 100,
-                'numeric' => 840,
-            ],
-            'GBP' => [
-                'code' => 'GBP',
-                'symbol' => '£',
-                'name' => 'Pound Sterling',
-                'subunit' => 'Pence',
-                'per' => 100,
-                'numeric' => 826,
-            ],
-            'CAD' => [
-                'code' => 'CAD',
-                'symbol' => '¢',
-                'name' => 'Pound Sterling',
-                'subunit' => 'Pence',
-                'per' => 100,
-                'numeric' => 124,
-            ],
-        ]);
+        return Currencies::create(
+            Currency::new(
+                'NGN',
+                '₦',
+                'Naira',
+                'Kobo',
+                100,
+                566
+            ),
+            Currency::new(
+                'USD',
+                '$',
+                'Dollar',
+                'Cent',
+                100,
+                840
+            ),
+            Currency::new(
+                'GBP',
+                '£',
+                'Pound Sterling',
+                'Pence',
+                100,
+                826
+            ),
+            Currency::new(
+                'CAD',
+                '¢',
+                'Pound Sterling',
+                'Pence',
+                100,
+                124
+            ),
+        );
     }
 
     /**

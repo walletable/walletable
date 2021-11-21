@@ -15,6 +15,7 @@ class TransferAction implements ActionInterface
     {
         if ($transaction->type == 'credit') {
             $transaction->forceFill([
+                'action' => 'transfer',
                 'method_id' => $data->sender->getKey(),
                 'method_type' => $data->sender->getMorphClass()
             ]);
@@ -22,6 +23,7 @@ class TransferAction implements ActionInterface
 
         if ($transaction->type == 'debit') {
             $transaction->forceFill([
+                'action' => 'transfer',
                 'method_id' => $data->receiver->getKey(),
                 'method_type' => $data->receiver->getMorphClass()
             ]);
@@ -34,5 +36,22 @@ class TransferAction implements ActionInterface
     public function title(Transaction $transaction)
     {
         return $transaction->method->walletable->getOwnerName();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function suppportDebit(): bool
+    {
+        return true;
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    public function suppportCredit(): bool
+    {
+        return true;
     }
 }

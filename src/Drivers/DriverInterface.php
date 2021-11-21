@@ -8,6 +8,7 @@ use Walletable\Apis\Wallet\NewWallet;
 use Walletable\Contracts\Walletable;
 use Walletable\Models\Transaction;
 use Walletable\Models\Wallet;
+use Walletable\Money\Currencies;
 
 interface DriverInterface
 {
@@ -106,5 +107,5 @@ interface DriverInterface
     /**
      * Get collection of supported currencies
      */
-    public function currencies(): Collection;
+    public function currencies(): Currencies;
 }
