@@ -53,6 +53,13 @@ class IntlMoneyFormatter implements MoneyFormatter
             $formatted = '-' . $formatted;
         }
 
-        return $this->formatter->formatCurrency($formatted, $money->getCurrency()->getCode());
+        return str_replace(
+            $money->getCurrency()->getCode(),
+            $money->getCurrency()->getSymbol(),
+            $this->formatter->formatCurrency(
+                $formatted,
+                $money->getCurrency()->getCode()
+            )
+        );
     }
 }

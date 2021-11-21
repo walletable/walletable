@@ -162,7 +162,7 @@ class Currency implements \JsonSerializable
 
     /**
      * Get the subunit length of the currency
-     * 
+     *
      * @return int
      */
     public function subunitLength()
