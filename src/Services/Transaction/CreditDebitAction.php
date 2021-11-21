@@ -14,7 +14,9 @@ class CreditDebitAction implements ActionInterface
     public function apply(Transaction $transaction, ActionDataInterfare $data)
     {
         $title = $transaction->type === 'credit' ? 'Credit' : 'Debit';
-        $transaction->data('title', $data->title ?? $title);
+        $transaction->forceFill([
+            'action' => 'credit_debit'
+        ])->data('title', $data->title ?? $title);
     }
 
     /**
@@ -23,5 +25,22 @@ class CreditDebitAction implements ActionInterface
     public function title(Transaction $transaction)
     {
         return $transaction->data('title');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function suppportDebit(): bool
+    {
+        return true;
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    public function suppportCredit(): bool
+    {
+        return true;
     }
 }

@@ -2,8 +2,12 @@
 
 namespace Walletable\Services\Transaction;
 
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
+use Walletable\Actions\ActionDataInterfare;
+use Walletable\Actions\ActionInterface;
 use Walletable\Exceptions\InsufficientBalanceException;
 use Walletable\Facades\Wallet as Manager;
 use Walletable\Lockers\LockerInterface;
@@ -75,6 +79,20 @@ class CreditDebit
      */
     protected $locker;
 
+    /**
+     * Action of the transaction
+     *
+     * @var \Walletable\Actions\ActionInterface
+     */
+    protected $action;
+
+    /**
+     * Action of the transaction
+     *
+     * @var \Walletable\Actions\ActionDataInterfare
+     */
+    protected $actionData;
+
     public function __construct(
         string $type,
         Wallet $wallet,
@@ -82,6 +100,10 @@ class CreditDebit
         string $title = null,
         string $remarks = null
     ) {
+        if (!in_array($type, ['credit', 'debit'])) {
+            throw new InvalidArgumentException('Argument 1 value can only be "credit" or "debit"');
+        }
+
         $this->type = $type;
         $this->wallet = $wallet;
         $this->amount = $amount;
@@ -110,14 +132,24 @@ class CreditDebit
             ]);
 
             $method = $this->type . 'Lock';
+            $action = $this->action ?? Manager::action('credit_debit');
+
+            if (!$action->{'suppport' . ucfirst($this->type) }()) {
+                throw new Exception('This action does not support ' . $this->type . ' operations', 1);
+            }
 
             if ($this->locker()->$method($this->wallet, $this->amount, $transaction)) {
                 $this->successful = true;
 
-                Manager::applyAction('credit_debit', $this->bag, new CreditDebitData(
-                    $this->wallet,
-                    $this->title
-                ));
+                Manager::applyAction(
+                    $action,
+                    $this->bag,
+                    $this->actionData ??  new CreditDebitData(
+                        $this->wallet,
+                        $this->title
+                    )
+                );
+
                 $this->bag->each(function ($item) {
                     $item->forceFill([
                         'created_at' => now()
@@ -180,6 +212,30 @@ class CreditDebit
     public function getAmount(): Money
     {
         return $this->amount;
+    }
+
+    /**
+     * Set the action for the transaction
+     *
+     * @param \Walletable\Actions\ActionInterface|string $action
+     * @param \Walletable\Actions\ActionDataInterfare $actionData
+     *
+     * @return self
+     */
+    public function setAction($action, ActionDataInterfare $actionData): self
+    {
+        if (!is_string($action) && !($action instanceof ActionInterface)) {
+            throw new InvalidArgumentException('Argument 1 must be of type ' . ActionInterface::class . ' or String');
+        }
+
+        if (is_string($action)) {
+            $action = Manager::action($action);
+        }
+
+        $this->action = $action;
+        $this->actionData = $actionData;
+
+        return $this;
     }
 
     /**

@@ -20,4 +20,18 @@ interface ActionInterface
      * @param \Walletable\Models\Transaction $transaction The trasanction
      */
     public function title(Transaction $transaction);
+
+    /**
+     * Check if the action supports debit
+     *
+     * @return bool
+     */
+    public function suppportDebit(): bool;
+
+    /**
+     * Check if the action supports credit
+     *
+     * @return bool
+     */
+    public function suppportCredit(): bool;
 }

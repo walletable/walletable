@@ -20,7 +20,8 @@ class ActionManager
      */
     protected $action;
 
-    public function __construct(Transaction $transaction, ActionInterface $action) {
+    public function __construct(Transaction $transaction, ActionInterface $action)
+    {
         $this->transaction = $transaction;
         $this->action = $action;
     }

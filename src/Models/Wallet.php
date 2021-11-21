@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
 use InvalidArgumentException;
+use Walletable\Actions\Action;
 use Walletable\Contracts\WalletInterface;
 use Walletable\Facades\Wallet as FacadesWallet;
 use Walletable\Models\Traits\WalletRelations;
@@ -22,6 +23,8 @@ class Wallet extends Model implements WalletInterface
     use ConditionalUuid;
     use WalletRelations;
     use WorkWithData;
+
+    protected $objCache = [];
 
     public function getAmountAttribute()
     {
@@ -61,11 +64,11 @@ class Wallet extends Model implements WalletInterface
     public function transfer(self $wallet, $amount, string $remarks = null): Transfer
     {
         if (!is_int($amount) && !($amount instanceof Money)) {
-            throw new InvalidArgumentException('\$amount type must be Money object or Integer');
+            throw new InvalidArgumentException('Argument 2 must be of type ' . Money::class . ' or Integer');
         }
 
         if (is_int($amount)) {
-            $amount = new Money($amount, $this->currency);
+            $amount = $this->money($amount);
         }
 
         return (new Transfer($this, $amount, $wallet, $remarks))->execute();
@@ -81,11 +84,11 @@ class Wallet extends Model implements WalletInterface
     public function credit($amount, string $title = null, string $remarks = null): CreditDebit
     {
         if (!is_int($amount) && !($amount instanceof Money)) {
-            throw new InvalidArgumentException('\$amount type must be Money object or Integer');
+            throw new InvalidArgumentException('Argument 1 must be of type ' . Money::class . ' or Integer');
         }
 
         if (is_int($amount)) {
-            $amount = new Money($amount, $this->currency);
+            $amount = $this->money($amount);
         }
 
         return (new CreditDebit('credit', $this, $amount, $title, $remarks))->execute();
@@ -101,13 +104,41 @@ class Wallet extends Model implements WalletInterface
     public function debit($amount, string $title = null, string $remarks = null): CreditDebit
     {
         if (!is_int($amount) && !($amount instanceof Money)) {
-            throw new InvalidArgumentException('\$amount type must be Money object or Integer');
+            throw new InvalidArgumentException('Argument 1 must be of type ' . Money::class . ' or Integer');
         }
 
         if (is_int($amount)) {
-            $amount = new Money($amount, $this->currency);
+            $amount = $this->money($amount);
         }
 
         return (new CreditDebit('debit', $this, $amount, $title, $remarks))->execute();
+    }
+
+    /**
+     * Return money object of thesame currency
+     *
+     * @param int $amount
+     *
+     * @return \Walletable\Money\Money
+     */
+    public function money(int $amount)
+    {
+        return new Money(
+            $amount,
+            $this->currency
+        );
+    }
+
+    public function action(string $action)
+    {
+        if (isset($this->objCache['action'])) {
+            return $this->objCache['action'];
+        }
+
+        return $this->objCache['action'] = new Action(
+            $this,
+            App::make(WalletManager::class)
+                ->action($action)
+        );
     }
 }

@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Support\Traits\ForwardsCalls;
 use InvalidArgumentException;
 use Walletable\Actions\ActionDataInterfare;
+use Walletable\Actions\ActionInterface;
 use Walletable\Actions\Traits\HasActions;
 use Walletable\Apis\Wallet\Creator;
 use Walletable\Apis\Wallet\NewWallet;
@@ -169,11 +170,11 @@ class WalletManager
     /**
      * Apply action to a transaction model
      *
-     * @param string $actionName the name of the action
+     * @param \Walletable\Actions\ActionInterface|string $action
      * @param \Walletable\Services\Transaction\TransactionBag|\Walletable\Models\Transaction $transactions Transactions
      * @param \Walletable\Actions\ActionDataInterfare $data
      */
-    public function applyAction(string $actionName, $transactions, ActionDataInterfare $data)
+    public function applyAction($action, object $transactions, ActionDataInterfare $data)
     {
         if (!$transactions instanceof TransactionBag && $transactions instanceof Transaction) {
             throw new InvalidArgumentException(
@@ -182,20 +183,22 @@ class WalletManager
             );
         }
 
-        $action = $this->action($actionName);
+        if (!is_string($action) && !($action instanceof ActionInterface)) {
+            throw new InvalidArgumentException('Argument 1 must be of type ' . ActionInterface::class . ' or String');
+        }
+
+        if (is_string($action)) {
+            $action = $this->action($action);
+        }
 
         if ($transactions instanceof TransactionBag) {
-            $transactions->each(function ($transaction) use ($data, $action, $actionName) {
-                $action->apply($transaction->forceFill([
-                    'action' => $actionName
-                ]), $data);
+            $transactions->each(function ($transaction) use ($data, $action) {
+                $action->apply($transaction, $data);
             });
             return;
         }
 
-        $action->apply($transactions->forceFill([
-            'action' => $actionName
-        ]), $data);
+        $action->apply($transactions, $data);
     }
 
 /*
