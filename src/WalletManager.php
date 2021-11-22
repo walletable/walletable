@@ -5,6 +5,7 @@ namespace Walletable;
 use Closure;
 use Exception;
 use Illuminate\Support\Traits\ForwardsCalls;
+use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
 use Walletable\Actions\ActionDataInterfare;
 use Walletable\Actions\ActionInterface;
@@ -13,15 +14,17 @@ use Walletable\Apis\Wallet\Creator;
 use Walletable\Apis\Wallet\NewWallet;
 use Walletable\Contracts\Walletable;
 use Walletable\Drivers\DriverInterface;
-use Walletable\Facades\Wallet as FacadesWallet;
 use Walletable\Lockers\Traits\HasLockers;
 use Walletable\Models\Transaction;
 use Walletable\Models\Wallet;
-use Walletable\Services\Transaction\TransactionBag;
+use Walletable\Wallet\Transaction\TransactionBag;
 
 class WalletManager
 {
     use ForwardsCalls;
+    use Macroable {
+        __call as macroCall;
+    }
     use HasLockers;
     use HasActions;
 
@@ -171,7 +174,7 @@ class WalletManager
      * Apply action to a transaction model
      *
      * @param \Walletable\Actions\ActionInterface|string $action
-     * @param \Walletable\Services\Transaction\TransactionBag|\Walletable\Models\Transaction $transactions Transactions
+     * @param \Walletable\Wallet\Transaction\TransactionBag|\Walletable\Models\Transaction $transactions Transactions
      * @param \Walletable\Actions\ActionDataInterfare $data
      */
     public function applyAction($action, object $transactions, ActionDataInterfare $data)
@@ -201,54 +204,15 @@ class WalletManager
         $action->apply($transactions, $data);
     }
 
-/*
-    public function generateForModel(
-        string $label,
-        string $tag,
-        string $currency, Contracts\DriverInterface $driver, Contracts\Walletable $walletable)
-    {
-        $owner_id = $owner->{$walletable->getKeyName()};
-        $owner_type = get_class($walletable);
-        $wallet = app(config('walletable.models.wallet'))->fill(
-            [
-                'walletable_id' => $owner_id,
-                'walletable_type' => $owner_type,
-                'label' => $label,
-                'name' => $name,
-                'driver' => $driver->signature(),
-                'balance' => 0,
-                'data' => '{}',
-            ]
-        );
-
-        $i = 1;
-        while ($i <= config('wallet.generation.tries', 5)) {
-
-            $result = $driverClass::generate( $wallet, $walletable);
-
-            if ($result['success']) {
-                break;
-            }
-
-            $i++;
-
-        }
-
-        if ($result['success']) {
-            $wallet->fill(
-                $result['data']
-            )->save();
-            return $this->make($wallet);
-        }else{
-            return false;
-        }
-    }
- */
     /**
      * Forward methods calls
      */
     public function __call(string $method, array $parameters)
     {
+        if ($this->hasMacro($method)) {
+            return $this->macroCall($method, $parameters);
+        }
+
         return $this->forwardCallTo($this->default(), $method, $parameters);
     }
 
