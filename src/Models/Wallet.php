@@ -12,8 +12,8 @@ use Walletable\Facades\Wallet as FacadesWallet;
 use Walletable\Models\Traits\WalletRelations;
 use Walletable\Models\Traits\WorkWithData;
 use Walletable\Money\Money;
-use Walletable\Services\Transaction\CreditDebit;
-use Walletable\Services\Transaction\Transfer;
+use Walletable\Wallet\Transaction\CreditDebit;
+use Walletable\Wallet\Transaction\Transfer;
 use Walletable\Traits\ConditionalUuid;
 use Walletable\WalletManager;
 

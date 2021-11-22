@@ -5,7 +5,7 @@ namespace Walletable\Actions;
 use InvalidArgumentException;
 use Walletable\Models\Wallet;
 use Walletable\Money\Money;
-use Walletable\Services\Transaction\CreditDebit;
+use Walletable\Wallet\Transaction\CreditDebit;
 
 class Action
 {

@@ -10,8 +10,8 @@ use Walletable\Facades\Wallet;
 use Walletable\Lockers\OptimisticLocker;
 use Walletable\Money\Formatter\IntlMoneyFormatter;
 use Walletable\Money\Money;
-use Walletable\Services\Transaction\CreditDebitAction;
-use Walletable\Services\Transaction\TransferAction;
+use Walletable\Wallet\Transaction\CreditDebitAction;
+use Walletable\Wallet\Transaction\TransferAction;
 
 class WalletableServiceProvider extends ServiceProvider
 {
