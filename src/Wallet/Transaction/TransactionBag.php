@@ -1,6 +1,6 @@
 <?php
 
-namespace Walletable\Services\Transaction;
+namespace Walletable\Wallet\Transaction;
 
 use Illuminate\Support\Traits\ForwardsCalls;
 use Walletable\Models\Transaction;

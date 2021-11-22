@@ -1,6 +1,6 @@
 <?php
 
-namespace Walletable\Services\Transaction;
+namespace Walletable\Wallet\Transaction;
 
 use Walletable\Actions\ActionDataInterfare;
 use Walletable\Actions\ActionInterface;

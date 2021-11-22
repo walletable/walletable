@@ -1,6 +1,6 @@
 <?php
 
-namespace Walletable\Services\Transaction;
+namespace Walletable\Wallet\Transaction;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -37,7 +37,7 @@ class Transfer
     /**
      * Trasanction bads
      *
-     * @var \Walletable\Services\Transaction\TransactionBag
+     * @var \Walletable\Wallet\Transaction\TransactionBag
      */
     protected $bag;
 
@@ -157,7 +157,7 @@ class Transfer
     /**
      * Get transaction bag
      *
-     * @return \Walletable\Services\Transaction\TransactionBag
+     * @return \Walletable\Wallet\Transaction\TransactionBag
      */
     public function getTransactions(): TransactionBag
     {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Walletable\Services\Transaction;
+namespace Walletable\Wallet\Transaction;
 
 use Symfony\Component\Translation\TranslatorBag;
 use Walletable\Actions\ActionDataInterfare;
@@ -33,7 +33,7 @@ class TransferData implements ActionDataInterfare
     /**
      * Trasanction bads
      *
-     * @var \Walletable\Services\Transaction\TransactionBag
+     * @var \Walletable\Wallet\Transaction\TransactionBag
      */
     //public $bag;
 

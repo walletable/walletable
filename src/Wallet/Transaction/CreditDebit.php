@@ -1,6 +1,6 @@
 <?php
 
-namespace Walletable\Services\Transaction;
+namespace Walletable\Wallet\Transaction;
 
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -40,7 +40,7 @@ class CreditDebit
     /**
      * Trasanction bads
      *
-     * @var \Walletable\Services\Transaction\TransactionBag
+     * @var \Walletable\Wallet\Transaction\TransactionBag
      */
     protected $bag;
 
@@ -197,7 +197,7 @@ class CreditDebit
     /**
      * Get transaction bag
      *
-     * @return \Walletable\Services\Transaction\TransactionBag
+     * @return \Walletable\Wallet\Transaction\TransactionBag
      */
     public function getTransactions(): TransactionBag
     {
