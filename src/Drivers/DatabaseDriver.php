@@ -186,13 +186,6 @@ class DatabaseDriver implements DriverInterface
             throw new InvalidArgumentException("Currency [{$code}] is not supported by this driver", 1);
         }
 
-        return Currency::new(
-            $code,
-            $data['symbol'],
-            $data['name'],
-            $data['subunit'],
-            $data['per'] ?? null,
-            $data['numeric'] ?? null
-        );
+        return $data;
     }
 }

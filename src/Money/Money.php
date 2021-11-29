@@ -6,7 +6,6 @@ use Closure;
 use Illuminate\Support\Traits\Macroable;
 use Walletable\Money\Calculator\CalculatorInterface;
 use Walletable\Money\Calculator\PhpCalculator;
-use Walletable\Money\Formatter\MoneyFormatter;
 use Walletable\Money\Traits\HasFormatters;
 
 /**
