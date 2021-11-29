@@ -33,4 +33,20 @@ class ActionManager
     {
         return $this->action->title($this->transaction);
     }
+
+    /**
+     * Returns the image
+     */
+    public function image()
+    {
+        return $this->action->image($this->transaction);
+    }
+
+    /**
+     * Returns the details
+     */
+    public function details()
+    {
+        return $this->action->details($this->transaction);
+    }
 }

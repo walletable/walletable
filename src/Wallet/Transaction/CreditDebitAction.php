@@ -30,6 +30,22 @@ class CreditDebitAction implements ActionInterface
     /**
      * {@inheritdoc}
      */
+    public function image(Transaction $transaction)
+    {
+        return null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function details(Transaction $transaction)
+    {
+        return \collect([]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function suppportDebit(): bool
     {
         return true;

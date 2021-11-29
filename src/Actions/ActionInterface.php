@@ -9,7 +9,7 @@ interface ActionInterface
     /**
      * Apply the action to the transaction before saving
      *
-     * @param \Walletable\Models\Transaction $transaction The trasanction
+     * @param \Walletable\Models\Transaction $transaction The transaction
      * @param \Walletable\Actions\ActionDataInterfare $data Data from the Operation
      */
     public function apply(Transaction $transaction, ActionDataInterfare $data);
@@ -17,9 +17,27 @@ interface ActionInterface
     /**
      * Returns the title of the transaction
      *
-     * @param \Walletable\Models\Transaction $transaction The trasanction
+     * @param \Walletable\Models\Transaction $transaction The transaction
      */
     public function title(Transaction $transaction);
+
+    /**
+     * Returns the title of the transaction
+     *
+     * @param \Walletable\Models\Transaction $transaction The transaction
+     *
+     * @return string
+     */
+    public function image(Transaction $transaction);
+
+    /**
+     * Returns the details of the transaction
+     *
+     * @param \Walletable\Models\Transaction $transaction The transaction
+     *
+     * @return string
+     */
+    public function details(Transaction $transaction);
 
     /**
      * Check if the action supports debit

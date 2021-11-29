@@ -49,6 +49,16 @@ class Transaction extends Model
         return $this->action->title();
     }
 
+    public function getImageAttribute()
+    {
+        return $this->action->image();
+    }
+
+    public function getDetailsAttribute()
+    {
+        return $this->action->details();
+    }
+
     public function getDriverAttribute()
     {
         return App::make(WalletManager::class)->driver($this->getRawOriginal('driver'));
