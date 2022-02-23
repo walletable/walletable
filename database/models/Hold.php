@@ -2,24 +2,26 @@
 
 namespace App\Models;
 
-use Walletable\Models\Wallet as Model;
+use Walletable\Models\Hold as Model;
 
-class Wallet extends Model
+class Hold extends Model
 {
-
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'label',
-        'tag',
+        'wallet_id',
         'amount',
+        'for_id',
+        'for_type',
         'currency',
-        'data',
-        'driver',
+        'label',
+        'remarks',
+        'action',
         'status',
+        'relieved_at',
     ];
 
     /**

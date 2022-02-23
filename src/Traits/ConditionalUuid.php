@@ -1,12 +1,10 @@
 <?php
 
-namespace Walletable\Models\Traits;
-
+namespace Walletable\Traits;
 
 use Illuminate\Support\Str;
 
-
-trait PrimaryUuid
+trait ConditionalUuid
 {
 
     /**
@@ -17,7 +15,7 @@ trait PrimaryUuid
         parent::boot();
 
         static::creating(function ($model) {
-            if (empty($model->{$model->getKeyName()})) {
+            if (config('walletable.model_uuids') && empty($model->{$model->getKeyName()})) {
                 $model->{$model->getKeyName()} = Str::Uuid();
             }
         });
@@ -30,7 +28,7 @@ trait PrimaryUuid
      */
     public function getIncrementing()
     {
-        return false;
+        return !config('walletable.model_uuids');
     }
 
     /**

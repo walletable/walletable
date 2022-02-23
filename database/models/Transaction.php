@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Walletable\Models\Wallet as Model;
+use Walletable\Models\Transaction as Model;
 
-class Wallet extends Model
+class Transaction extends Model
 {
 
     /**
@@ -13,13 +13,7 @@ class Wallet extends Model
      * @var array
      */
     protected $fillable = [
-        'label',
-        'tag',
-        'amount',
-        'currency',
-        'data',
-        'driver',
-        'status',
+        //
     ];
 
     /**

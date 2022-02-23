@@ -4,35 +4,141 @@ namespace Walletable\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Walletable\Traits\PrimaryUuid;
+use Illuminate\Support\Facades\App;
+use InvalidArgumentException;
+use Walletable\Actions\Action;
+use Walletable\Contracts\WalletInterface;
+use Walletable\Facades\Wallet as FacadesWallet;
+use Walletable\Models\Traits\WalletRelations;
+use Walletable\Models\Traits\WorkWithData;
+use Walletable\Money\Money;
+use Walletable\Services\Transaction\CreditDebit;
+use Walletable\Services\Transaction\Transfer;
+use Walletable\Traits\ConditionalUuid;
+use Walletable\WalletManager;
 
 class Wallet extends Model implements WalletInterface
 {
-    use HasFactory, PrimaryUuid;
+    use HasFactory;
+    use ConditionalUuid;
+    use WalletRelations;
+    use WorkWithData;
+
+    protected $objCache = [];
+
+    public function getAmountAttribute()
+    {
+        return new Money(
+            $this->getRawOriginal('amount'),
+            $this->currency
+        );
+    }
+
+    public function getDriverAttribute()
+    {
+        return App::make(WalletManager::class)->driver($this->getRawOriginal('driver'));
+    }
+
+    public function getCurrencyAttribute()
+    {
+        return $this->driver->currency($this->getRawOriginal('currency'));
+    }
 
     /**
-     * The attributes that are mass assignable.
+     * Check if this wallet is compactible with another wallet
      *
-     * @var array
+     * @param self $wallet
      */
-    protected $fillable = [
-        'walletable_id',
-        'walletable_type',
-        'name',
-        'label',
-        'amount',
-        'currency_id',
-        'data',
-        'provider',
-        'status',
-    ];
+    public function compactible(self $wallet): bool
+    {
+        return FacadesWallet::compactible($this, $wallet);
+    }
 
-/*     /**
-     * The attributes that should be cast to native types.
+    /**
+     * Transfer money to another wallet
      *
-     * @var array
+     * @param self $wallet
+     * @param int|\Walletable\Money\Money $amount
+     * @param string|null $remarks
+     */
+    public function transfer(self $wallet, $amount, string $remarks = null): Transfer
+    {
+        if (!is_int($amount) && !($amount instanceof Money)) {
+            throw new InvalidArgumentException('Argument 2 must be of type ' . Money::class . ' or Integer');
+        }
+
+        if (is_int($amount)) {
+            $amount = $this->money($amount);
+        }
+
+        return (new Transfer($this, $amount, $wallet, $remarks))->execute();
+    }
+
+    /**
+     * Credit the wallet
      *
-    protected $casts = [
-        'status' => \App\Casts\Status::class,
-    ]; */
+     * @param int|\Walletable\Money\Money $amount
+     * @param string|null $title
+     * @param string|null $remarks
+     */
+    public function credit($amount, string $title = null, string $remarks = null): CreditDebit
+    {
+        if (!is_int($amount) && !($amount instanceof Money)) {
+            throw new InvalidArgumentException('Argument 1 must be of type ' . Money::class . ' or Integer');
+        }
+
+        if (is_int($amount)) {
+            $amount = $this->money($amount);
+        }
+
+        return (new CreditDebit('credit', $this, $amount, $title, $remarks))->execute();
+    }
+
+    /**
+     * Debit the wallet
+     *
+     * @param int|\Walletable\Money\Money $amount
+     * @param string|null $title
+     * @param string|null $remarks
+     */
+    public function debit($amount, string $title = null, string $remarks = null): CreditDebit
+    {
+        if (!is_int($amount) && !($amount instanceof Money)) {
+            throw new InvalidArgumentException('Argument 1 must be of type ' . Money::class . ' or Integer');
+        }
+
+        if (is_int($amount)) {
+            $amount = $this->money($amount);
+        }
+
+        return (new CreditDebit('debit', $this, $amount, $title, $remarks))->execute();
+    }
+
+    /**
+     * Return money object of thesame currency
+     *
+     * @param int $amount
+     *
+     * @return \Walletable\Money\Money
+     */
+    public function money(int $amount)
+    {
+        return new Money(
+            $amount,
+            $this->currency
+        );
+    }
+
+    public function action(string $action)
+    {
+        if (isset($this->objCache['action'])) {
+            return $this->objCache['action'];
+        }
+
+        return $this->objCache['action'] = new Action(
+            $this,
+            App::make(WalletManager::class)
+                ->action($action)
+        );
+    }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Walletable\Models;
+namespace Walletable\Contracts;
 
 interface WalletInterface
 {

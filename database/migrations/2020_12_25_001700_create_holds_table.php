@@ -4,13 +4,13 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateWalletHoldsTable extends Migration
+class CreateHoldsTable extends Migration
 {
     /**
      * Schema table name to migrate
      * @var string
      */
-    public $tableName = 'wallet_holds';
+    public $tableName = 'holds';
 
     /**
      * Run the migrations.
@@ -21,12 +21,13 @@ class CreateWalletHoldsTable extends Migration
     public function up()
     {
         Schema::create($this->tableName, function (Blueprint $table) {
-            $table->primaryUuid();
-            $table->uuid('wallet_id')->index();
-            $table->nullableIndexedUuidMorphs('for');
+            $table->id();
+            $table->unsignedBigInteger('wallet_id')->index();
+            $table->string('for_id', 100);
+            $table->string('for_type', 45);
             $table->unsignedBigInteger('amount');
             $table->char('currency', 10);
-            $table->char('label', 45)->index();
+            $table->char('tag', 45)->index();
             $table->string('remarks', 200)->index();
             $table->enum('action', ['released', 'resolved'])->nullable()->index();
             $table->enum('status', ['active', 'inactive'])->index();
@@ -44,8 +45,8 @@ class CreateWalletHoldsTable extends Migration
      *
      * @return void
      */
-     public function down()
-     {
-       Schema::dropIfExists($this->tableName);
-     }
+    public function down()
+    {
+        Schema::dropIfExists($this->tableName);
+    }
 }

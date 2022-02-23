@@ -9,16 +9,22 @@ trait Walletable
      * Generate a wallet for the model
      * @return string
      */
-    public function createWallet(string $provider = null){
-        if (!$provider) $provider = config('wallet.default');
-        return Wallet::generate($provider, $this);
+    public function createWallet(string $label, string $tag = null, string $currency = null, string $provider = null){
+
+        $provider = Wallet::instance()->{$provider ?? config('wallet.default')};
+
+        $label = $label ?? $provider->getDefaultLabel();
+
+        $currency = $currency ?? $provider->getDefaultCurrency();
+        
+        return Wallet::generate( $name, $label, $currency, $provider, $this);
     }
 
     /**
      * Generate a wallet for the model
      * @return string
      */
-    public function getWallet(string $provider = null, bool $catchError = false){
+    public function purse(string $provider = null, bool $catchError = false){
 
         if (!$provider) $provider = config('wallet.default');
 
