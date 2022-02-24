@@ -153,7 +153,7 @@ class WalletManager
      */
     public function supportedCurrency(DriverInterface $driver, $currency)
     {
-        return isset($driver->currencies()[$currency]);
+        return !is_null($driver->currencies()->get($currency));
     }
 
     /**
