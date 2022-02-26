@@ -32,7 +32,7 @@ class Wallet extends Model implements WalletInterface
      * Hold object for the wallet
      * @var array
      */
-    protected $objCache = [];
+    protected $instanceCache = [];
 
     /**
      * Get the real balance object of a wallet
@@ -155,11 +155,11 @@ class Wallet extends Model implements WalletInterface
      */
     public function action(string $action): Action
     {
-        if (isset($this->objCache['action'])) {
-            return $this->objCache['action'];
+        if (isset($this->instanceCache['action'])) {
+            return $this->instanceCache['action'];
         }
 
-        return $this->objCache['action'] = new Action(
+        return $this->instanceCache['action'] = new Action(
             $this,
             App::make(WalletManager::class)
                 ->action($action)
