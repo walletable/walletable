@@ -155,11 +155,11 @@ class Wallet extends Model implements WalletInterface
      */
     public function action(string $action): Action
     {
-        if (isset($this->instanceCache['action'])) {
-            return $this->instanceCache['action'];
+        if (isset($this->instanceCache['actions'][$action])) {
+            return $this->instanceCache['actions'][$action];
         }
 
-        return $this->instanceCache['action'] = new Action(
+        return $this->instanceCache['actions'][$action] = new Action(
             $this,
             App::make(WalletManager::class)
                 ->action($action)
