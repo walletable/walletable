@@ -25,7 +25,7 @@ class InsufficientBalanceException extends AssertionError
     public function __construct(Wallet $wallet, Money $amount) {
         $this->wallet = $wallet;
         $this->amount = $amount;
-        $this->message = 'Insufficient wallet balance, The wallet ballance is less than'  .  $amount;
+        $this->message = 'Insufficient wallet balance, The wallet ballance is less than '  .  $amount;
     }
 
     /**
