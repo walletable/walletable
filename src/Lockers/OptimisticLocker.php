@@ -9,7 +9,6 @@ use Walletable\Money\Money;
 
 class OptimisticLocker implements LockerInterface
 {
-
     /**
      * {@inheritdoc}
      */

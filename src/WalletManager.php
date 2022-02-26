@@ -57,7 +57,7 @@ class WalletManager
     /**
      * Get Default driver
      *
-     * @return \App\Services\Card\Contracts\CardDriverInterface
+     * @return \Walletable\Drivers\DriverInterface
      */
     public function default(): DriverInterface
     {
@@ -95,8 +95,8 @@ class WalletManager
         string $tag,
         string $currency
     ): NewWallet {
-
         $creator = new Creator($this->default());
+
         return $creator->reference($reference)
             ->name($walletable->getOwnerName())
             ->email($walletable->getOwnerEmail())
@@ -179,7 +179,7 @@ class WalletManager
      */
     public function applyAction($action, object $transactions, ActionDataInterfare $data)
     {
-        if (!$transactions instanceof TransactionBag && $transactions instanceof Transaction) {
+        if (!($transactions instanceof TransactionBag) && !($transactions instanceof Transaction)) {
             throw new InvalidArgumentException(
                 'Argument 2 can be either an instance of ' .
                 TransactionBag::class . ' or ' . Transaction::class
