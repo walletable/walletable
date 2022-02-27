@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Config;
 use InvalidArgumentException;
 use Walletable\Contracts\Walletable;
 use Walletable\Events\CreatingWallet;
-use Walletable\Events\WalletCreated;
+use Walletable\Events\CreatedWallet;
 use Walletable\Facades\Wallet;
 use Walletable\Models\Wallet as WalletModel;
 
@@ -118,7 +118,7 @@ class Creator
 
         $model->save();
 
-        $event->dispatch(new WalletCreated(
+        $event->dispatch(new CreatedWallet(
             $model,
             $walletable
         ));

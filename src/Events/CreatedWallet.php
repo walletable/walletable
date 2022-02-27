@@ -4,7 +4,7 @@ namespace Walletable\Events;
 
 use Illuminate\Queue\SerializesModels;
 
-class WalletCreated
+class CreatedWallet
 {
     use SerializesModels;
 
