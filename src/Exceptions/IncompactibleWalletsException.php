@@ -22,7 +22,8 @@ class IncompactibleWalletsException extends AssertionError
      */
     protected $against;
 
-    public function __construct(Wallet $wallet, Wallet $against) {
+    public function __construct(Wallet $wallet, Wallet $against)
+    {
         $this->wallet = $wallet;
         $this->against = $against;
         $this->message = 'Can`t perform any operations between two incompactible wallets';
