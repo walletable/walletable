@@ -105,9 +105,8 @@ class Creator
         $model->forceFill([
             'label' => $this->data['label'],
             'tag' => $this->data['tag'],
-            'amount' => $this->data['amount'],
             'currency' => $this->data['currency'],
-            'data' => $this->data['data'],
+            'data' => '{}',
             'amount' => 0
         ]);
 
