@@ -5,12 +5,6 @@ namespace Walletable\Contracts;
 interface Walletable
 {
     /**
-     * Generate a wallet for the model
-     * @return string
-     */
-    //public function createWallet();
-
-    /**
      * Get the name of wallet owner
      *
      * @return string

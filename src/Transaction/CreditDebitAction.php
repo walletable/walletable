@@ -1,9 +1,9 @@
 <?php
 
-namespace Walletable\Services\Transaction;
+namespace Walletable\Transaction;
 
-use Walletable\Actions\ActionDataInterfare;
-use Walletable\Actions\ActionInterface;
+use Walletable\Internals\Actions\ActionDataInterfare;
+use Walletable\Internals\Actions\ActionInterface;
 use Walletable\Models\Transaction;
 
 class CreditDebitAction implements ActionInterface
@@ -25,6 +25,22 @@ class CreditDebitAction implements ActionInterface
     public function title(Transaction $transaction)
     {
         return $transaction->data('title');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function image(Transaction $transaction)
+    {
+        return null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function details(Transaction $transaction)
+    {
+        return \collect([]);
     }
 
     /**

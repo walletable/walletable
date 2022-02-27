@@ -1,6 +1,6 @@
 <?php
 
-namespace Walletable\Lockers;
+namespace Walletable\Internals\Lockers;
 
 use Illuminate\Support\Facades\DB;
 use Walletable\Models\Transaction;
@@ -9,7 +9,6 @@ use Walletable\Money\Money;
 
 class OptimisticLocker implements LockerInterface
 {
-
     /**
      * {@inheritdoc}
      */

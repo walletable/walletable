@@ -6,17 +6,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
 use InvalidArgumentException;
-use Walletable\Actions\Action;
+use Walletable\Internals\Actions\Action;
 use Walletable\Contracts\WalletInterface;
 use Walletable\Facades\Wallet as FacadesWallet;
 use Walletable\Models\Traits\WalletRelations;
 use Walletable\Models\Traits\WorkWithData;
 use Walletable\Money\Money;
-use Walletable\Services\Transaction\CreditDebit;
-use Walletable\Services\Transaction\Transfer;
+use Walletable\Transaction\CreditDebit;
+use Walletable\Transaction\Transfer;
 use Walletable\Traits\ConditionalUuid;
 use Walletable\WalletManager;
 
+/**
+ * @property-read \Walletable\Money\Money $amount
+ * @property-read \Walletable\Money\Currency $currency
+ */
 class Wallet extends Model implements WalletInterface
 {
     use HasFactory;
@@ -24,8 +28,17 @@ class Wallet extends Model implements WalletInterface
     use WalletRelations;
     use WorkWithData;
 
-    protected $objCache = [];
+    /**
+     * Hold object for the wallet
+     * @var array
+     */
+    protected $instanceCache = [];
 
+    /**
+     * Get the real balance object of a wallet
+     *
+     * @return \Walletable\Money\Money
+     */
     public function getAmountAttribute()
     {
         return new Money(
@@ -34,14 +47,14 @@ class Wallet extends Model implements WalletInterface
         );
     }
 
-    public function getDriverAttribute()
-    {
-        return App::make(WalletManager::class)->driver($this->getRawOriginal('driver'));
-    }
-
+    /**
+     * Get the currency object of the wallet
+     *
+     * @return \Walletable\Money\Currency
+     */
     public function getCurrencyAttribute()
     {
-        return $this->driver->currency($this->getRawOriginal('currency'));
+        return App::make(WalletManager::class)->currency($this->getRawOriginal('currency'));
     }
 
     /**
@@ -129,13 +142,19 @@ class Wallet extends Model implements WalletInterface
         );
     }
 
-    public function action(string $action)
+    /**
+     * Create action for the wallet
+     *
+     * @param string $action the name of the action
+     * @return \Walletable\Internals\Actions\Action
+     */
+    public function action(string $action): Action
     {
-        if (isset($this->objCache['action'])) {
-            return $this->objCache['action'];
+        if (isset($this->instanceCache['actions'][$action])) {
+            return $this->instanceCache['actions'][$action];
         }
 
-        return $this->objCache['action'] = new Action(
+        return $this->instanceCache['actions'][$action] = new Action(
             $this,
             App::make(WalletManager::class)
                 ->action($action)

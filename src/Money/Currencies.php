@@ -17,7 +17,13 @@ class Currencies
 
     public function __construct(?Currency ...$currencies)
     {
-        $this->currencies = \collect($currencies ?? []);
+        $newCurrencies = [];
+
+        foreach ($currencies as $currency) {
+            $newCurrencies[$currency->getCode()] = $currency;
+        }
+
+        $this->currencies = \collect($newCurrencies ?? []);
     }
 
     /**
@@ -50,7 +56,7 @@ class Currencies
      */
     public function get(string $code)
     {
-        return $this->currencies->where('code', $code)->first();
+        return $this->currencies[$code] ?? null;
     }
 
     /**

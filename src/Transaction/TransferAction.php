@@ -1,10 +1,12 @@
 <?php
 
-namespace Walletable\Services\Transaction;
+namespace Walletable\Transaction;
 
-use Walletable\Actions\ActionDataInterfare;
-use Walletable\Actions\ActionInterface;
+use Walletable\Internals\Actions\ActionDataInterfare;
+use Walletable\Internals\Actions\ActionInterface;
 use Walletable\Models\Transaction;
+use Walletable\Internals\Details\Info;
+use Walletable\Internals\Details\Section;
 
 class TransferAction implements ActionInterface
 {
@@ -36,6 +38,22 @@ class TransferAction implements ActionInterface
     public function title(Transaction $transaction)
     {
         return $transaction->method->walletable->getOwnerName();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function image(Transaction $transaction)
+    {
+        return $transaction->method->walletable->getOwnerImage();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function details(Transaction $transaction)
+    {
+        return \collect([]);
     }
 
     /**

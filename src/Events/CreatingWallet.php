@@ -9,13 +9,6 @@ class CreatingWallet
     use SerializesModels;
 
     /**
-     * The created wallet driver.
-     *
-     * @var \Walletable\Drivers\DriverInterface
-     */
-    public $driver;
-
-    /**
      * The created wallet.
      *
      * @var \Walletable\Models\Wallet
@@ -32,15 +25,13 @@ class CreatingWallet
     /**
      * Create a new event instance.
      *
-     * @param  \Walletable\Drivers\DriverInterface  $driver
      * @param  \Walletable\Models\Wallet  $wallet
      * @param  \Walletable\Contracts\Walletable  $walletable
      *
      * @return void
      */
-    public function __construct($driver, $wallet, $walletable)
+    public function __construct($wallet, $walletable)
     {
-        $this->driver = $driver;
         $this->wallet = $wallet;
         $this->walletable = $walletable;
     }

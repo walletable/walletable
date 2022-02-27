@@ -90,18 +90,6 @@ class InstallCommand extends Command
             '$table->unsignedBigInteger(\'wallet_id\')->index();',
             '$table->uuid(\'wallet_id\')->index();'
         );
-
-        // Replace in file for Hold migration
-        $this->replaceInFile(
-            database_path('migrations/2020_12_25_001700_create_holds_table.php'),
-            '$table->id();',
-            '$table->uuid(\'id\')->primary();'
-        );
-        $this->replaceInFile(
-            database_path('migrations/2020_12_25_001700_create_holds_table.php'),
-            '$table->unsignedBigInteger(\'wallet_id\')->index();',
-            '$table->uuid(\'wallet_id\')->index();'
-        );
     }
 
     /**

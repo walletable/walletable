@@ -5,13 +5,15 @@ namespace Walletable;
 use Illuminate\Support\ServiceProvider;
 use Walletable\WalletManager;
 use Walletable\Commands\InstallCommand;
-use Walletable\Drivers\DatabaseDriver;
 use Walletable\Facades\Wallet;
-use Walletable\Lockers\OptimisticLocker;
+use Walletable\Internals\Lockers\OptimisticLocker;
 use Walletable\Money\Formatter\IntlMoneyFormatter;
 use Walletable\Money\Money;
-use Walletable\Services\Transaction\CreditDebitAction;
-use Walletable\Services\Transaction\TransferAction;
+use Walletable\Internals\Details\Info;
+use Walletable\Internals\Details\MoneyCast;
+use Walletable\Internals\Details\TextCast;
+use Walletable\Transaction\CreditDebitAction;
+use Walletable\Transaction\TransferAction;
 
 class WalletableServiceProvider extends ServiceProvider
 {
@@ -32,8 +34,6 @@ class WalletableServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Wallet::driver('database', DatabaseDriver::class);
-
         Money::formatter('intl', function () {
             return new IntlMoneyFormatter(
                 new \NumberFormatter('en_US', \NumberFormatter::CURRENCY)
@@ -44,6 +44,9 @@ class WalletableServiceProvider extends ServiceProvider
 
         Wallet::action('transfer', TransferAction::class);
         Wallet::action('credit_debit', CreditDebitAction::class);
+
+        Info::cast('text', TextCast::class);
+        Info::cast('money', MoneyCast::class);
 
         $this->addPublishes();
         $this->addCommands();

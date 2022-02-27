@@ -5,7 +5,6 @@ namespace Walletable\Money\Calculator;
 use Walletable\Money\Money;
 use Walletable\Money\Number;
 
-
 class PhpCalculator implements CalculatorInterface
 {
     /**

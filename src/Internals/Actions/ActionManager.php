@@ -1,6 +1,6 @@
 <?php
 
-namespace Walletable\Actions;
+namespace Walletable\Internals\Actions;
 
 use Walletable\Models\Transaction;
 
@@ -16,7 +16,7 @@ class ActionManager
     /**
      * The transaction
      *
-     * @var \Walletable\Actions\ActionInterface
+     * @var \Walletable\Internals\Actions\ActionInterface
      */
     protected $action;
 
@@ -32,5 +32,21 @@ class ActionManager
     public function title()
     {
         return $this->action->title($this->transaction);
+    }
+
+    /**
+     * Returns the image
+     */
+    public function image()
+    {
+        return $this->action->image($this->transaction);
+    }
+
+    /**
+     * Returns the details
+     */
+    public function details()
+    {
+        return $this->action->details($this->transaction);
     }
 }

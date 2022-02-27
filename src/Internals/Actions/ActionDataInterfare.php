@@ -1,6 +1,6 @@
 <?php
 
-namespace Walletable\Actions;
+namespace Walletable\Internals\Actions;
 
 interface ActionDataInterfare
 {

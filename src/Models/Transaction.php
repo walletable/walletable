@@ -5,7 +5,7 @@ namespace Walletable\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
-use Walletable\Actions\ActionManager;
+use Walletable\Internals\Actions\ActionManager;
 use Walletable\Models\Traits\TransactionRelations;
 use Walletable\Models\Traits\WorkWithData;
 use Walletable\Money\Money;
@@ -49,13 +49,18 @@ class Transaction extends Model
         return $this->action->title();
     }
 
-    public function getDriverAttribute()
+    public function getImageAttribute()
     {
-        return App::make(WalletManager::class)->driver($this->getRawOriginal('driver'));
+        return $this->action->image();
+    }
+
+    public function getDetailsAttribute()
+    {
+        return $this->action->details();
     }
 
     public function getCurrencyAttribute()
     {
-        return $this->driver->currency($this->getRawOriginal('currency'));
+        return App::make(WalletManager::class)->currency($this->getRawOriginal('currency'));
     }
 }
