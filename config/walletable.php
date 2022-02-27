@@ -4,18 +4,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Default Wallet Driver
-    |--------------------------------------------------------------------------
-    |
-    | Here you may specify which of the wallet drivers you wish to use
-    | as your default driver for all wallet created incase you didn`t
-    | specify any driver during creation.
-    |
-    */
-    'default' => env('WALLETABLE_DRIVER', 'database'),
-
-    /*
-    |--------------------------------------------------------------------------
     | Locker
     |--------------------------------------------------------------------------
     |
@@ -36,9 +24,6 @@ return [
     */
     'models' => [
         'wallet' => \App\Models\Wallet::class,
-        'hold' => \App\Models\Hold::class,
-        'inbound' => \App\Models\Inbound::class,
-        'outbound' => \App\Models\Outbound::class,
         'transaction' => \App\Models\Transaction::class,
     ],
 

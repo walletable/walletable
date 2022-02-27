@@ -59,13 +59,8 @@ class Transaction extends Model
         return $this->action->details();
     }
 
-    public function getDriverAttribute()
-    {
-        return App::make(WalletManager::class)->driver($this->getRawOriginal('driver'));
-    }
-
     public function getCurrencyAttribute()
     {
-        return $this->driver->currency($this->getRawOriginal('currency'));
+        return App::make(WalletManager::class)->currency($this->getRawOriginal('currency'));
     }
 }

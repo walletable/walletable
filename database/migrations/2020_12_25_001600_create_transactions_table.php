@@ -32,8 +32,7 @@ class CreateTransactionsTable extends Migration
             $table->string('method_id', 100)->nullable();
             $table->string('method_type', 45)->nullable();
             $table->string('remarks', 200)->nullable()->index();
-            $table->string('driver', 45)->index();
-            $table->json('data')->nullable();
+            $table->json('meta')->nullable();
             $table->timestamp('created_at')->nullable();
 
             $table->index(['method_id', 'method_type']);

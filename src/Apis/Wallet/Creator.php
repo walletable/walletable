@@ -4,13 +4,13 @@ namespace Walletable\Apis\Wallet;
 
 use Exception;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Config;
 use InvalidArgumentException;
-use Walletable\Drivers\DriverInterface;
+use Walletable\Contracts\Walletable;
 use Walletable\Events\CreatingWallet;
 use Walletable\Events\WalletCreated;
 use Walletable\Facades\Wallet;
 use Walletable\Models\Wallet as WalletModel;
-use Walletable\WalletManager;
 
 class Creator
 {
@@ -31,23 +31,20 @@ class Creator
         'name',
         'email',
         'label',
-        'walletable',
         'tag',
-        'currency',
-        'driver'
+        'currency'
     ];
 
     /**
      * Data to create a new wallet
      *
-     * @var \Walletable\Drivers\DriverInterface
+     * @var \Walletable\Contracts\Walletable
      */
-    protected $driver;
+    protected $walletable;
 
-    public function __construct(DriverInterface $driver)
+    public function __construct(Walletable $walletable)
     {
-        $this->driver = $driver;
-        $this->data['driver'] = App::make(WalletManager::class)->driverName(get_class($driver));
+        $this->walletable = $walletable;
     }
 
     /**
@@ -90,44 +87,31 @@ class Creator
     /**
      * Create a new wallet
      *
-     * @return \Walletable\Apis\Wallet\NewWallet
+     * @return \Walletable\Models\Wallet
      */
-    public function create(): NewWallet
+    public function create(): WalletModel
     {
-        if (!Wallet::supportedCurrency($this->driver, $this->data['currency'])) {
+        if (!Wallet::supportedCurrency($this->data['currency'])) {
             throw new InvalidArgumentException("[{$this->data['currency']}] is not a supported currency");
         }
 
         $event = App::make('events');
-        $walletable = $this->data['walletable'];
+        $walletable = $this->walletable;
 
         $model = $this->newWalletModel();
-        $model->driver = $this->data['driver'];
         $model->walletable_id = $walletable->getOwnerID();
         $model->walletable_type = $walletable->getOwnerMorphName();
 
-        $newWallet = $this->driver->create(
-            $this->data['reference'],
-            $this->data['name'],
-            $this->data['email'],
-            $this->data['label'],
-            $this->data['tag'],
-            $this->data['currency'],
-            $model,
-            $walletable,
-        );
-
         $model->forceFill([
-            'label' => $newWallet->label,
-            'tag' => $newWallet->tag,
-            'amount' => $newWallet->amount,
-            'currency' => $newWallet->currency,
-            'data' => $newWallet->data,
+            'label' => $this->data['label'],
+            'tag' => $this->data['tag'],
+            'amount' => $this->data['amount'],
+            'currency' => $this->data['currency'],
+            'data' => $this->data['data'],
             'amount' => 0
         ]);
 
         $event->dispatch(new CreatingWallet(
-            $this->driver,
             $model,
             $walletable
         ));
@@ -135,12 +119,11 @@ class Creator
         $model->save();
 
         $event->dispatch(new WalletCreated(
-            $this->driver,
             $model,
             $walletable
         ));
 
-        return $newWallet;
+        return $model;
     }
 
     /**
@@ -150,6 +133,6 @@ class Creator
      */
     public function newWalletModel(): WalletModel
     {
-        return App::make(WalletModel::class);
+        return App::make(Config::get('walletable.models.wallet'));
     }
 }

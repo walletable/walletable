@@ -5,7 +5,6 @@ namespace Walletable;
 use Illuminate\Support\ServiceProvider;
 use Walletable\WalletManager;
 use Walletable\Commands\InstallCommand;
-use Walletable\Drivers\DatabaseDriver;
 use Walletable\Facades\Wallet;
 use Walletable\Lockers\OptimisticLocker;
 use Walletable\Money\Formatter\IntlMoneyFormatter;
@@ -35,8 +34,6 @@ class WalletableServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Wallet::driver('database', DatabaseDriver::class);
-
         Money::formatter('intl', function () {
             return new IntlMoneyFormatter(
                 new \NumberFormatter('en_US', \NumberFormatter::CURRENCY)

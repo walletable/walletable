@@ -34,8 +34,7 @@ class TransactionBag
     {
         $trasanction = app(config('walletable.models.transaction'))->forceFill([
             'wallet_id' => $wallet->getKey(),
-            'currency' => $wallet->getRawOriginal('currency'),
-            'driver' => $wallet->getRawOriginal('driver')
+            'currency' => $wallet->getRawOriginal('currency')
         ] + $data);
         $this->transactions->add($trasanction);
         return $trasanction;

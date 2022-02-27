@@ -47,11 +47,6 @@ class Wallet extends Model implements WalletInterface
         );
     }
 
-    public function getDriverAttribute()
-    {
-        return App::make(WalletManager::class)->driver($this->getRawOriginal('driver'));
-    }
-
     /**
      * Get the currency object of the wallet
      *
@@ -59,7 +54,7 @@ class Wallet extends Model implements WalletInterface
      */
     public function getCurrencyAttribute()
     {
-        return $this->driver->currency($this->getRawOriginal('currency'));
+        return App::make(WalletManager::class)->currency($this->getRawOriginal('currency'));
     }
 
     /**
