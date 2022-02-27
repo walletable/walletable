@@ -6,14 +6,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
 use InvalidArgumentException;
-use Walletable\Actions\Action;
+use Walletable\Internals\Actions\Action;
 use Walletable\Contracts\WalletInterface;
 use Walletable\Facades\Wallet as FacadesWallet;
 use Walletable\Models\Traits\WalletRelations;
 use Walletable\Models\Traits\WorkWithData;
 use Walletable\Money\Money;
-use Walletable\Wallet\Transaction\CreditDebit;
-use Walletable\Wallet\Transaction\Transfer;
+use Walletable\Transaction\CreditDebit;
+use Walletable\Transaction\Transfer;
 use Walletable\Traits\ConditionalUuid;
 use Walletable\WalletManager;
 
@@ -146,7 +146,7 @@ class Wallet extends Model implements WalletInterface
      * Create action for the wallet
      *
      * @param string $action the name of the action
-     * @return \Walletable\Actions\Action
+     * @return \Walletable\Internals\Actions\Action
      */
     public function action(string $action): Action
     {

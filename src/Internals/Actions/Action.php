@@ -1,11 +1,11 @@
 <?php
 
-namespace Walletable\Actions;
+namespace Walletable\Internals\Actions;
 
 use InvalidArgumentException;
 use Walletable\Models\Wallet;
 use Walletable\Money\Money;
-use Walletable\Wallet\Transaction\CreditDebit;
+use Walletable\Transaction\CreditDebit;
 
 class Action
 {
@@ -19,7 +19,7 @@ class Action
     /**
      * The action
      *
-     * @var \Walletable\Actions\ActionInterface
+     * @var \Walletable\Internals\Actions\ActionInterface
      */
     protected $action;
 
@@ -33,7 +33,7 @@ class Action
      * Credit the wallet
      *
      * @param int|\Walletable\Money\Money $amount
-     * @param \Walletable\Actions\ActionDataInterfare $data
+     * @param \Walletable\Internals\Actions\ActionDataInterfare $data
      * @param string|null $remarks
      */
     public function credit($amount, ActionDataInterfare $data, string $remarks = null): CreditDebit
@@ -59,7 +59,7 @@ class Action
      * Debit the wallet
      *
      * @param int|\Walletable\Money\Money $amount
-     * @param \Walletable\Actions\ActionDataInterfare $data
+     * @param \Walletable\Internals\Actions\ActionDataInterfare $data
      * @param string|null $remarks
      */
     public function debit($amount, ActionDataInterfare $data, string $remarks = null): CreditDebit

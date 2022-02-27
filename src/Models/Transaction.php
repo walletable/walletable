@@ -5,7 +5,7 @@ namespace Walletable\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
-use Walletable\Actions\ActionManager;
+use Walletable\Internals\Actions\ActionManager;
 use Walletable\Models\Traits\TransactionRelations;
 use Walletable\Models\Traits\WorkWithData;
 use Walletable\Money\Money;

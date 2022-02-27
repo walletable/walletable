@@ -1,6 +1,6 @@
 <?php
 
-namespace Walletable\Lockers;
+namespace Walletable\Internals\Lockers;
 
 use Walletable\Models\Transaction;
 use Walletable\Models\Wallet;

@@ -1,16 +1,16 @@
 <?php
 
-namespace Walletable\Wallet\Transaction;
+namespace Walletable\Transaction;
 
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
-use Walletable\Actions\ActionDataInterfare;
-use Walletable\Actions\ActionInterface;
+use Walletable\Internals\Actions\ActionDataInterfare;
+use Walletable\Internals\Actions\ActionInterface;
 use Walletable\Exceptions\InsufficientBalanceException;
 use Walletable\Facades\Wallet as Manager;
-use Walletable\Lockers\LockerInterface;
+use Walletable\Internals\Lockers\LockerInterface;
 use Walletable\Models\Wallet;
 use Walletable\Money\Money;
 
@@ -40,7 +40,7 @@ class CreditDebit
     /**
      * Trasanction bads
      *
-     * @var \Walletable\Wallet\Transaction\TransactionBag
+     * @var \Walletable\Transaction\TransactionBag
      */
     protected $bag;
 
@@ -75,21 +75,21 @@ class CreditDebit
     /**
      * The transfer locker
      *
-     * @var \Walletable\Lockers\OptimisticLocker
+     * @var \Walletable\Internals\Lockers\OptimisticLocker
      */
     protected $locker;
 
     /**
      * Action of the transaction
      *
-     * @var \Walletable\Actions\ActionInterface
+     * @var \Walletable\Internals\Actions\ActionInterface
      */
     protected $action;
 
     /**
      * Action of the transaction
      *
-     * @var \Walletable\Actions\ActionDataInterfare
+     * @var \Walletable\Internals\Actions\ActionDataInterfare
      */
     protected $actionData;
 
@@ -197,7 +197,7 @@ class CreditDebit
     /**
      * Get transaction bag
      *
-     * @return \Walletable\Wallet\Transaction\TransactionBag
+     * @return \Walletable\Transaction\TransactionBag
      */
     public function getTransactions(): TransactionBag
     {
@@ -217,8 +217,8 @@ class CreditDebit
     /**
      * Set the action for the transaction
      *
-     * @param \Walletable\Actions\ActionInterface|string $action
-     * @param \Walletable\Actions\ActionDataInterfare $actionData
+     * @param \Walletable\Internals\Actions\ActionInterface|string $action
+     * @param \Walletable\Internals\Actions\ActionDataInterfare $actionData
      *
      * @return self
      */

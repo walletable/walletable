@@ -1,11 +1,11 @@
 <?php
 
-namespace Walletable\Lockers\Traits;
+namespace Walletable\Internals\Lockers\Traits;
 
 use Closure;
 use Exception;
 use InvalidArgumentException;
-use Walletable\Lockers\LockerInterface;
+use Walletable\Internals\Lockers\LockerInterface;
 
 trait HasLockers
 {
@@ -29,7 +29,7 @@ trait HasLockers
      * @param string $name
      * @param string|\Closure|null $locker
      *
-     * @return \Walletable\Lockers\LockerInterface|void
+     * @return \Walletable\Internals\Lockers\LockerInterface|void
      */
     public function locker(string $name, $locker = null)
     {
@@ -85,7 +85,7 @@ trait HasLockers
      *
      * @param Closure $resolver
      *
-     * @return \Walletable\Lockers\LockerInterface
+     * @return \Walletable\Internals\Lockers\LockerInterface
      */
     protected function resolveLockerFromClosure(Closure $resolver): LockerInterface
     {
@@ -101,7 +101,7 @@ trait HasLockers
      *
      * @param string $resolver
      *
-     * @return \Walletable\Lockers\LockerInterface
+     * @return \Walletable\Internals\Lockers\LockerInterface
      */
     protected function resolveLockerFromClass(string $resolver): LockerInterface
     {

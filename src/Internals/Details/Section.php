@@ -1,10 +1,11 @@
 <?php
 
-namespace Walletable\Wallet\Details;
+namespace Walletable\Internals\Details;
 
 use ArrayIterator;
 use Illuminate\Support\Traits\ForwardsCalls;
 use IteratorAggregate;
+use Traversable;
 
 class Section implements IteratorAggregate
 {
@@ -33,7 +34,7 @@ class Section implements IteratorAggregate
     /**
      * Get Iterator
      */
-    public function getIterator()
+    public function getIterator(): Traversable
     {
         return new ArrayIterator($this->infos->all());
     }
@@ -41,7 +42,7 @@ class Section implements IteratorAggregate
     /**
      * Static Collecting method
      *
-     * @param \Walletable\Wallet\Details\Info ...$infos
+     * @param \Walletable\Internals\Details\Info ...$infos
      */
     public static function create(string $name, Info ...$infos)
     {
@@ -59,7 +60,7 @@ class Section implements IteratorAggregate
     /**
      * Add new info
      *
-     * @param \Walletable\Wallet\Details\Info $info
+     * @param \Walletable\Internals\Details\Info $info
      * @return self
      */
     public function add(Info $info)

@@ -1,6 +1,6 @@
 <?php
 
-namespace Walletable\Actions;
+namespace Walletable\Internals\Actions;
 
 use Walletable\Models\Transaction;
 
@@ -10,7 +10,7 @@ interface ActionInterface
      * Apply the action to the transaction before saving
      *
      * @param \Walletable\Models\Transaction $transaction The transaction
-     * @param \Walletable\Actions\ActionDataInterfare $data Data from the Operation
+     * @param \Walletable\Internals\Actions\ActionDataInterfare $data Data from the Operation
      */
     public function apply(Transaction $transaction, ActionDataInterfare $data);
 

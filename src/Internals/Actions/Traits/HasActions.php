@@ -1,12 +1,12 @@
 <?php
 
-namespace Walletable\Actions\Traits;
+namespace Walletable\Internals\Actions\Traits;
 
 use Closure;
 use Exception;
 use InvalidArgumentException;
-use Walletable\Actions\ActionInterface as ActionsActionInterface;
-use Walletable\Actions\ActionInterface;
+use Walletable\Internals\Actions\ActionInterface as ActionsActionInterface;
+use Walletable\Internals\Actions\ActionInterface;
 
 trait HasActions
 {
@@ -30,7 +30,7 @@ trait HasActions
      * @param string $name
      * @param string|\Closure|null $action
      *
-     * @return \Walletable\Actions\ActionInterface|void
+     * @return \Walletable\Internals\Actions\ActionInterface|void
      */
     public function action(string $name, $action = null)
     {
@@ -86,7 +86,7 @@ trait HasActions
      *
      * @param Closure $resolver
      *
-     * @return \Walletable\Actions\ActionInterface
+     * @return \Walletable\Internals\Actions\ActionInterface
      */
     protected function resolveActionFromClosure(Closure $resolver): ActionInterface
     {
@@ -102,7 +102,7 @@ trait HasActions
      *
      * @param string $resolver
      *
-     * @return \Walletable\Actions\ActionInterface
+     * @return \Walletable\Internals\Actions\ActionInterface
      */
     protected function resolveActionFromClass(string $resolver): ActionInterface
     {

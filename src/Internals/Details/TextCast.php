@@ -1,6 +1,6 @@
 <?php
 
-namespace Walletable\Wallet\Details;
+namespace Walletable\Internals\Details;
 
 class TextCast implements CastInterface
 {

@@ -2,22 +2,20 @@
 
 namespace Walletable;
 
-use Closure;
-use Exception;
 use Illuminate\Support\Traits\ForwardsCalls;
 use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
-use Walletable\Actions\ActionDataInterfare;
-use Walletable\Actions\ActionInterface;
-use Walletable\Actions\Traits\HasActions;
-use Walletable\Apis\Wallet\Creator;
+use Walletable\Internals\Actions\ActionDataInterfare;
+use Walletable\Internals\Actions\ActionInterface;
+use Walletable\Internals\Actions\Traits\HasActions;
+use Walletable\Internals\Creator;
 use Walletable\Contracts\Walletable;
-use Walletable\Lockers\Traits\HasLockers;
+use Walletable\Internals\Lockers\Traits\HasLockers;
 use Walletable\Models\Transaction;
 use Walletable\Models\Wallet;
 use Walletable\Money\Currencies;
 use Walletable\Money\Currency;
-use Walletable\Wallet\Transaction\TransactionBag;
+use Walletable\Transaction\TransactionBag;
 
 class WalletManager
 {
@@ -127,9 +125,9 @@ class WalletManager
     /**
      * Apply action to a transaction model
      *
-     * @param \Walletable\Actions\ActionInterface|string $action
-     * @param \Walletable\Wallet\Transaction\TransactionBag|\Walletable\Models\Transaction $transactions Transactions
-     * @param \Walletable\Actions\ActionDataInterfare $data
+     * @param \Walletable\Internals\Actions\ActionInterface|string $action
+     * @param \Walletable\Transaction\TransactionBag|\Walletable\Models\Transaction $transactions Transactions
+     * @param \Walletable\Internals\Actions\ActionDataInterfare $data
      */
     public function applyAction($action, object $transactions, ActionDataInterfare $data)
     {

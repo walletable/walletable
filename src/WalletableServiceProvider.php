@@ -6,14 +6,14 @@ use Illuminate\Support\ServiceProvider;
 use Walletable\WalletManager;
 use Walletable\Commands\InstallCommand;
 use Walletable\Facades\Wallet;
-use Walletable\Lockers\OptimisticLocker;
+use Walletable\Internals\Lockers\OptimisticLocker;
 use Walletable\Money\Formatter\IntlMoneyFormatter;
 use Walletable\Money\Money;
-use Walletable\Wallet\Details\Info;
-use Walletable\Wallet\Details\MoneyCast;
-use Walletable\Wallet\Details\TextCast;
-use Walletable\Wallet\Transaction\CreditDebitAction;
-use Walletable\Wallet\Transaction\TransferAction;
+use Walletable\Internals\Details\Info;
+use Walletable\Internals\Details\MoneyCast;
+use Walletable\Internals\Details\TextCast;
+use Walletable\Transaction\CreditDebitAction;
+use Walletable\Transaction\TransferAction;
 
 class WalletableServiceProvider extends ServiceProvider
 {

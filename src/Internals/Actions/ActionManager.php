@@ -1,6 +1,6 @@
 <?php
 
-namespace Walletable\Actions;
+namespace Walletable\Internals\Actions;
 
 use Walletable\Models\Transaction;
 
@@ -16,7 +16,7 @@ class ActionManager
     /**
      * The transaction
      *
-     * @var \Walletable\Actions\ActionInterface
+     * @var \Walletable\Internals\Actions\ActionInterface
      */
     protected $action;
 

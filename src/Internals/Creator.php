@@ -1,6 +1,6 @@
 <?php
 
-namespace Walletable\Apis\Wallet;
+namespace Walletable\Internals;
 
 use Exception;
 use Illuminate\Support\Facades\App;

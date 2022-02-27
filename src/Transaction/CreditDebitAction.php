@@ -1,9 +1,9 @@
 <?php
 
-namespace Walletable\Wallet\Transaction;
+namespace Walletable\Transaction;
 
-use Walletable\Actions\ActionDataInterfare;
-use Walletable\Actions\ActionInterface;
+use Walletable\Internals\Actions\ActionDataInterfare;
+use Walletable\Internals\Actions\ActionInterface;
 use Walletable\Models\Transaction;
 
 class CreditDebitAction implements ActionInterface

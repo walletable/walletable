@@ -1,8 +1,8 @@
 <?php
 
-namespace Walletable\Wallet\Transaction;
+namespace Walletable\Transaction;
 
-use Walletable\Actions\ActionDataInterfare;
+use Walletable\Internals\Actions\ActionDataInterfare;
 use Walletable\Models\Wallet;
 
 class CreditDebitData implements ActionDataInterfare

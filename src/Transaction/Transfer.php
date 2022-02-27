@@ -1,13 +1,13 @@
 <?php
 
-namespace Walletable\Wallet\Transaction;
+namespace Walletable\Transaction;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Walletable\Exceptions\IncompactibleWalletsException;
 use Walletable\Exceptions\InsufficientBalanceException;
 use Walletable\Facades\Wallet as Manager;
-use Walletable\Lockers\LockerInterface;
+use Walletable\Internals\Lockers\LockerInterface;
 use Walletable\Models\Wallet;
 use Walletable\Money\Money;
 
@@ -37,7 +37,7 @@ class Transfer
     /**
      * Trasanction bads
      *
-     * @var \Walletable\Wallet\Transaction\TransactionBag
+     * @var \Walletable\Transaction\TransactionBag
      */
     protected $bag;
 
@@ -65,7 +65,7 @@ class Transfer
     /**
      * The transfer locker
      *
-     * @var \Walletable\Lockers\OptimisticLocker
+     * @var \Walletable\Internals\Lockers\OptimisticLocker
      */
     protected $locker;
 
@@ -157,7 +157,7 @@ class Transfer
     /**
      * Get transaction bag
      *
-     * @return \Walletable\Wallet\Transaction\TransactionBag
+     * @return \Walletable\Transaction\TransactionBag
      */
     public function getTransactions(): TransactionBag
     {

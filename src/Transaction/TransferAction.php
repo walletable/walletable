@@ -1,12 +1,12 @@
 <?php
 
-namespace Walletable\Wallet\Transaction;
+namespace Walletable\Transaction;
 
-use Walletable\Actions\ActionDataInterfare;
-use Walletable\Actions\ActionInterface;
+use Walletable\Internals\Actions\ActionDataInterfare;
+use Walletable\Internals\Actions\ActionInterface;
 use Walletable\Models\Transaction;
-use Walletable\Wallet\Details\Info;
-use Walletable\Wallet\Details\Section;
+use Walletable\Internals\Details\Info;
+use Walletable\Internals\Details\Section;
 
 class TransferAction implements ActionInterface
 {
