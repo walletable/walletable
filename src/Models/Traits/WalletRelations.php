@@ -13,14 +13,6 @@ trait WalletRelations
     }
 
     /**
-     * Get holds of wallet
-     */
-    public function holds()
-    {
-        return $this->hasMany(config('walletable.models.hold'));
-    }
-
-    /**
      * Get the wallet owner
      */
     public function walletable()
