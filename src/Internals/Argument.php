@@ -86,7 +86,7 @@ class Argument
             is_null($this->argumentBag->getKeyValue($this->key))
         ) {
             throw new InvalidArgumentException(
-                sprintf("Missing argument %d for %s", $this->key + 1, $this->getName())
+                sprintf("Empty argument %d for %s", $this->key + 1, $this->getName())
             );
         }
 
@@ -108,7 +108,13 @@ class Argument
         }
 
         throw new InvalidArgumentException(
-            sprintf("Missing argument %d for %s", $this->key + 1, $this->getName())
+            sprintf(
+                "Argument %d must be an instance of %s but %s given for %s",
+                $this->key + 1,
+                $class,
+                gettype($value),
+                $this->getName()
+            )
         );
     }
 
