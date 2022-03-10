@@ -78,7 +78,7 @@ class Creator
         }
 
         if (count($empty) && $throw) {
-            throw new Exception("Missing value(s): " . implode(',', $empty));
+            throw new Exception(sprintf('Missing value(s): %s', implode(',', $empty)));
         } else {
             return (count($empty)) ? false : true;
         }
@@ -92,7 +92,7 @@ class Creator
     public function create(): WalletModel
     {
         if (!Wallet::supportedCurrency($this->data['currency'])) {
-            throw new InvalidArgumentException("[{$this->data['currency']}] is not a supported currency");
+            throw new InvalidArgumentException(sprintf('[%s] is not a supported currency.', $this->data['currency']));
         }
 
         $event = App::make('events');

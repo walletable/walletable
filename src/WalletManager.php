@@ -133,13 +133,15 @@ class WalletManager
     {
         if (!($transactions instanceof TransactionBag) && !($transactions instanceof Transaction)) {
             throw new InvalidArgumentException(
-                'Argument 2 can be either an instance of ' .
-                    TransactionBag::class . ' or ' . Transaction::class
+                sprintf('Argument 2 can be either an instance of %s or %s', TransactionBag::class, Transaction::class)
             );
         }
 
         if (!is_string($action) && !($action instanceof ActionInterface)) {
-            throw new InvalidArgumentException('Argument 1 must be of type ' . ActionInterface::class . ' or String');
+            throw new InvalidArgumentException(sprintf(
+                'Argument 1 must be of type %s or String',
+                ActionInterface::class
+            ));
         }
 
         if (is_string($action)) {
