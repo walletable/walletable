@@ -6,10 +6,10 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
-use Walletable\Internals\Actions\ActionDataInterfare;
 use Walletable\Internals\Actions\ActionInterface;
 use Walletable\Exceptions\InsufficientBalanceException;
 use Walletable\Facades\Wallet as Manager;
+use Walletable\Internals\Actions\ActionData;
 use Walletable\Internals\Lockers\LockerInterface;
 use Walletable\Models\Wallet;
 use Walletable\Money\Money;
@@ -89,7 +89,7 @@ class CreditDebit
     /**
      * Action of the transaction
      *
-     * @var \Walletable\Internals\Actions\ActionDataInterfare
+     * @var \Walletable\Internals\Actions\ActionData
      */
     protected $actionData;
 
@@ -144,7 +144,7 @@ class CreditDebit
                 Manager::applyAction(
                     $action,
                     $this->bag,
-                    $this->actionData ??  new CreditDebitData(
+                    $this->actionData ??  new ActionData(
                         $this->wallet,
                         $this->title
                     )
@@ -189,7 +189,10 @@ class CreditDebit
      */
     protected function checks()
     {
-        if ($this->type === 'debit' && $this->wallet->amount->lessThan($this->amount)) {
+        if (
+            $this->type === 'debit' &&
+            $this->wallet->amount->lessThan($this->amount)
+        ) {
             throw new InsufficientBalanceException($this->wallet, $this->amount);
         }
     }
@@ -218,14 +221,16 @@ class CreditDebit
      * Set the action for the transaction
      *
      * @param \Walletable\Internals\Actions\ActionInterface|string $action
-     * @param \Walletable\Internals\Actions\ActionDataInterfare $actionData
+     * @param \Walletable\Internals\Actions\ActionData $actionData
      *
      * @return self
      */
-    public function setAction($action, ActionDataInterfare $actionData): self
+    public function setAction($action, ActionData $actionData): self
     {
         if (!is_string($action) && !($action instanceof ActionInterface)) {
-            throw new InvalidArgumentException('Argument 1 must be of type ' . ActionInterface::class . ' or String');
+            throw new InvalidArgumentException(
+                sprintf('Argument 1 must be of type %s or String', ActionInterface::class)
+            );
         }
 
         if (is_string($action)) {

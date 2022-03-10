@@ -10,9 +10,9 @@ interface ActionInterface
      * Apply the action to the transaction before saving
      *
      * @param \Walletable\Models\Transaction $transaction The transaction
-     * @param \Walletable\Internals\Actions\ActionDataInterfare $data Data from the Operation
+     * @param \Walletable\Internals\Actions\ActionData $data Data from the Operation
      */
-    public function apply(Transaction $transaction, ActionDataInterfare $data);
+    public function apply(Transaction $transaction, ActionData $data);
 
     /**
      * Returns the title of the transaction
