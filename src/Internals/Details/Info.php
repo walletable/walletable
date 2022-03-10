@@ -183,7 +183,7 @@ class Info
     }
 
     /**
-     * Cast the Info to string
+     * Cast the Info to json format
      */
     public function json()
     {

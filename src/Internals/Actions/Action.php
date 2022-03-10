@@ -47,10 +47,6 @@ class Action
             $amount = $this->wallet->money($amount);
         }
 
-        if (isset($data->remarks) && is_string($data->remarks)) {
-            $remarks = $data->remarks;
-        }
-
         return (new CreditDebit('credit', $this->wallet, $amount, null, $remarks))
             ->setAction($this->action, $data)
             ->execute();
@@ -71,10 +67,6 @@ class Action
 
         if (is_int($amount)) {
             $amount = $this->wallet->money($amount);
-        }
-
-        if (isset($data->remarks) && is_string($data->remarks)) {
-            $remarks = $data->remarks;
         }
 
         return (new CreditDebit('debit', $this->wallet, $amount, null, $remarks))
