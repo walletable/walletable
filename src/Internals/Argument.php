@@ -75,7 +75,7 @@ class Argument
     }
 
     /**
-     * Defines current argument as required
+     * Defines current argument as not empty
      *
      * @return self
      */
@@ -91,6 +91,25 @@ class Argument
         }
 
         return $this;
+    }
+
+    /**
+     * Defines current argument is a of a class or subclass
+     *
+     * @param string $class
+     * @return self
+     */
+    public function isA(string $class): self
+    {
+        $value = $this->value();
+
+        if (is_object($value) && is_a($value, $class)) {
+            return $this;
+        }
+
+        throw new InvalidArgumentException(
+            sprintf("Missing argument %d for %s", $this->key + 1, $this->getName())
+        );
     }
 
     /**
