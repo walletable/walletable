@@ -5,6 +5,7 @@ namespace Walletable\Internals\Actions;
 use InvalidArgumentException;
 use Walletable\Models\Wallet;
 use Walletable\Money\Money;
+use Walletable\Internals\Actions\ActionData;
 use Walletable\Transaction\CreditDebit;
 
 class Action
@@ -33,10 +34,10 @@ class Action
      * Credit the wallet
      *
      * @param int|\Walletable\Money\Money $amount
-     * @param \Walletable\Internals\Actions\ActionDataInterfare $data
+     * @param \Walletable\Internals\Actions\ActionData $data
      * @param string|null $remarks
      */
-    public function credit($amount, ActionDataInterfare $data, string $remarks = null): CreditDebit
+    public function credit($amount, ActionData $data, string $remarks = null): CreditDebit
     {
         if (!is_int($amount) && !($amount instanceof Money)) {
             throw new InvalidArgumentException('Argument 1 must be of type ' . Money::class . ' or Integer');
@@ -44,10 +45,6 @@ class Action
 
         if (is_int($amount)) {
             $amount = $this->wallet->money($amount);
-        }
-
-        if (isset($data->remarks) && is_string($data->remarks)) {
-            $remarks = $data->remarks;
         }
 
         return (new CreditDebit('credit', $this->wallet, $amount, null, $remarks))
@@ -59,10 +56,10 @@ class Action
      * Debit the wallet
      *
      * @param int|\Walletable\Money\Money $amount
-     * @param \Walletable\Internals\Actions\ActionDataInterfare $data
+     * @param \Walletable\Internals\Actions\ActionData $data
      * @param string|null $remarks
      */
-    public function debit($amount, ActionDataInterfare $data, string $remarks = null): CreditDebit
+    public function debit($amount, ActionData $data, string $remarks = null): CreditDebit
     {
         if (!is_int($amount) && !($amount instanceof Money)) {
             throw new InvalidArgumentException('Argument 1 must be of type ' . Money::class . ' or Integer');
@@ -70,10 +67,6 @@ class Action
 
         if (is_int($amount)) {
             $amount = $this->wallet->money($amount);
-        }
-
-        if (isset($data->remarks) && is_string($data->remarks)) {
-            $remarks = $data->remarks;
         }
 
         return (new CreditDebit('debit', $this->wallet, $amount, null, $remarks))

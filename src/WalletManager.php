@@ -5,11 +5,11 @@ namespace Walletable;
 use Illuminate\Support\Traits\ForwardsCalls;
 use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
-use Walletable\Internals\Actions\ActionDataInterfare;
 use Walletable\Internals\Actions\ActionInterface;
 use Walletable\Internals\Actions\Traits\HasActions;
 use Walletable\Internals\Creator;
 use Walletable\Contracts\Walletable;
+use Walletable\Internals\Actions\ActionData;
 use Walletable\Internals\Lockers\Traits\HasLockers;
 use Walletable\Models\Transaction;
 use Walletable\Models\Wallet;
@@ -127,9 +127,9 @@ class WalletManager
      *
      * @param \Walletable\Internals\Actions\ActionInterface|string $action
      * @param \Walletable\Transaction\TransactionBag|\Walletable\Models\Transaction $transactions Transactions
-     * @param \Walletable\Internals\Actions\ActionDataInterfare $data
+     * @param \Walletable\Internals\Actions\ActionData $data
      */
-    public function applyAction($action, object $transactions, ActionDataInterfare $data)
+    public function applyAction($action, object $transactions, ActionData $data)
     {
         if (!($transactions instanceof TransactionBag) && !($transactions instanceof Transaction)) {
             throw new InvalidArgumentException(

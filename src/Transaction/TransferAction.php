@@ -2,32 +2,34 @@
 
 namespace Walletable\Transaction;
 
-use Walletable\Internals\Actions\ActionDataInterfare;
+use Walletable\Internals\Actions\ActionData;
 use Walletable\Internals\Actions\ActionInterface;
 use Walletable\Models\Transaction;
-use Walletable\Internals\Details\Info;
-use Walletable\Internals\Details\Section;
+use Walletable\Models\Wallet;
 
 class TransferAction implements ActionInterface
 {
     /**
      * {@inheritdoc}
      */
-    public function apply(Transaction $transaction, ActionDataInterfare $data)
+    public function apply(Transaction $transaction, ActionData $data)
     {
+        $sender = $data->argument(0)->isA(Wallet::class)->value();
+        $receiver = $data->argument(1)->isA(Wallet::class)->value();
+
         if ($transaction->type == 'credit') {
             $transaction->forceFill([
                 'action' => 'transfer',
-                'method_id' => $data->sender->getKey(),
-                'method_type' => $data->sender->getMorphClass()
+                'method_id' => $sender->getKey(),
+                'method_type' => $sender->getMorphClass()
             ]);
         }
 
         if ($transaction->type == 'debit') {
             $transaction->forceFill([
                 'action' => 'transfer',
-                'method_id' => $data->receiver->getKey(),
-                'method_type' => $data->receiver->getMorphClass()
+                'method_id' => $receiver->getKey(),
+                'method_type' => $receiver->getMorphClass()
             ]);
         }
     }

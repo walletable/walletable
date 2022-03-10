@@ -2,7 +2,7 @@
 
 namespace Walletable\Transaction;
 
-use Walletable\Internals\Actions\ActionDataInterfare;
+use Walletable\Internals\Actions\ActionData;
 use Walletable\Internals\Actions\ActionInterface;
 use Walletable\Models\Transaction;
 
@@ -11,12 +11,15 @@ class CreditDebitAction implements ActionInterface
     /**
      * {@inheritdoc}
      */
-    public function apply(Transaction $transaction, ActionDataInterfare $data)
+    public function apply(Transaction $transaction, ActionData $data)
     {
-        $title = $transaction->type === 'credit' ? 'Credit' : 'Debit';
+        $title = $data->argument(0)->type('type')->value(
+            $transaction->type === 'credit' ? 'Credit' : 'Debit'
+        );
+
         $transaction->forceFill([
             'action' => 'credit_debit'
-        ])->data('title', $data->title ?? $title);
+        ])->data('title', $title);
     }
 
     /**
