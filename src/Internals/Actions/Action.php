@@ -40,7 +40,7 @@ class Action
     public function credit($amount, ActionData $data, string $remarks = null): CreditDebit
     {
         if (!is_int($amount) && !($amount instanceof Money)) {
-            throw new InvalidArgumentException('Argument 1 must be of type ' . Money::class . ' or Integer');
+            throw new InvalidArgumentException(sprintf('Argument 1 must be of type %s or Integer', Money::class));
         }
 
         if (is_int($amount)) {
@@ -62,7 +62,7 @@ class Action
     public function debit($amount, ActionData $data, string $remarks = null): CreditDebit
     {
         if (!is_int($amount) && !($amount instanceof Money)) {
-            throw new InvalidArgumentException('Argument 1 must be of type ' . Money::class . ' or Integer');
+            throw new InvalidArgumentException(sprintf('Argument 1 must be of type %s or Integer', Money::class));
         }
 
         if (is_int($amount)) {

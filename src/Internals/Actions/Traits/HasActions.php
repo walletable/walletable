@@ -47,7 +47,7 @@ trait HasActions
                 is_string($action) &&
                 !(class_exists($action) && is_subclass_of($action, ActionInterface::class))
             ) {
-                throw new Exception('Action class must implement ' . ActionsActionInterface::class);
+                throw new Exception(sprintf('Action class must implement %s', ActionsActionInterface::class));
             }
 
             $this->actionResolvers[$name] = $action;
@@ -64,7 +64,7 @@ trait HasActions
     protected function getResolvedAction(string $name)
     {
         if (!isset($this->actionResolvers[$name])) {
-            throw new Exception("\"$name\" not found as a wallet action");
+            throw new Exception(sprintf('"%s" not found as a wallet action'), $name);
         }
 
         if (!isset($this->actions[$name])) {
@@ -91,7 +91,7 @@ trait HasActions
     protected function resolveActionFromClosure(Closure $resolver): ActionInterface
     {
         if (!($action = app()->call($resolver)) instanceof ActionInterface) {
-            throw new Exception('Closure resolver must return an instance of ' . ActionInterface::class);
+            throw new Exception(sprintf('Closure resolver must return an instance of %s', ActionInterface::class));
         }
 
         return $action;
