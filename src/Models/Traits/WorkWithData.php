@@ -9,7 +9,7 @@ trait WorkWithData
      */
     public function data(string $key = null, $value = null)
     {
-        $data = $this->data;
+        $data = $this->meta;
 
         if (is_string($key) && !is_null($value)) {
             data_set($data, $key, $value, true);
