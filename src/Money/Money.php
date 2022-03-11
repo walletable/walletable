@@ -519,7 +519,7 @@ class Money implements \JsonSerializable
         return [
             'amount' => $this->amount,
             'display' => $this->display(),
-            'symbol' => $this->currency->symbol(),
+            'symbol' => $this->currency->getSymbol(),
             'currency' => $this->currency->jsonSerialize(),
         ];
     }
