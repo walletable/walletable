@@ -26,7 +26,7 @@ class CreateTransactionsTable extends Migration
             $table->string('session', 100)->index();
             $table->enum('type', ['credit', 'debit'])->index();
             $table->unsignedBigInteger('amount');
-            $table->unsignedBigInteger('balance');
+            $table->bigInteger('balance');
             $table->string('currency', 10);
             $table->string('action', 45)->index();
             $table->string('method_id', 100)->nullable();
