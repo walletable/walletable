@@ -6,7 +6,6 @@ use Walletable\Models\Transaction as Model;
 
 class Transaction extends Model
 {
-
     /**
      * The attributes that are mass assignable.
      *
@@ -22,6 +21,7 @@ class Transaction extends Model
      * @var array
      */
     protected $casts = [
-        'data' => 'array'
+        'meta' => 'array',
+        'created_at' => 'datetime'
     ];
 }

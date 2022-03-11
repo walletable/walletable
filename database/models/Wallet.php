@@ -6,7 +6,6 @@ use Walletable\Models\Wallet as Model;
 
 class Wallet extends Model
 {
-
     /**
      * The attributes that are mass assignable.
      *
@@ -17,7 +16,7 @@ class Wallet extends Model
         'tag',
         'amount',
         'currency',
-        'data',
+        'meta',
         'driver',
         'status',
     ];
@@ -28,6 +27,6 @@ class Wallet extends Model
      * @var array
      */
     protected $casts = [
-        'data' => 'array'
+        'meta' => 'array'
     ];
 }

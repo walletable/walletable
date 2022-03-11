@@ -106,7 +106,7 @@ class Creator
             'label' => $this->data['label'],
             'tag' => $this->data['tag'],
             'currency' => $this->data['currency'],
-            'data' => '{}',
+            'meta' => '{}',
             'amount' => 0
         ]);
 

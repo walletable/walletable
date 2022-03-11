@@ -14,7 +14,7 @@ trait WorkWithData
         if (is_string($key) && !is_null($value)) {
             data_set($data, $key, $value, true);
             $this->forceFill([
-                'data' => $data
+                'meta' => $data
             ]);
 
             return $value;
