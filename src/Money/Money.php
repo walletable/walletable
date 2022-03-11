@@ -532,11 +532,9 @@ class Money implements \JsonSerializable
      */
     public function json(Closure $callback = null)
     {
-        if ($callback instanceof Closure) {
-            return $callback($this);
-        }
-
-        return $this->jsonSerialize();
+        return ($callback instanceof Closure) ?
+            $callback($this, $this->jsonSerialize()) :
+            $this->jsonSerialize();
     }
 
     /**
