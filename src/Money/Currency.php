@@ -27,6 +27,13 @@ class Currency implements \JsonSerializable
     private $code;
 
     /**
+     * Currency symbol.
+     *
+     * @var string
+     */
+    private $symbol;
+
+    /**
      * Currency name.
      *
      * @var string
@@ -69,7 +76,7 @@ class Currency implements \JsonSerializable
         string $name,
         string $subunit,
         int $per = null,
-        int $number = null
+        int $numeric = null
     ) {
         if ($code === '') {
             throw new \InvalidArgumentException('Currency code should not be empty string');
@@ -80,7 +87,7 @@ class Currency implements \JsonSerializable
         $this->name = $name;
         $this->subunit = $subunit;
         $this->per = $per;
-        $this->number = $number;
+        $this->numeric = $numeric;
     }
 
     /**
