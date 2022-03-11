@@ -31,6 +31,14 @@ class Transaction extends Model
         );
     }
 
+    public function getBalanceAttribute()
+    {
+        return new Money(
+            $this->getRawOriginal('balance'),
+            $this->currency
+        );
+    }
+
     public function getActionAttribute()
     {
         if (isset($this->transactionCache['action'])) {
