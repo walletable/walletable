@@ -20,16 +20,16 @@ class TransferAction implements ActionInterface
         if ($transaction->type == 'credit') {
             $transaction->forceFill([
                 'action' => 'transfer',
-                'method_id' => $sender->getKey(),
-                'method_type' => $sender->getMorphClass()
+                'method_id' => $receiver->getKey(),
+                'method_type' => $receiver->getMorphClass()
             ]);
         }
 
         if ($transaction->type == 'debit') {
             $transaction->forceFill([
                 'action' => 'transfer',
-                'method_id' => $receiver->getKey(),
-                'method_type' => $receiver->getMorphClass()
+                'method_id' => $sender->getKey(),
+                'method_type' => $sender->getMorphClass()
             ]);
         }
     }
