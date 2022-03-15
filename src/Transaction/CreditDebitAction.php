@@ -5,6 +5,7 @@ namespace Walletable\Transaction;
 use Walletable\Internals\Actions\ActionData;
 use Walletable\Internals\Actions\ActionInterface;
 use Walletable\Models\Transaction;
+use Walletable\Models\Wallet;
 
 class CreditDebitAction implements ActionInterface
 {
