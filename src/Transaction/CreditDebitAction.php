@@ -13,7 +13,9 @@ class CreditDebitAction implements ActionInterface
      */
     public function apply(Transaction $transaction, ActionData $data)
     {
-        $title = $data->argument(0)->type('type')->value(
+        $data->argument(0)->isA(Wallet::class);
+
+        $title = $data->argument(1)->type('string')->value(
             $transaction->type === 'credit' ? 'Credit' : 'Debit'
         );
 
