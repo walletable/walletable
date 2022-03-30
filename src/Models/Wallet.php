@@ -5,12 +5,13 @@ namespace Walletable\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
 use Walletable\Internals\Actions\Action;
 use Walletable\Contracts\WalletInterface;
 use Walletable\Facades\Wallet as FacadesWallet;
 use Walletable\Models\Traits\WalletRelations;
-use Walletable\Models\Traits\WorkWithData;
+use Walletable\Models\Traits\WorkWithMeta;
 use Walletable\Money\Money;
 use Walletable\Transaction\CreditDebit;
 use Walletable\Transaction\Transfer;
@@ -26,7 +27,11 @@ class Wallet extends Model implements WalletInterface
     use HasFactory;
     use ConditionalUuid;
     use WalletRelations;
-    use WorkWithData;
+    use WorkWithMeta;
+    use Macroable {
+        __call as macroCall;
+        __callStatic as macroCallStatic;
+    }
 
     /**
      * Hold object for the wallet
@@ -159,5 +164,37 @@ class Wallet extends Model implements WalletInterface
             App::make(WalletManager::class)
                 ->action($action)
         );
+    }
+
+    /**
+     * Handle dynamic calls into macros or pass missing methods to the parrent.
+     *
+     * @param  string  $method
+     * @param  array  $parameters
+     * @return mixed
+     */
+    public function __call($method, $parameters)
+    {
+        if (static::hasMacro($method)) {
+            return $this->macroCall($method, $parameters);
+        }
+
+        return parent::__call($method, $parameters);
+    }
+
+    /**
+     * Handle dynamic static calls into macros or pass missing methods to the parrent.
+     *
+     * @param  string  $method
+     * @param  array  $parameters
+     * @return mixed
+     */
+    public static function __callStatic($method, $parameters)
+    {
+        if (static::hasMacro($method)) {
+            return static::macroCallStatic($method, $parameters);
+        }
+
+        return parent::__callStatic($method, $parameters);
     }
 }
