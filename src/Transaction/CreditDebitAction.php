@@ -22,7 +22,7 @@ class CreditDebitAction implements ActionInterface
 
         $transaction->forceFill([
             'action' => 'credit_debit'
-        ])->data('title', $title);
+        ])->meta('title', $title);
     }
 
     /**
@@ -30,7 +30,7 @@ class CreditDebitAction implements ActionInterface
      */
     public function title(Transaction $transaction)
     {
-        return $transaction->data('title');
+        return $transaction->meta('title');
     }
 
     /**

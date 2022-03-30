@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
 use Walletable\Internals\Actions\ActionManager;
 use Walletable\Models\Traits\TransactionRelations;
-use Walletable\Models\Traits\WorkWithData;
+use Walletable\Models\Traits\WorkWithMeta;
 use Walletable\Money\Money;
 use Walletable\Traits\ConditionalUuid;
 use Walletable\WalletManager;
@@ -17,7 +17,7 @@ class Transaction extends Model
     use HasFactory;
     use ConditionalUuid;
     use TransactionRelations;
-    use WorkWithData;
+    use WorkWithMeta;
 
     public $timestamps = false;
 
