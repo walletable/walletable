@@ -64,7 +64,7 @@ trait HasActions
     protected function getResolvedAction(string $name)
     {
         if (!isset($this->actionResolvers[$name])) {
-            throw new Exception(sprintf('"%s" not found as a wallet action'), $name);
+            throw new Exception(sprintf('"%s" not found as a wallet action', $name));
         }
 
         if (!isset($this->actions[$name])) {
