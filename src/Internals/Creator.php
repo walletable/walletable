@@ -9,8 +9,8 @@ use InvalidArgumentException;
 use Walletable\Contracts\Walletable;
 use Walletable\Events\CreatingWallet;
 use Walletable\Events\CreatedWallet;
-use Walletable\Facades\Wallet;
 use Walletable\Models\Wallet as WalletModel;
+use Walletable\Money\Money;
 
 class Creator
 {
@@ -91,7 +91,7 @@ class Creator
      */
     public function create(): WalletModel
     {
-        if (!Wallet::supportedCurrency($this->data['currency'])) {
+        if (!Money::hasCurrency($this->data['currency'])) {
             throw new InvalidArgumentException(sprintf('[%s] is not a supported currency.', $this->data['currency']));
         }
 
