@@ -13,8 +13,8 @@ use Walletable\Internals\Actions\ActionData;
 use Walletable\Internals\Lockers\Traits\HasLockers;
 use Walletable\Models\Transaction;
 use Walletable\Models\Wallet;
-use Walletable\Money\Currencies;
 use Walletable\Money\Currency;
+use Walletable\Money\Money;
 use Walletable\Transaction\TransactionBag;
 
 class WalletManager
@@ -23,13 +23,6 @@ class WalletManager
     use Macroable;
     use HasLockers;
     use HasActions;
-
-    /**
-     * Collection of supported currencies
-     *
-     * @var \Walletable\Money\Currencies
-     */
-    protected $currencies;
 
     public function __construct()
     {
@@ -65,48 +58,6 @@ class WalletManager
             ->label($label)
             ->tag($tag)
             ->currency($currency)->create();
-    }
-
-    /**
-     * Check if currency is supported
-     *
-     * @param string $currency
-     *
-     * @return bool
-     */
-    public function supportedCurrency(string $currency)
-    {
-        return !is_null($this->currencies->get($currency));
-    }
-
-    /**
-     * Get currency instance
-     *
-     * @param string $currency
-     *
-     * @return bool
-     */
-    public function currency(string $currency)
-    {
-        if (is_null($currency = $this->currencies->get($currency))) {
-            throw new InvalidArgumentException(sprintf('[%s] currency not supported'));
-        }
-
-        return $currency;
-    }
-
-    /**
-     * Check if currency is supported
-     *
-     * @param string $
-     *
-     * @return bool
-     */
-    public function supportedCurrencies(Currency ...$currencies)
-    {
-        $this->currencies = Currencies::create(...$currencies);
-
-        return $this;
     }
 
     /**

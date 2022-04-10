@@ -69,6 +69,6 @@ class Transaction extends Model
 
     public function getCurrencyAttribute()
     {
-        return App::make(WalletManager::class)->currency($this->getRawOriginal('currency'));
+        return Money::currency($this->getRawOriginal('currency'));
     }
 }

@@ -4,9 +4,11 @@ namespace Walletable\Money;
 
 use Closure;
 use Illuminate\Support\Traits\Macroable;
+use InvalidArgumentException;
 use Walletable\Money\Calculator\CalculatorInterface;
 use Walletable\Money\Calculator\PhpCalculator;
 use Walletable\Money\Traits\HasFormatters;
+use Walletable\Money\Traits\MoneyFactory;
 
 /**
  * Money Value Object.
@@ -17,7 +19,10 @@ use Walletable\Money\Traits\HasFormatters;
  */
 class Money implements \JsonSerializable
 {
-    use Macroable;
+    use Macroable, MoneyFactory {
+        Macroable::__callStatic as macroCallStatic;
+        MoneyFactory::__callStatic as factoryCallStatic;
+    }
     use HasFormatters;
 
     public const ROUND_HALF_UP = PHP_ROUND_HALF_UP;
@@ -47,6 +52,12 @@ class Money implements \JsonSerializable
      * @var Currency
      */
     private $currency;
+
+    /**
+     * Supported currency
+     * @var array<string=>Currency>
+     */
+    private static $currencies;
 
     /**
      * @var \Walletable\Money\Calculator\CalculatorInterface
@@ -151,7 +162,7 @@ class Money implements \JsonSerializable
     }
 
     /**
-     * @param \Money\Money $other
+     * @param \Walletable\Money\Money $other
      *
      * @return bool
      */
@@ -171,7 +182,7 @@ class Money implements \JsonSerializable
     }
 
     /**
-     * @param \Money\Money $other
+     * @param \Walletable\Money\Money $other
      *
      * @return bool
      */
@@ -214,7 +225,7 @@ class Money implements \JsonSerializable
      * Returns a new Money object that represents
      * the sum of this and an other Money object.
      *
-     * @param Money[] $addends
+     * @param Money ...$addends
      *
      * @return Money
      */
@@ -236,7 +247,7 @@ class Money implements \JsonSerializable
      * Returns a new Money object that represents
      * the difference of this and an other Money object.
      *
-     * @param Money[] $subtrahends
+     * @param Money ...$subtrahends
      *
      * @return Money
      *
@@ -668,5 +679,101 @@ class Money implements \JsonSerializable
     public function __toString()
     {
         return $this->display();
+    }
+
+    /**
+     * Add supported currencies
+     *
+     * @param Currency ...$currencies
+     * @return void
+     */
+    public static function currencies(Currency ...$currencies)
+    {
+        foreach ($currencies as $currency) {
+            static::$currencies[$currency->getCode()] = $currency;
+        }
+    }
+
+    /**
+     * Check if currency is supported
+     *
+     * @param Currency|string $currency
+     * @return boolean
+     */
+    public static function hasCurrency($currency)
+    {
+        if (!is_string($currency) && !($currency instanceof Currency)) {
+            throw new InvalidArgumentException(
+                sprintf('Argument #1 can either be string or instance of %s', Currency::class)
+            );
+        } elseif ($currency instanceof Currency) {
+            $currency = $currency->getCode();
+        }
+
+        return isset(static::$currencies[$currency]);
+    }
+
+    /**
+     * Get currency instance
+     *
+     * @param string $currency
+     * @return Currency|null
+     */
+    public static function currency($currency)
+    {
+        if (!isset(static::$currencies[$currency])) {
+            throw new InvalidArgumentException(sprintf('[%s] currency not supported.', $currency));
+        }
+
+        return static::$currencies[$currency];
+    }
+
+    /**
+     * Remove currency
+     *
+     * @param Currency|string $currency
+     * @return void
+     */
+    public static function removeCurrency($currency)
+    {
+        if (!is_string($currency) && !($currency instanceof Currency)) {
+            throw new InvalidArgumentException(
+                sprintf('Argument #1 can either be string or instance of %s', Currency::class)
+            );
+        } elseif ($currency instanceof Currency) {
+            $currency = $currency->getCode();
+        }
+
+        if (isset(static::$currencies[$currency])) {
+            unset(static::$currencies[$currency]);
+        }
+    }
+
+    /**
+     * Remove all currency
+     *
+     * @return void
+     */
+    public static function removeAllCurrency()
+    {
+        static::$currencies = [];
+    }
+
+    /**
+     * Resolve the trait of maigic methods
+     *
+     * @param string          $method
+     * @param array{int=>mixed} $arguments
+     *
+     * @throws InvalidArgumentException.
+     *
+     */
+    public static function __callStatic(string $method, array $arguments): Money
+    {
+        if (static::hasMacro($method)) {
+            return static::macroCallStatic($method, $arguments);
+        }
+
+        return static::factoryCallStatic($method, $arguments);
     }
 }
