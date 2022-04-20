@@ -44,12 +44,12 @@ interface ActionInterface
      *
      * @return bool
      */
-    public function suppportDebit(): bool;
+    public function supportDebit(): bool;
 
     /**
      * Check if the action supports credit
      *
      * @return bool
      */
-    public function suppportCredit(): bool;
+    public function supportCredit(): bool;
 }

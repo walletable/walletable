@@ -52,7 +52,7 @@ class CreditDebitAction implements ActionInterface
     /**
      * {@inheritdoc}
      */
-    public function suppportDebit(): bool
+    public function supportDebit(): bool
     {
         return true;
     }
@@ -61,7 +61,7 @@ class CreditDebitAction implements ActionInterface
     /**
      * {@inheritdoc}
      */
-    public function suppportCredit(): bool
+    public function supportCredit(): bool
     {
         return true;
     }
