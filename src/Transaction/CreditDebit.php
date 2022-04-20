@@ -134,7 +134,7 @@ class CreditDebit
             $method = $this->type . 'Lock';
             $action = $this->action ?? Manager::action('credit_debit');
 
-            if (!$action->{'suppport' . ucfirst($this->type) }()) {
+            if (!$action->{'support' . ucfirst($this->type) }()) {
                 throw new Exception('This action does not support ' . $this->type . ' operations', 1);
             }
 
