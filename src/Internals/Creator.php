@@ -27,7 +27,6 @@ class Creator
      * @var array
      */
     protected $accepted_key = [
-        'reference',
         'name',
         'email',
         'label',

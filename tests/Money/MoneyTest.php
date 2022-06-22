@@ -21,7 +21,7 @@ class MoneyTest extends TestCase
     public function testUsingNotSupported()
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('[NGN] currency not supported.');
-        Money::NGN(100000);
+        $this->expectExceptionMessage('[LRD] currency not supported.');
+        Money::LRD(100000);
     }
 }

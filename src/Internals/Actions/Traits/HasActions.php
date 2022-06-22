@@ -5,7 +5,6 @@ namespace Walletable\Internals\Actions\Traits;
 use Closure;
 use Exception;
 use InvalidArgumentException;
-use Walletable\Internals\Actions\ActionInterface as ActionsActionInterface;
 use Walletable\Internals\Actions\ActionInterface;
 
 trait HasActions
@@ -39,7 +38,7 @@ trait HasActions
             !is_string($action) &&
             !($action instanceof \Closure)
         ) {
-            throw new InvalidArgumentException('A action can only be resolved through class name or closure');
+            throw new InvalidArgumentException('An action can only be resolved through class name or closure');
         }
 
         if (!is_null($action)) {
@@ -47,7 +46,10 @@ trait HasActions
                 is_string($action) &&
                 !(class_exists($action) && is_subclass_of($action, ActionInterface::class))
             ) {
-                throw new Exception(sprintf('Action class must implement %s', ActionsActionInterface::class));
+                throw new Exception(sprintf(
+                    'Action class must implement [%s] interface',
+                    ActionInterface::class
+                ));
             }
 
             $this->actionResolvers[$name] = $action;
