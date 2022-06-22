@@ -46,7 +46,10 @@ trait HasLockers
                 is_string($locker) &&
                 !(class_exists($locker) && is_subclass_of($locker, LockerInterface::class))
             ) {
-                throw new Exception('Locker class must implement ' . LockerInterface::class);
+                throw new Exception(sprintf(
+                    'Locker class must implement [%s] interface',
+                    LockerInterface::class
+                ));
             }
 
             $this->lockerResolvers[$name] = $locker;

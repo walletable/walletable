@@ -2,7 +2,6 @@
 
 namespace Walletable;
 
-use Illuminate\Support\Traits\ForwardsCalls;
 use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
 use Walletable\Internals\Actions\ActionInterface;
@@ -13,26 +12,17 @@ use Walletable\Internals\Actions\ActionData;
 use Walletable\Internals\Lockers\Traits\HasLockers;
 use Walletable\Models\Transaction;
 use Walletable\Models\Wallet;
-use Walletable\Money\Currency;
-use Walletable\Money\Money;
 use Walletable\Transaction\TransactionBag;
 
 class WalletManager
 {
-    use ForwardsCalls;
     use Macroable;
     use HasLockers;
     use HasActions;
 
-    public function __construct()
-    {
-        //
-    }
-
     /**
      * Create a new wallet
      *
-     * @param string $reference
      * @param string $name
      * @param string $email
      * @param string $label
@@ -45,14 +35,13 @@ class WalletManager
      */
     public function create(
         Walletable $walletable,
-        string $reference,
         string $label,
         string $tag,
         string $currency
     ): Wallet {
         $creator = new Creator($walletable);
 
-        return $creator->reference($reference)
+        return $creator
             ->name($walletable->getOwnerName())
             ->email($walletable->getOwnerEmail())
             ->label($label)
