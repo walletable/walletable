@@ -1,3 +1,3 @@
 <?php
 
-// Helper functions 
+// Helper functions
