@@ -5,7 +5,6 @@ namespace Walletable\Tests\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Walletable\Contracts\Walletable as ContractsWalletable;
-use Walletable\Models\Wallet;
 
 class Walletable extends Model implements ContractsWalletable
 {
