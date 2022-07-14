@@ -2,7 +2,6 @@
 
 namespace Walletable\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Traits\Macroable;
@@ -24,7 +23,6 @@ use Walletable\WalletManager;
  */
 class Wallet extends Model implements WalletInterface
 {
-    use HasFactory;
     use ConditionalUuid;
     use WalletRelations;
     use WorkWithMeta;

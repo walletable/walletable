@@ -2,7 +2,6 @@
 
 namespace Walletable\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
 use Walletable\Internals\Actions\ActionManager;
@@ -14,7 +13,6 @@ use Walletable\WalletManager;
 
 class Transaction extends Model
 {
-    use HasFactory;
     use ConditionalUuid;
     use TransactionRelations;
     use WorkWithMeta;
