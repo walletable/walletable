@@ -7,6 +7,7 @@ use Walletable\Internals\Actions\ActionData;
 use Walletable\Internals\Actions\ActionManager;
 use Walletable\Internals\Argument;
 use Walletable\Tests\Models\Transaction;
+use Walletable\Tests\Models\Walletable;
 use Walletable\Transaction\CreditDebitAction;
 
 class ActionTest extends TestBench
@@ -88,5 +89,51 @@ class ActionTest extends TestBench
 
         $this->assertSame('Test Transaction', $manager->title());
         $this->assertSame('/image/test/transaction.jpg', $manager->image());
+    }
+
+    public function testArgument()
+    {
+        $data = new ActionData(
+            'Wellcome',
+            200,
+            true,
+            '234',
+            4.5,
+            [4, 5],
+            function () {
+                # code...
+            },
+            '89099876',
+            Walletable::create([
+                'name' => 'Olawale Ilesanmi',
+                'email' => 'olawale@olawale.com',
+            ])
+        );
+
+
+
+        $this->assertSame('Wellcome', (new Argument($data, 0))->value());
+
+        $this->assertInstanceOf(Argument::class, $data->argument(0)->required());
+        $this->assertInstanceOf(Argument::class, $data->argument(0)->notEmpty());
+        $this->assertInstanceOf(Argument::class, $data->argument(0)->type('str'));
+        $this->assertInstanceOf(Argument::class, $data->argument(0)->type('string'));
+        $this->assertInstanceOf(Argument::class, $data->argument(1)->type('int'));
+        $this->assertInstanceOf(Argument::class, $data->argument(1)->type('integer'));
+        $this->assertInstanceOf(Argument::class, $data->argument(2)->type('bool'));
+        $this->assertInstanceOf(Argument::class, $data->argument(2)->type('boolean'));
+        $this->assertInstanceOf(Argument::class, $data->argument(3)->type('num'));
+        $this->assertInstanceOf(Argument::class, $data->argument(3)->type('numeric'));
+        $this->assertInstanceOf(Argument::class, $data->argument(4)->type('num'));
+        $this->assertInstanceOf(Argument::class, $data->argument(4)->type('numeric'));
+        $this->assertInstanceOf(Argument::class, $data->argument(5)->type('array'));
+        $this->assertInstanceOf(Argument::class, $data->argument(6)->type('closure'));
+        $this->assertInstanceOf(Argument::class, $data->argument(7)->type('digit'));
+
+        $this->assertInstanceOf(Argument::class, $data->argument(8)->isA(Walletable::class));
+
+        $this->assertInstanceOf(Argument::class, $data->argument(1)->between(191, 201));
+        $this->assertInstanceOf(Argument::class, $data->argument(1)->min(191));
+        $this->assertInstanceOf(Argument::class, $data->argument(1)->max(201));
     }
 }
