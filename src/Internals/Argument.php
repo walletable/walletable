@@ -161,9 +161,9 @@ class Argument
                 $valid = is_a($value, '\Closure');
                 $message = '%s accepts only Closure as argument %d.';
                 break;
-            case 'digit':
+            case 'digits':
                 $valid = $this->isDigit($value);
-                $message = '%s accepts only integer values as argument %d.';
+                $message = '%s accepts only digits values as argument %d.';
                 break;
         }
 
