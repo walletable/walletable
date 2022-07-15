@@ -12,6 +12,12 @@ use Walletable\Events\CreatedWallet;
 use Walletable\Models\Wallet as WalletModel;
 use Walletable\Money\Money;
 
+/**
+ * @method self email(string $email)
+ * @method self label(string $label)
+ * @method self tag(string $tag)
+ * @method self currency(string $currency)
+ */
 class Creator
 {
     /**
