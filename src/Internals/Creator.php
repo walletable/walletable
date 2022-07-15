@@ -72,7 +72,7 @@ class Creator
      * @param bool $throw
      * @return bool
      */
-    protected function filled(bool $throw = false)
+    public function filled(bool $throw = false)
     {
         $empty = [];
         foreach ($this->accepted_key as $value) {
