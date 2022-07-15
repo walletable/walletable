@@ -33,7 +33,6 @@ class Creator
      * @var array
      */
     protected $accepted_key = [
-        'name',
         'email',
         'label',
         'tag',
@@ -55,8 +54,8 @@ class Creator
     /**
      * Dynamically foward property assigning to data property
      *
-     * @param string $name
-     * @param mixed $value
+     * @param string $method
+     * @param mixed $parameters
      */
     public function __call(string $method, $parameters)
     {
