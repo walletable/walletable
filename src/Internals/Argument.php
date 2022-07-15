@@ -83,7 +83,10 @@ class Argument
     {
         if (
             $this->argumentBag->keyExists($this->key) &&
-            is_null($this->argumentBag->getKeyValue($this->key))
+            (
+                empty($this->argumentBag->getKeyValue($this->key)) ||
+                is_null($this->argumentBag->getKeyValue($this->key))
+            )
         ) {
             throw new InvalidArgumentException(
                 sprintf("Empty argument %d for %s", $this->key + 1, $this->getName())
