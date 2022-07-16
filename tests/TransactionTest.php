@@ -78,4 +78,37 @@ class TransactionTest extends TestBench
 
         $this->assertInstanceOf(TransferAction::class, $transaction->action->getAction());
     }
+
+    public function testMacroable()
+    {
+        Transaction::macro('testMacro', function () {
+            /**
+             * @var Transaction $this
+             */
+            return $this->amount->getAmount();
+        });
+
+        Transaction::macro('testStaticMacro', function () {
+            return 'Transaction Macro';
+        });
+
+        $wallet = $this->createWallet(100000);
+
+        ($transaction = new Transaction())->forceFill([
+            'wallet_id' => $wallet->id,
+            'session' => 'fhfherdfhfdhdfidhdfidfjfd',
+            'type' => 'credit',
+            'amount' => 100000,
+            'balance' => 100000,
+            'currency' => 'NGN',
+            'action' => 'transfer',
+            'remarks' => 'This is a test transaction',
+            'meta' => ['title' => 'Test Credit'],
+            'created_at' => now(),
+        ])->save();
+
+        $this->assertSame('100000', $transaction->testMacro());
+        $this->assertSame('Transaction Macro', Transaction::testStaticMacro());
+    }
+
 }
