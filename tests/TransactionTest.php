@@ -110,5 +110,4 @@ class TransactionTest extends TestBench
         $this->assertSame('100000', $transaction->testMacro());
         $this->assertSame('Transaction Macro', Transaction::testStaticMacro());
     }
-
 }
