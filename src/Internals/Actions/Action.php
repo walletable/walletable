@@ -73,4 +73,14 @@ class Action
             ->setAction($this->action, $data)
             ->execute();
     }
+
+    /**
+     * Get the raw action object
+     *
+     * @return ActionInterface
+     */
+    public function getAction(): ActionInterface
+    {
+        return $this->action;
+    }
 }
