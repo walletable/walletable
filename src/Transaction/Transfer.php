@@ -185,4 +185,14 @@ class Transfer
         }
         return $this->locker = Manager::locker(config('walletable.locker'));
     }
+
+    /**
+     * Check is the transfer was successful
+     *
+     * @return boolean
+     */
+    public function successful(): bool
+    {
+        return $this->successful;
+    }
 }
