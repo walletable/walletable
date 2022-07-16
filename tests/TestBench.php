@@ -69,7 +69,7 @@ class TestBench extends BaseTestCase
         });
     }
 
-    public function createWallet(int $amount = 0, Walletable $walletable = null): Wallet
+    public function createWallet(int $amount = 0, string $currency = 'NGN', Walletable $walletable = null): Wallet
     {
         $walletable = $walletable ?? Walletable::create([
             'name' => 'Olawale Ilesanmi',
@@ -80,7 +80,7 @@ class TestBench extends BaseTestCase
             'label' => 'Main Wallet',
             'tag' => 'main',
             'amount' => $amount,
-            'currency' => 'NGN',
+            'currency' => $currency,
             'meta' => '[]',
             'status' => 'active',
         ])->setRelation('walletable', $walletable);

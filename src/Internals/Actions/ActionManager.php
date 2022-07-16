@@ -49,4 +49,14 @@ class ActionManager
     {
         return $this->action->details($this->transaction);
     }
+
+    /**
+     * Get the raw action object
+     *
+     * @return ActionInterface
+     */
+    public function getAction(): ActionInterface
+    {
+        return $this->action;
+    }
 }

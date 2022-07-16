@@ -16,7 +16,7 @@ class ActionTest extends TestBench
         $this->setUpCurrencies();
         $wallet = $this->createWallet();
 
-        $action = new Action($wallet, new CreditDebitAction());
+        $action = new Action($wallet, $actionObj = new CreditDebitAction());
 
         $action->credit(100000, new ActionData($wallet), 'Test Credit');
 
@@ -26,6 +26,9 @@ class ActionTest extends TestBench
         $this->assertSame('Test Credit', $wallet->transactions->first()->remarks);
         $this->assertSame('Credit', $wallet->transactions->first()->title);
         $this->assertSame('credit', $wallet->transactions->first()->type);
+
+        $this->assertTrue($actionObj->supportCredit());
+        $this->assertTrue($actionObj->supportDebit());
     }
 
     public function testDebit()

@@ -7,10 +7,19 @@ use Illuminate\Support\Facades\App;
 use Walletable\Internals\Actions\ActionManager;
 use Walletable\Models\Traits\TransactionRelations;
 use Walletable\Models\Traits\WorkWithMeta;
+use Walletable\Money\Currency;
 use Walletable\Money\Money;
 use Walletable\Traits\ConditionalUuid;
 use Walletable\WalletManager;
 
+/**
+ * @property-read \Walletable\Money\Money $balance
+ * @property-read \Walletable\Money\Money $amount
+ * @property-read \Walletable\Money\Currency $currency
+ * @property-read \Walletable\Internals\Actions\ActionManager $action
+ * @property-read string $title
+ * @property-read string $image
+ */
 class Transaction extends Model
 {
     use ConditionalUuid;
@@ -21,7 +30,7 @@ class Transaction extends Model
 
     protected $transactionCache = [];
 
-    public function getAmountAttribute()
+    public function getAmountAttribute(): Money
     {
         return new Money(
             $this->getRawOriginal('amount'),
@@ -29,7 +38,7 @@ class Transaction extends Model
         );
     }
 
-    public function getBalanceAttribute()
+    public function getBalanceAttribute(): Money
     {
         return new Money(
             $this->getRawOriginal('balance'),
@@ -37,7 +46,7 @@ class Transaction extends Model
         );
     }
 
-    public function getActionAttribute()
+    public function getActionAttribute(): ActionManager
     {
         if (isset($this->transactionCache['action'])) {
             return $this->transactionCache['action'];
@@ -50,12 +59,12 @@ class Transaction extends Model
         );
     }
 
-    public function getTitleAttribute()
+    public function getTitleAttribute(): ?string
     {
         return $this->action->title();
     }
 
-    public function getImageAttribute()
+    public function getImageAttribute(): ?string
     {
         return $this->action->image();
     }
@@ -65,7 +74,7 @@ class Transaction extends Model
         return $this->action->details();
     }
 
-    public function getCurrencyAttribute()
+    public function getCurrencyAttribute(): Currency
     {
         return Money::currency($this->getRawOriginal('currency'));
     }
