@@ -57,13 +57,15 @@ class TransactionBag
     /**
      * Save all transactions in this bag
      *
-     * @return void;
+     * @return self
      */
     public function save()
     {
         $this->transactions->each(function (Transaction $trasanction) {
             $trasanction->save();
         });
+
+        return $this;
     }
 
     /**
