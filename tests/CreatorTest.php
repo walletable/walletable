@@ -3,6 +3,9 @@
 namespace Walletable\Tests;
 
 use Exception;
+use Illuminate\Support\Facades\Event;
+use Walletable\Events\CreatedWallet;
+use Walletable\Events\CreatingWallet;
 use Walletable\Internals\Creator;
 use Walletable\Models\Wallet;
 use Walletable\Tests\Models\Wallet as ModelsWallet;
@@ -55,6 +58,11 @@ class CreatorTest extends TestBench
 
     public function testCreateMethod()
     {
+        Event::fake([
+            CreatingWallet::class,
+            CreatedWallet::class
+        ]);
+
         $creator = new Creator(Walletable::create([
             'name' => 'Olawale Ilesanmi',
             'email' => 'olawale@olawale.com',
@@ -68,5 +76,8 @@ class CreatorTest extends TestBench
         $this->assertInstanceOf(Wallet::class, $wallet = $creator->create());
         $this->assertInstanceOf(ModelsWallet::class, $wallet);
         $this->assertSame(0, $wallet->refresh()->amount->getInt());
+
+        Event::assertDispatched(CreatingWallet::class);
+        Event::assertDispatched(CreatedWallet::class);
     }
 }
