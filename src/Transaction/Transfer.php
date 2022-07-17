@@ -9,6 +9,7 @@ use Walletable\Exceptions\InsufficientBalanceException;
 use Walletable\Facades\Walletable;
 use Walletable\Internals\Actions\ActionData;
 use Walletable\Internals\Lockers\LockerInterface;
+use Walletable\Models\Transaction;
 use Walletable\Models\Wallet;
 use Walletable\Money\Money;
 
@@ -163,6 +164,26 @@ class Transfer
     public function getTransactions(): TransactionBag
     {
         return $this->bag;
+    }
+
+    /**
+     * Get the senders transaction
+     *
+     * @return Transaction
+     */
+    public function out(): Transaction
+    {
+        return $this->bag->where('type', 'debit')->first();
+    }
+
+    /**
+     * Get the reciepient`s transaction
+     *
+     * @return Transaction
+     */
+    public function in(): Transaction
+    {
+        return $this->bag->where('type', 'credit')->first();
     }
 
     /**
