@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Walletable\Internals\Actions\ActionInterface;
 use Walletable\Exceptions\InsufficientBalanceException;
-use Walletable\Facades\Wallet as Manager;
+use Walletable\Facades\Walletable;
 use Walletable\Internals\Actions\ActionData;
 use Walletable\Internals\Lockers\LockerInterface;
 use Walletable\Models\Wallet;
@@ -132,7 +132,7 @@ class CreditDebit
             ]);
 
             $method = $this->type . 'Lock';
-            $action = $this->action ?? Manager::action('credit_debit');
+            $action = $this->action ?? Walletable::action('credit_debit');
 
             if (!$action->{'support' . ucfirst($this->type) }()) {
                 throw new Exception('This action does not support ' . $this->type . ' operations', 1);
@@ -141,7 +141,7 @@ class CreditDebit
             if ($this->locker()->$method($this->wallet, $this->amount, $transaction)) {
                 $this->successful = true;
 
-                Manager::applyAction(
+                Walletable::applyAction(
                     $action,
                     $this->bag,
                     $this->actionData ??  new ActionData(
@@ -164,22 +164,6 @@ class CreditDebit
         }
 
         return $this;
-    }
-
-    /**
-     * Debit the wallet
-     */
-    protected function debitSender()
-    {
-        $transaction = $this->bag->new($this->wallet, [
-            'type' => 'debit',
-            'session' => $this->session,
-            'remarks' => $this->remarks
-        ]);
-
-        if ($this->locker()->debitLock($this->wallet, $this->amount, $transaction)) {
-            return true;
-        }
     }
 
     /**
@@ -234,7 +218,7 @@ class CreditDebit
         }
 
         if (is_string($action)) {
-            $action = Manager::action($action);
+            $action = Walletable::action($action);
         }
 
         $this->action = $action;
@@ -251,6 +235,6 @@ class CreditDebit
         if ($this->locker) {
             return $this->locker;
         }
-        return $this->locker = Manager::locker(config('walletable.locker'));
+        return $this->locker = Walletable::locker(config('walletable.locker'));
     }
 }

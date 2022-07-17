@@ -14,7 +14,7 @@ use Walletable\Models\Transaction;
 use Walletable\Models\Wallet;
 use Walletable\Transaction\TransactionBag;
 
-class WalletManager
+class WalletableManager
 {
     use Macroable;
     use HasLockers;

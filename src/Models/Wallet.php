@@ -8,14 +8,14 @@ use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
 use Walletable\Internals\Actions\Action;
 use Walletable\Contracts\WalletInterface;
-use Walletable\Facades\Wallet as FacadesWallet;
+use Walletable\Facades\Walletable;
 use Walletable\Models\Traits\WalletRelations;
 use Walletable\Models\Traits\WorkWithMeta;
 use Walletable\Money\Money;
 use Walletable\Transaction\CreditDebit;
 use Walletable\Transaction\Transfer;
 use Walletable\Traits\ConditionalUuid;
-use Walletable\WalletManager;
+use Walletable\WalletableManager;
 
 /**
  * @property-read \Walletable\Money\Money $amount
@@ -67,7 +67,7 @@ class Wallet extends Model implements WalletInterface
      */
     public function compactible(self $wallet): bool
     {
-        return FacadesWallet::compactible($this, $wallet);
+        return Walletable::compactible($this, $wallet);
     }
 
     /**
@@ -159,7 +159,7 @@ class Wallet extends Model implements WalletInterface
 
         return $this->instanceCache['actions'][$action] = new Action(
             $this,
-            App::make(WalletManager::class)
+            App::make(WalletableManager::class)
                 ->action($action)
         );
     }
