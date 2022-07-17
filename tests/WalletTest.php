@@ -24,6 +24,16 @@ class WalletTest extends TestBench
         $this->assertFalse($wallet2->compactible($wallet3));
     }
 
+    public function testMoney()
+    {
+
+        $wallet = $this->createWallet(100000);
+        $wallet2 = $this->createWallet(100000, 'USD');
+
+        $this->assertSame('NGN', $wallet->money(100000)->getCurrency()->getCode());
+        $this->assertSame('USD', $wallet2->money(100000)->getCurrency()->getCode());
+    }
+
     public function testTransfer()
     {
 

@@ -20,6 +20,7 @@ use Walletable\WalletManager;
  * @property-read \Walletable\Internals\Actions\ActionManager $action
  * @property-read string $title
  * @property-read string $image
+ * @property-read string $remarks
  */
 class Transaction extends Model
 {
