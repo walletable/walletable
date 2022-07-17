@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Walletable\Exceptions\IncompactibleWalletsException;
 use Walletable\Exceptions\InsufficientBalanceException;
-use Walletable\Facades\Wallet as Manager;
+use Walletable\Facades\Walletable;
 use Walletable\Internals\Actions\ActionData;
 use Walletable\Internals\Lockers\LockerInterface;
 use Walletable\Models\Wallet;
@@ -102,7 +102,7 @@ class Transfer
                 if ($this->locker()->creditLock($this->receiver, $this->amount, $transaction)) {
                     $this->successful = true;
 
-                    Manager::applyAction('transfer', $this->bag, new ActionData(
+                    Walletable::applyAction('transfer', $this->bag, new ActionData(
                         $this->sender,
                         $this->receiver
                     ));
@@ -183,7 +183,7 @@ class Transfer
         if ($this->locker) {
             return $this->locker;
         }
-        return $this->locker = Manager::locker(config('walletable.locker'));
+        return $this->locker = Walletable::locker(config('walletable.locker'));
     }
 
     /**

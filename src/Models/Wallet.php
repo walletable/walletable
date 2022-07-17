@@ -8,7 +8,7 @@ use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
 use Walletable\Internals\Actions\Action;
 use Walletable\Contracts\WalletInterface;
-use Walletable\Facades\Wallet as FacadesWallet;
+use Walletable\Facades\Walletable;
 use Walletable\Models\Traits\WalletRelations;
 use Walletable\Models\Traits\WorkWithMeta;
 use Walletable\Money\Money;
@@ -67,7 +67,7 @@ class Wallet extends Model implements WalletInterface
      */
     public function compactible(self $wallet): bool
     {
-        return FacadesWallet::compactible($this, $wallet);
+        return Walletable::compactible($this, $wallet);
     }
 
     /**
