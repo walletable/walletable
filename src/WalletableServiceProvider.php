@@ -3,7 +3,7 @@
 namespace Walletable;
 
 use Illuminate\Support\ServiceProvider;
-use Walletable\WalletManager;
+use Walletable\WalletableManager;
 use Walletable\Commands\InstallCommand;
 use Walletable\Facades\Walletable;
 use Walletable\Internals\Lockers\OptimisticLocker;
@@ -24,7 +24,7 @@ class WalletableServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton(WalletManager::class);
+        $this->app->singleton(WalletableManager::class);
     }
 
     /**

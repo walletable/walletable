@@ -3,7 +3,7 @@
 namespace Walletable\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Walletable\WalletManager;
+use Walletable\WalletableManager;
 
 /**
  * @method static \Walletable\Models\Wallet create(\Walletable\Contracts\Walletable $walletable, string $label, string $tag, string $currency)
@@ -20,6 +20,6 @@ class Walletable extends Facade
 {
     protected static function getFacadeAccessor()
     {
-        return WalletManager::class;
+        return WalletableManager::class;
     }
 }

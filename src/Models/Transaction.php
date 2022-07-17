@@ -11,7 +11,7 @@ use Walletable\Models\Traits\WorkWithMeta;
 use Walletable\Money\Currency;
 use Walletable\Money\Money;
 use Walletable\Traits\ConditionalUuid;
-use Walletable\WalletManager;
+use Walletable\WalletableManager;
 
 /**
  * @property-read \Walletable\Money\Money $balance
@@ -60,7 +60,7 @@ class Transaction extends Model
 
         return $this->transactionCache['action'] = new ActionManager(
             $this,
-            App::make(WalletManager::class)
+            App::make(WalletableManager::class)
                 ->action($this->getRawOriginal('action'))
         );
     }

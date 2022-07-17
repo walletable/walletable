@@ -15,7 +15,7 @@ use Walletable\Money\Money;
 use Walletable\Transaction\CreditDebit;
 use Walletable\Transaction\Transfer;
 use Walletable\Traits\ConditionalUuid;
-use Walletable\WalletManager;
+use Walletable\WalletableManager;
 
 /**
  * @property-read \Walletable\Money\Money $amount
@@ -159,7 +159,7 @@ class Wallet extends Model implements WalletInterface
 
         return $this->instanceCache['actions'][$action] = new Action(
             $this,
-            App::make(WalletManager::class)
+            App::make(WalletableManager::class)
                 ->action($action)
         );
     }
