@@ -2,8 +2,8 @@
 
 namespace Walletable\Tests;
 
-use Exception;
 use Illuminate\Support\Facades\Event;
+use InvalidArgumentException;
 use Walletable\Events\CreatedWallet;
 use Walletable\Events\CreatingWallet;
 use Walletable\Internals\Creator;
@@ -32,7 +32,7 @@ class CreatorTest extends TestBench
 
     public function testFilledException()
     {
-        $this->expectException(Exception::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(
             'Missing value(s): email,label,tag,currency'
         );
