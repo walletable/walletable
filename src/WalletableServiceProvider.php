@@ -9,9 +9,6 @@ use Walletable\Facades\Walletable;
 use Walletable\Internals\Lockers\OptimisticLocker;
 use Walletable\Money\Formatter\IntlMoneyFormatter;
 use Walletable\Money\Money;
-use Walletable\Internals\Details\Info;
-use Walletable\Internals\Details\MoneyCast;
-use Walletable\Internals\Details\TextCast;
 use Walletable\Transaction\CreditDebitAction;
 use Walletable\Transaction\TransferAction;
 
@@ -44,9 +41,6 @@ class WalletableServiceProvider extends ServiceProvider
 
         Walletable::action('transfer', TransferAction::class);
         Walletable::action('credit_debit', CreditDebitAction::class);
-
-        Info::cast('text', TextCast::class);
-        Info::cast('money', MoneyCast::class);
 
         $this->addPublishes();
         $this->addCommands();

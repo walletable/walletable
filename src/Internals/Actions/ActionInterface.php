@@ -31,15 +31,6 @@ interface ActionInterface
     public function image(Transaction $transaction);
 
     /**
-     * Returns the details of the transaction
-     *
-     * @param \Walletable\Models\Transaction $transaction The transaction
-     *
-     * @return string
-     */
-    public function details(Transaction $transaction);
-
-    /**
      * Check if the action supports debit
      *
      * @return bool

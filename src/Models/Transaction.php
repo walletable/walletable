@@ -75,11 +75,6 @@ class Transaction extends Model
         return $this->action->image();
     }
 
-    public function getDetailsAttribute()
-    {
-        return $this->action->details();
-    }
-
     public function getCurrencyAttribute(): Currency
     {
         return Money::currency($this->getRawOriginal('currency'));
