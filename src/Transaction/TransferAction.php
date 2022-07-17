@@ -53,14 +53,6 @@ class TransferAction implements ActionInterface
     /**
      * {@inheritdoc}
      */
-    public function details(Transaction $transaction)
-    {
-        return \collect([]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function supportDebit(): bool
     {
         return true;
