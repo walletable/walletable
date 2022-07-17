@@ -167,22 +167,6 @@ class CreditDebit
     }
 
     /**
-     * Debit the wallet
-     */
-    protected function debitSender()
-    {
-        $transaction = $this->bag->new($this->wallet, [
-            'type' => 'debit',
-            'session' => $this->session,
-            'remarks' => $this->remarks
-        ]);
-
-        if ($this->locker()->debitLock($this->wallet, $this->amount, $transaction)) {
-            return true;
-        }
-    }
-
-    /**
      * Run some compulsory checks
      *
      * @return void
