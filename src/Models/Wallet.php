@@ -96,10 +96,11 @@ class Wallet extends Model implements WalletInterface
      * Credit the wallet
      *
      * @param int|\Walletable\Money\Money $amount
+     * @param bool $confirmed
      * @param string|null $title
      * @param string|null $remarks
      */
-    public function credit($amount, string $title = null, string $remarks = null): CreditDebit
+    public function credit($amount, bool $confirmed = true, string $title = null, string $remarks = null): CreditDebit
     {
         if (!is_int($amount) && !($amount instanceof Money)) {
             throw new InvalidArgumentException('Argument 1 must be of type ' . Money::class . ' or Integer');
@@ -109,17 +110,18 @@ class Wallet extends Model implements WalletInterface
             $amount = $this->money($amount);
         }
 
-        return (new CreditDebit('credit', $this, $amount, $title, $remarks))->execute();
+        return (new CreditDebit('credit', $this, $amount, $confirmed, $title, $remarks))->execute();
     }
 
     /**
      * Debit the wallet
      *
      * @param int|\Walletable\Money\Money $amount
+     * @param bool $confirmed
      * @param string|null $title
      * @param string|null $remarks
      */
-    public function debit($amount, string $title = null, string $remarks = null): CreditDebit
+    public function debit($amount, bool $confirmed = true, string $title = null, string $remarks = null): CreditDebit
     {
         if (!is_int($amount) && !($amount instanceof Money)) {
             throw new InvalidArgumentException('Argument 1 must be of type ' . Money::class . ' or Integer');
@@ -129,7 +131,7 @@ class Wallet extends Model implements WalletInterface
             $amount = $this->money($amount);
         }
 
-        return (new CreditDebit('debit', $this, $amount, $title, $remarks))->execute();
+        return (new CreditDebit('debit', $this, $amount, $confirmed, $title, $remarks))->execute();
     }
 
     /**

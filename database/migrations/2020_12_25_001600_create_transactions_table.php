@@ -28,6 +28,7 @@ class CreateTransactionsTable extends Migration
             $table->unsignedBigInteger('amount');
             $table->bigInteger('balance');
             $table->string('currency', 10);
+            $table->boolean('confirmed');
             $table->string('action', 45)->index();
             $table->string('method_id', 100)->nullable();
             $table->string('method_type', 45)->nullable();

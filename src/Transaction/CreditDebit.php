@@ -3,16 +3,16 @@
 namespace Walletable\Transaction;
 
 use Exception;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Walletable\Money\Money;
 use InvalidArgumentException;
-use Walletable\Internals\Actions\ActionInterface;
-use Walletable\Exceptions\InsufficientBalanceException;
+use Walletable\Models\Wallet;
+use Illuminate\Support\Facades\DB;
 use Walletable\Facades\Wallet as Manager;
 use Walletable\Internals\Actions\ActionData;
+use Walletable\Internals\Actions\ActionInterface;
 use Walletable\Internals\Lockers\LockerInterface;
-use Walletable\Models\Wallet;
-use Walletable\Money\Money;
+use Walletable\Exceptions\InsufficientBalanceException;
 
 class CreditDebit
 {
@@ -29,6 +29,14 @@ class CreditDebit
      * @var \Walletable\Models\Wallet
      */
     protected $wallet;
+
+    /**
+     * confirm transaction
+     *
+     * @var bool
+     */
+    protected $confirmed;
+
 
     /**
      * Amount to transfer
@@ -97,6 +105,7 @@ class CreditDebit
         string $type,
         Wallet $wallet,
         Money $amount,
+        bool $confirmed = true,
         string $title = null,
         string $remarks = null
     ) {
@@ -107,6 +116,7 @@ class CreditDebit
         $this->type = $type;
         $this->wallet = $wallet;
         $this->amount = $amount;
+        $this->confirmed = $confirmed;
         $this->title = $title;
         $this->remarks = $remarks;
         $this->session = Str::uuid();
@@ -138,7 +148,7 @@ class CreditDebit
                 throw new Exception('This action does not support ' . $this->type . ' operations', 1);
             }
 
-            if ($this->locker()->$method($this->wallet, $this->amount, $transaction)) {
+            if ($this->locker()->$method($this->wallet, $this->amount, $this->confirmed, $transaction)) {
                 $this->successful = true;
 
                 Manager::applyAction(
