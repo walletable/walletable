@@ -14,7 +14,7 @@ use Walletable\Models\Transaction;
 use Walletable\Models\Wallet;
 use Walletable\Transaction\TransactionBag;
 
-class WalletManager
+class WalletableManager
 {
     use Macroable;
     use HasLockers;
@@ -23,13 +23,10 @@ class WalletManager
     /**
      * Create a new wallet
      *
-     * @param string $name
-     * @param string $email
+     * @param \Walletable\Contracts\Walletable $walletable
      * @param string $label
      * @param string $tag
      * @param string $currency
-     * @param \Walletable\Models\Wallet $model
-     * @param \Walletable\Contracts\Walletable $walletable
      *
      * @return \Walletable\Models\Wallet
      */
@@ -68,6 +65,8 @@ class WalletManager
      * @param \Walletable\Internals\Actions\ActionInterface|string $action
      * @param \Walletable\Transaction\TransactionBag|\Walletable\Models\Transaction $transactions Transactions
      * @param \Walletable\Internals\Actions\ActionData $data
+     *
+     * @return mixed
      */
     public function applyAction($action, object $transactions, ActionData $data)
     {

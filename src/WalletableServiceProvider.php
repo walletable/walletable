@@ -3,15 +3,12 @@
 namespace Walletable;
 
 use Illuminate\Support\ServiceProvider;
-use Walletable\WalletManager;
+use Walletable\WalletableManager;
 use Walletable\Commands\InstallCommand;
-use Walletable\Facades\Wallet;
+use Walletable\Facades\Walletable;
 use Walletable\Internals\Lockers\OptimisticLocker;
 use Walletable\Money\Formatter\IntlMoneyFormatter;
 use Walletable\Money\Money;
-use Walletable\Internals\Details\Info;
-use Walletable\Internals\Details\MoneyCast;
-use Walletable\Internals\Details\TextCast;
 use Walletable\Transaction\CreditDebitAction;
 use Walletable\Transaction\TransferAction;
 
@@ -24,7 +21,7 @@ class WalletableServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton(WalletManager::class);
+        $this->app->singleton(WalletableManager::class);
     }
 
     /**
@@ -40,13 +37,10 @@ class WalletableServiceProvider extends ServiceProvider
             );
         });
 
-        Wallet::locker('optimistic', OptimisticLocker::class);
+        Walletable::locker('optimistic', OptimisticLocker::class);
 
-        Wallet::action('transfer', TransferAction::class);
-        Wallet::action('credit_debit', CreditDebitAction::class);
-
-        Info::cast('text', TextCast::class);
-        Info::cast('money', MoneyCast::class);
+        Walletable::action('transfer', TransferAction::class);
+        Walletable::action('credit_debit', CreditDebitAction::class);
 
         $this->addPublishes();
         $this->addCommands();

@@ -2,6 +2,8 @@
 
 namespace Walletable\Transaction;
 
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Traits\ForwardsCalls;
 use Walletable\Models\Transaction;
 use Walletable\Models\Wallet;
@@ -32,7 +34,7 @@ class TransactionBag
      */
     public function new(Wallet $wallet, array $data)
     {
-        $trasanction = app(config('walletable.models.transaction'))->forceFill([
+        $trasanction = App::make(Config::get('walletable.models.transaction'))->forceFill([
             'wallet_id' => $wallet->getKey(),
             'currency' => $wallet->getRawOriginal('currency')
         ] + $data);
@@ -55,13 +57,15 @@ class TransactionBag
     /**
      * Save all transactions in this bag
      *
-     * @return void;
+     * @return self
      */
     public function save()
     {
         $this->transactions->each(function (Transaction $trasanction) {
             $trasanction->save();
         });
+
+        return $this;
     }
 
     /**

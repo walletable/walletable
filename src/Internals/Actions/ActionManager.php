@@ -43,10 +43,12 @@ class ActionManager
     }
 
     /**
-     * Returns the details
+     * Get the raw action object
+     *
+     * @return ActionInterface
      */
-    public function details()
+    public function getAction(): ActionInterface
     {
-        return $this->action->details($this->transaction);
+        return $this->action;
     }
 }

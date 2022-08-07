@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Walletable\Models\Wallet as Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Wallet extends Model
 {

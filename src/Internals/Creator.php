@@ -2,7 +2,6 @@
 
 namespace Walletable\Internals;
 
-use Exception;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 use InvalidArgumentException;
@@ -12,6 +11,12 @@ use Walletable\Events\CreatedWallet;
 use Walletable\Models\Wallet as WalletModel;
 use Walletable\Money\Money;
 
+/**
+ * @method self email(string $email)
+ * @method self label(string $label)
+ * @method self tag(string $tag)
+ * @method self currency(string $currency)
+ */
 class Creator
 {
     /**
@@ -27,7 +32,6 @@ class Creator
      * @var array
      */
     protected $accepted_key = [
-        'name',
         'email',
         'label',
         'tag',
@@ -49,8 +53,8 @@ class Creator
     /**
      * Dynamically foward property assigning to data property
      *
-     * @param string $name
-     * @param mixed $value
+     * @param string $method
+     * @param mixed $parameters
      */
     public function __call(string $method, $parameters)
     {
@@ -67,7 +71,7 @@ class Creator
      * @param bool $throw
      * @return bool
      */
-    protected function filled(bool $throw = false)
+    public function filled(bool $throw = false)
     {
         $empty = [];
         foreach ($this->accepted_key as $value) {
@@ -77,7 +81,7 @@ class Creator
         }
 
         if (count($empty) && $throw) {
-            throw new Exception(sprintf('Missing value(s): %s', implode(',', $empty)));
+            throw new InvalidArgumentException(sprintf('Missing value(s): %s', implode(',', $empty)));
         } else {
             return (count($empty)) ? false : true;
         }

@@ -6,9 +6,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Walletable\Exceptions\IncompactibleWalletsException;
 use Walletable\Exceptions\InsufficientBalanceException;
-use Walletable\Facades\Wallet as Manager;
+use Walletable\Facades\Walletable;
 use Walletable\Internals\Actions\ActionData;
 use Walletable\Internals\Lockers\LockerInterface;
+use Walletable\Models\Transaction;
 use Walletable\Models\Wallet;
 use Walletable\Money\Money;
 
@@ -102,7 +103,7 @@ class Transfer
                 if ($this->locker()->creditLock($this->receiver, $this->amount, $transaction)) {
                     $this->successful = true;
 
-                    Manager::applyAction('transfer', $this->bag, new ActionData(
+                    Walletable::applyAction('transfer', $this->bag, new ActionData(
                         $this->sender,
                         $this->receiver
                     ));
@@ -166,6 +167,26 @@ class Transfer
     }
 
     /**
+     * Get the senders transaction
+     *
+     * @return Transaction
+     */
+    public function out(): Transaction
+    {
+        return $this->bag->where('type', 'debit')->first();
+    }
+
+    /**
+     * Get the reciepient`s transaction
+     *
+     * @return Transaction
+     */
+    public function in(): Transaction
+    {
+        return $this->bag->where('type', 'credit')->first();
+    }
+
+    /**
      * Get amount
      *
      * @return \Walletable\Money\Money
@@ -183,6 +204,16 @@ class Transfer
         if ($this->locker) {
             return $this->locker;
         }
-        return $this->locker = Manager::locker(config('walletable.locker'));
+        return $this->locker = Walletable::locker(config('walletable.locker'));
+    }
+
+    /**
+     * Check is the transfer was successful
+     *
+     * @return boolean
+     */
+    public function successful(): bool
+    {
+        return $this->successful;
     }
 }

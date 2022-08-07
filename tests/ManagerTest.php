@@ -8,13 +8,13 @@ use Walletable\Internals\Actions\ActionInterface;
 use Walletable\Internals\Lockers\LockerInterface;
 use Walletable\Internals\Lockers\OptimisticLocker;
 use Walletable\Transaction\TransferAction;
-use Walletable\WalletManager;
+use Walletable\WalletableManager;
 
 class ManagerTest extends TestBench
 {
     public function testRegisterAction()
     {
-        $manager = new WalletManager();
+        $manager = new WalletableManager();
 
         $manager->action('transfer', TransferAction::class);
 
@@ -23,7 +23,7 @@ class ManagerTest extends TestBench
 
     public function testRegisterActionWithClosure()
     {
-        $manager = new WalletManager();
+        $manager = new WalletableManager();
 
         $manager->action('transfer', function () {
             return new TransferAction();
@@ -40,7 +40,7 @@ class ManagerTest extends TestBench
             ActionInterface::class
         ));
 
-        $manager = new WalletManager();
+        $manager = new WalletableManager();
         $manager->action('transfer', function () {
             return $this;
         });
@@ -52,7 +52,7 @@ class ManagerTest extends TestBench
     {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('"transfer" not found as a wallet action');
-        $manager = new WalletManager();
+        $manager = new WalletableManager();
         $manager->action('transfer');
     }
 
@@ -63,7 +63,7 @@ class ManagerTest extends TestBench
             'Action class must implement [%s] interface',
             ActionInterface::class
         ));
-        $manager = new WalletManager();
+        $manager = new WalletableManager();
         $manager->action('transfer', PaymentManagerTest::class);
     }
 
@@ -73,13 +73,13 @@ class ManagerTest extends TestBench
         $this->expectExceptionMessage(
             'An action can only be resolved through class name or closure'
         );
-        $manager = new WalletManager();
+        $manager = new WalletableManager();
         $manager->action('transfer', []);
     }
 
     public function testRegisterLocker()
     {
-        $manager = new WalletManager();
+        $manager = new WalletableManager();
 
         $manager->locker('optimistic', OptimisticLocker::class);
 
@@ -88,7 +88,7 @@ class ManagerTest extends TestBench
 
     public function testRegisterLockerWithClosure()
     {
-        $manager = new WalletManager();
+        $manager = new WalletableManager();
 
         $manager->locker('optimistic', function () {
             return new OptimisticLocker();
@@ -105,7 +105,7 @@ class ManagerTest extends TestBench
             LockerInterface::class
         ));
 
-        $manager = new WalletManager();
+        $manager = new WalletableManager();
         $manager->locker('optimistic', function () {
             return $this;
         });
@@ -117,7 +117,7 @@ class ManagerTest extends TestBench
     {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('"optimistic" not found as a wallet locker');
-        $manager = new WalletManager();
+        $manager = new WalletableManager();
         $manager->locker('optimistic');
     }
 
@@ -128,7 +128,7 @@ class ManagerTest extends TestBench
             'Locker class must implement [%s] interface',
             LockerInterface::class
         ));
-        $manager = new WalletManager();
+        $manager = new WalletableManager();
         $manager->locker('optimistic', PaymentManagerTest::class);
     }
 
@@ -138,7 +138,7 @@ class ManagerTest extends TestBench
         $this->expectExceptionMessage(
             'A locker can only be resolved through class name or closure'
         );
-        $manager = new WalletManager();
+        $manager = new WalletableManager();
         $manager->locker('optimistic', []);
     }
 }

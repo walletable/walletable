@@ -39,7 +39,6 @@ class InstallCommand extends Command
     {
         $this->line("<info>Setting up Walletable</info>");
         $this->line("");
-        sleep(2);
 
         $this->call('vendor:publish', [
             '--tag' => 'walletable.config'
@@ -53,12 +52,11 @@ class InstallCommand extends Command
             '--tag' => 'walletable.models'
         ]);
 
-        if ($this->confirm('Use uuid for Walletable models?')) {
+        if ($this->confirm('Use uuid for walletable models?')) {
             $this->configureUuid();
         }
 
         $this->line("");
-        sleep(2);
         $this->line("<info>Walletable installed sucessfully!!</info>");
     }
 

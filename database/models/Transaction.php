@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Walletable\Models\Transaction as Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Transaction extends Model
 {

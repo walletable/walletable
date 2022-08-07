@@ -65,7 +65,7 @@ class Argument
      */
     public function required(): self
     {
-        if ($this->argumentBag->keyExists($this->key)) {
+        if (!$this->argumentBag->keyExists($this->key)) {
             throw new InvalidArgumentException(
                 sprintf("Missing argument %d for %s", $this->key + 1, $this->getName())
             );
@@ -83,7 +83,10 @@ class Argument
     {
         if (
             $this->argumentBag->keyExists($this->key) &&
-            is_null($this->argumentBag->getKeyValue($this->key))
+            (
+                empty($this->argumentBag->getKeyValue($this->key)) ||
+                is_null($this->argumentBag->getKeyValue($this->key))
+            )
         ) {
             throw new InvalidArgumentException(
                 sprintf("Empty argument %d for %s", $this->key + 1, $this->getName())
@@ -161,9 +164,9 @@ class Argument
                 $valid = is_a($value, '\Closure');
                 $message = '%s accepts only Closure as argument %d.';
                 break;
-            case 'digit':
+            case 'digits':
                 $valid = $this->isDigit($value);
-                $message = '%s accepts only integer values as argument %d.';
+                $message = '%s accepts only digits values as argument %d.';
                 break;
         }
 

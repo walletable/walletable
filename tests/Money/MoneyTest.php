@@ -3,6 +3,8 @@
 namespace Walletable\Tests\Money;
 
 use InvalidArgumentException;
+use Walletable\Money\Currency;
+use Walletable\Money\Formatter\IntlMoneyFormatter;
 use Walletable\Money\Money;
 use Walletable\Tests\TestBench as TestCase;
 
@@ -16,6 +18,9 @@ class MoneyTest extends TestCase
 
         $this->assertSame($naira->getCurrency(), $naira2->getCurrency());
         $this->assertSame('NGN', $naira->getCurrency()->getCode());
+        $this->assertSame('100000', $naira->getAmount());
+        $this->assertSame(100000, $naira->getInt());
+        $this->assertInstanceOf(Currency::class, $naira->getCurrency());
     }
 
     public function testUsingNotSupported()
@@ -131,5 +136,161 @@ class MoneyTest extends TestCase
 
             $this->assertSame(50000, $money->getInt());
         }
+    }
+
+    public function testGreaterThan()
+    {
+        $money = Money::NGN(200000);
+        $this->assertTrue($money->greaterThan(Money::NGN(100000)));
+        $this->assertNotTrue($money->greaterThan(Money::NGN(300000)));
+    }
+
+    public function testGreaterThanOrEqual()
+    {
+        $money = Money::NGN(200000);
+        $this->assertTrue($money->greaterThanOrEqual(Money::NGN(100000)));
+        $this->assertTrue($money->greaterThanOrEqual(Money::NGN(200000)));
+        $this->assertNotTrue($money->greaterThanOrEqual(Money::NGN(300000)));
+    }
+
+    public function testLessThan()
+    {
+        $money = Money::NGN(200000);
+        $this->assertNotTrue($money->lessThan(Money::NGN(100000)));
+        $this->assertTrue($money->lessThan(Money::NGN(300000)));
+    }
+
+    public function testLessThanOrEqual()
+    {
+        $money = Money::NGN(200000);
+        $this->assertNotTrue($money->lessThanOrEqual(Money::NGN(100000)));
+        $this->assertTrue($money->lessThanOrEqual(Money::NGN(300000)));
+        $this->assertTrue($money->lessThanOrEqual(Money::NGN(200000)));
+    }
+
+    public function testRatioOf()
+    {
+        $money = Money::NGN(100000);
+
+        $this->assertSame('0.5', $money->ratioOf(Money::NGN(200000)));
+    }
+
+    public function testAbsolute()
+    {
+        $money = Money::NGN(-100000);
+        $money2 = Money::NGN(100000);
+
+        $this->assertSame(100000, $money->absolute()->getInt());
+        $this->assertSame(100000, $money2->absolute()->getInt());
+    }
+
+    public function testNegative()
+    {
+        $money = Money::NGN(100000);
+
+        $this->assertTrue($money->negative()->isNegative());
+    }
+
+    public function testIsPositive()
+    {
+        $money = Money::NGN(100000);
+
+        $this->assertTrue($money->isPositive());
+    }
+
+    public function testIsZero()
+    {
+        $money = Money::NGN(0);
+
+        $this->assertTrue($money->isZero());
+    }
+
+    public function testMin()
+    {
+        $money = Money::min(
+            Money::NGN(13764),
+            Money::NGN(3535),
+            Money::NGN(5455),
+            Money::NGN(44345),
+            Money::NGN(13765),
+        );
+
+        $this->assertSame(3535, $money->getInt());
+    }
+
+    public function testMax()
+    {
+        $money = Money::max(
+            Money::NGN(13764),
+            Money::NGN(3535),
+            Money::NGN(5455),
+            Money::NGN(10345),
+            Money::NGN(13765),
+        );
+
+        $this->assertSame(13765, $money->getInt());
+    }
+
+    public function testAverage()
+    {
+        $money = Money::avg(
+            Money::NGN(300),
+            Money::NGN(434),
+            Money::NGN(345),
+            Money::NGN(872),
+            Money::NGN(700),
+        );
+
+        $this->assertSame(530, $money->getInt());
+    }
+
+    public function testAddAndRemoveCurrency()
+    {
+        Money::currencies(
+            Currency::new('WAL', '&', 'Wale', 'Ola', 100, 419)
+        );
+
+        /**
+         * @var Money
+         */
+        $money = Money::WAL(100000);
+
+        $this->assertSame('WAL', $money->getCurrency()->getCode());
+        $this->assertSame(2, $money->getCurrency()->subunitLength());
+
+        $currency = Money::currency('WAL');
+        $this->assertSame('WAL', $currency->getCode());
+        $this->assertSame(2, $currency->subunitLength());
+
+        Money::removeCurrency('WAL');
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage(
+            '[WAL] currency not supported.'
+        );
+        Money::WAL(100000);
+    }
+
+    public function testRemoveAllCurrency()
+    {
+        Money::removeAllCurrency();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage(
+            '[NGN] currency not supported.'
+        );
+        Money::NGN(100000);
+    }
+
+    public function testIntlFormatter()
+    {
+        $this->setUpCurrencies();
+
+        $formatter = new IntlMoneyFormatter(
+            new \NumberFormatter('en_US', \NumberFormatter::CURRENCY)
+        );
+        $money = Money::USD(250000);
+
+        $this->assertSame('$2,500.00', $formatter->format($money, $money->getCurrency()));
     }
 }

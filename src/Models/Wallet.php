@@ -2,21 +2,20 @@
 
 namespace Walletable\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
 use Walletable\Internals\Actions\Action;
 use Walletable\Contracts\WalletInterface;
-use Walletable\Facades\Wallet as FacadesWallet;
+use Walletable\Facades\Walletable;
 use Walletable\Models\Traits\WalletRelations;
 use Walletable\Models\Traits\WorkWithMeta;
 use Walletable\Money\Money;
 use Walletable\Transaction\CreditDebit;
 use Walletable\Transaction\Transfer;
 use Walletable\Traits\ConditionalUuid;
-use Walletable\WalletManager;
+use Walletable\WalletableManager;
 
 /**
  * @property-read \Walletable\Money\Money $amount
@@ -24,7 +23,6 @@ use Walletable\WalletManager;
  */
 class Wallet extends Model implements WalletInterface
 {
-    use HasFactory;
     use ConditionalUuid;
     use WalletRelations;
     use WorkWithMeta;
@@ -69,7 +67,7 @@ class Wallet extends Model implements WalletInterface
      */
     public function compactible(self $wallet): bool
     {
-        return FacadesWallet::compactible($this, $wallet);
+        return Walletable::compactible($this, $wallet);
     }
 
     /**
@@ -163,7 +161,7 @@ class Wallet extends Model implements WalletInterface
 
         return $this->instanceCache['actions'][$action] = new Action(
             $this,
-            App::make(WalletManager::class)
+            App::make(WalletableManager::class)
                 ->action($action)
         );
     }

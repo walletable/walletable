@@ -1,28 +1,19 @@
 <?php
 
-namespace Walletable\Transaction;
+namespace Walletable\Tests;
 
 use Walletable\Internals\Actions\ActionData;
 use Walletable\Internals\Actions\ActionInterface;
 use Walletable\Models\Transaction;
-use Walletable\Models\Wallet;
 
-class CreditDebitAction implements ActionInterface
+class TestAction implements ActionInterface
 {
     /**
      * {@inheritdoc}
      */
     public function apply(Transaction $transaction, ActionData $data)
     {
-        $data->argument(0)->isA(Wallet::class);
-
-        $title = $data->argument(1)->type('string')->value(
-            $transaction->type === 'credit' ? 'Credit' : 'Debit'
-        );
-
-        $transaction->forceFill([
-            'action' => 'credit_debit'
-        ])->meta('title', $title);
+        //
     }
 
     /**
@@ -30,7 +21,7 @@ class CreditDebitAction implements ActionInterface
      */
     public function title(Transaction $transaction)
     {
-        return $transaction->meta('title');
+        return 'Test Transaction';
     }
 
     /**
@@ -38,7 +29,7 @@ class CreditDebitAction implements ActionInterface
      */
     public function image(Transaction $transaction)
     {
-        return null;
+        return '/image/test/transaction.jpg';
     }
 
     /**

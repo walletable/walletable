@@ -10,6 +10,7 @@ use Walletable\Money\Currency;
 use Walletable\Money\Money;
 use Walletable\Tests\Models\Transaction;
 use Walletable\Tests\Models\Wallet;
+use Walletable\Tests\Models\Walletable;
 use Walletable\WalletableServiceProvider;
 
 class TestBench extends BaseTestCase
@@ -20,9 +21,9 @@ class TestBench extends BaseTestCase
     {
         $config = require __DIR__ . '/../config/walletable.php';
 
-        $app['config']->set('wallatable', $config);
-        $app['config']->set('wallatable.models.wallet', Wallet::class);
-        $app['config']->set('wallatable.models.transaction', Transaction::class);
+        $app['config']->set('walletable', $config);
+        $app['config']->set('walletable.models.wallet', Wallet::class);
+        $app['config']->set('walletable.models.transaction', Transaction::class);
         $this->migrate();
     }
 
@@ -66,5 +67,22 @@ class TestBench extends BaseTestCase
             $table->string('email', 75);
             $table->timestamps();
         });
+    }
+
+    public function createWallet(int $amount = 0, string $currency = 'NGN', Walletable $walletable = null): Wallet
+    {
+        $walletable = $walletable ?? Walletable::create([
+            'name' => 'Olawale Ilesanmi',
+            'email' => 'olawale@olawale.com',
+        ]);
+
+        return $walletable->wallets()->create([
+            'label' => 'Main Wallet',
+            'tag' => 'main',
+            'amount' => $amount,
+            'currency' => $currency,
+            'meta' => '[]',
+            'status' => 'active',
+        ])->setRelation('walletable', $walletable);
     }
 }

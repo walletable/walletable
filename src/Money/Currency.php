@@ -124,6 +124,56 @@ class Currency implements \JsonSerializable
     }
 
     /**
+     * Returns the currency numeric code.
+     *
+     * @return int
+     */
+    public function numeric()
+    {
+        return $this->numeric;
+    }
+
+    /**
+     * Returns the currency symbol.
+     *
+     * @return string
+     */
+    public function symbol()
+    {
+        return $this->symbol;
+    }
+
+    /**
+     * Returns the currency name.
+     *
+     * @return string
+     */
+    public function name()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Returns the currency subunit name.
+     *
+     * @return string
+     */
+    public function subunit()
+    {
+        return $this->subunit;
+    }
+
+    /**
+     * Returns the currency subunit per unit.
+     *
+     * @return int
+     */
+    public function per()
+    {
+        return $this->per;
+    }
+
+    /**
      * Checks whether this currency is the same as an other.
      *
      * @return bool
