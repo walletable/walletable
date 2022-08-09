@@ -48,4 +48,34 @@ class TestAction implements ActionInterface
     {
         return true;
     }
+
+    /**
+     * Check if the action reversal
+     *
+     * @return bool
+     */
+    public function reversable(Transaction $transaction): bool
+    {
+        return false;
+    }
+
+    /**
+     * Hook to the reversal to perform extra tasks
+     *
+     * @return self
+     */
+    public function reverse(Transaction $transaction, Transaction $new): self
+    {
+        return $this;
+    }
+
+    /**
+     * Get the resource or a transaction method
+     *
+     * @return mixed
+     */
+    public function methodResource(Transaction $transaction)
+    {
+        return null;
+    }
 }

@@ -43,6 +43,14 @@ class ActionManager
     }
 
     /**
+     * Returns the method resource
+     */
+    public function resource()
+    {
+        return $this->action->methodResource($this->transaction);
+    }
+
+    /**
      * Get the raw action object
      *
      * @return ActionInterface
