@@ -2,6 +2,8 @@
 
 namespace Walletable\Models\Traits;
 
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+
 trait TransactionRelations
 {
     /**
@@ -13,9 +15,11 @@ trait TransactionRelations
     }
 
     /**
-     * Get mothod entity of this transaction
+     * Method relationship
+     *
+     * @return MorphTo
      */
-    public function method()
+    public function method(): MorphTo
     {
         return $this->morphTo();
     }

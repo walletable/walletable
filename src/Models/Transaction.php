@@ -3,7 +3,6 @@
 namespace Walletable\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Traits\Macroable;
 use Walletable\Internals\Actions\ActionManager;
@@ -36,16 +35,6 @@ class Transaction extends Model
     public $timestamps = false;
 
     protected $transactionCache = [];
-
-    /**
-     * Method relationship
-     *
-     * @return MorphTo
-     */
-    public function method(): MorphTo
-    {
-        return $this->morphTo();
-    }
 
     public function getAmountAttribute(): Money
     {
