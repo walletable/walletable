@@ -49,7 +49,6 @@ class CreditDebitAction implements ActionInterface
         return true;
     }
 
-
     /**
      * {@inheritdoc}
      */
@@ -59,9 +58,7 @@ class CreditDebitAction implements ActionInterface
     }
 
     /**
-     * Check if the action reversal
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function reversable(Transaction $transaction): bool
     {
@@ -69,19 +66,15 @@ class CreditDebitAction implements ActionInterface
     }
 
     /**
-     * Hook to the reversal to perform extra tasks
-     *
-     * @return self
+     * {@inheritdoc}
      */
-    public function reverse(Transaction $transaction, Transaction $new): self
+    public function reverse(Transaction $transaction, Transaction $new): ActionInterface
     {
         return $this;
     }
 
     /**
-     * Get the resource or a transaction method
-     *
-     * @return mixed
+     * {@inheritdoc}
      */
     public function methodResource(Transaction $transaction)
     {

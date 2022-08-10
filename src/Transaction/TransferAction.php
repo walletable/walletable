@@ -76,9 +76,7 @@ class TransferAction implements ActionInterface
     }
 
     /**
-     * Check if the action reversal
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function reversable(Transaction $transaction): bool
     {
@@ -86,19 +84,15 @@ class TransferAction implements ActionInterface
     }
 
     /**
-     * Hook to the reversal to perform extra tasks
-     *
-     * @return self
+     * {@inheritdoc}
      */
-    public function reverse(Transaction $transaction, Transaction $new): self
+    public function reverse(Transaction $transaction, Transaction $new): ActionInterface
     {
         return $this;
     }
 
     /**
-     * Get the resource of a transaction method
-     *
-     * @return mixeda
+     * {@inheritdoc}
      */
     public function methodResource(Transaction $transaction)
     {
