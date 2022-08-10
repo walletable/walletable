@@ -64,7 +64,7 @@ class TestAction implements ActionInterface
      *
      * @return self
      */
-    public function reverse(Transaction $transaction, Transaction $new): self
+    public function reverse(Transaction $transaction, Transaction $new): ActionInterface
     {
         return $this;
     }
