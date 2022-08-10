@@ -43,4 +43,29 @@ interface ActionInterface
      * @return bool
      */
     public function supportCredit(): bool;
+
+    /**
+     * Check if the action reversal
+     *
+     * @param Transaction $transaction
+     * @return bool
+     */
+    public function reversable(Transaction $transaction): bool;
+
+    /**
+     * Hook to the reversal to perform extra tasks
+     *
+     * @param Transaction $transaction
+     * @param Transaction $new
+     * @return self
+     */
+    public function reverse(Transaction $transaction, Transaction $new): ActionInterface;
+
+    /**
+     * Get the resource or a transaction method
+     *
+     * @param Transaction $transaction
+     * @return mixed
+     */
+    public function methodResource(Transaction $transaction);
 }

@@ -49,12 +49,35 @@ class CreditDebitAction implements ActionInterface
         return true;
     }
 
-
     /**
      * {@inheritdoc}
      */
     public function supportCredit(): bool
     {
         return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function reversable(Transaction $transaction): bool
+    {
+        return false;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function reverse(Transaction $transaction, Transaction $new): ActionInterface
+    {
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function methodResource(Transaction $transaction)
+    {
+        return null;
     }
 }

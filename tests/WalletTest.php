@@ -78,6 +78,9 @@ class WalletTest extends TestBench
 
         $this->assertSame('debit', $trx1->type);
         $this->assertSame('credit', $trx2->type);
+
+        $this->assertSame($wallet->walletable->id, $trx2->method->id);
+        $this->assertSame($wallet2->walletable->id, $trx1->method->id);
     }
 
     public function testTransferInsuficientFund()

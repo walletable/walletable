@@ -80,6 +80,11 @@ class Transaction extends Model
         return Money::currency($this->getRawOriginal('currency'));
     }
 
+    public function getMethodResource()
+    {
+        return $this->action->resource();
+    }
+
     /**
      * Handle dynamic calls into macros or pass missing methods to the parrent.
      *

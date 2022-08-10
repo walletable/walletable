@@ -7,7 +7,10 @@ use Walletable\Internals\Actions\ActionData;
 use Walletable\Internals\Actions\ActionManager;
 use Walletable\Internals\Argument;
 use Walletable\Tests\Models\Transaction;
+use Walletable\Tests\Models\Walletable;
 use Walletable\Transaction\CreditDebitAction;
+use Walletable\Transaction\Transfer;
+use Walletable\Transaction\TransferAction;
 
 class ActionTest extends TestBench
 {
@@ -91,5 +94,44 @@ class ActionTest extends TestBench
 
         $this->assertSame('Test Transaction', $manager->title());
         $this->assertSame('/image/test/transaction.jpg', $manager->image());
+    }
+
+    public function testTransactionGetMethodResource()
+    {
+
+        $wallet = $this->createWallet(100000);
+        $wallet2 = $this->createWallet(0, 'NGN', Walletable::create([
+            'name' => 'Abisade Ilesanmi',
+            'email' => 'bisade@bisade.com',
+        ]));
+
+        $transfer = $wallet->transfer($wallet2, 50000, 'Test transfer');
+
+        $transaction = $transfer->in();
+
+        $this->assertSame($transaction->getMethodResource()->id, $wallet->walletable->id);
+    }
+
+    public function testTransfer()
+    {
+        TransferAction::methodResourceUsing(function ($action, $transaction) {
+            return [
+                'resource'
+            ];
+        });
+
+        $wallet = $this->createWallet(100000);
+        $wallet2 = $this->createWallet(0, 'NGN', Walletable::create([
+            'name' => 'Abisade Ilesanmi',
+            'email' => 'bisade@bisade.com',
+        ]));
+
+        $transfer = $wallet->transfer($wallet2, 50000, 'Test transfer');
+
+        $transaction = $transfer->in();
+
+        $this->assertSame($transaction->getMethodResource(), [
+            'resource'
+        ]);
     }
 }
