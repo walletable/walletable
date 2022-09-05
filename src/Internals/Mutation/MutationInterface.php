@@ -69,7 +69,7 @@ interface MutationInterface
      * @param callable $callback
      * @return $this
      */
-    public function setAfter(callable $callback): self;
+    public function setAfter(callable $callback): static;
 
     /**
      * Before the value is mutated
@@ -77,7 +77,7 @@ interface MutationInterface
      * @param callable $callback
      * @return $this
      */
-    public function setBefore(callable $callback): self;
+    public function setBefore(callable $callback): static;
 
     /**
      * Check if after callback exists
@@ -98,14 +98,14 @@ interface MutationInterface
      *
      * @return $this
      */
-    public function invokeAfter(): self;
+    public function invokeAfter(): static;
 
     /**
      * Invoke before callback
      *
      * @return $this
      */
-    public function invokeBefore(): self;
+    public function invokeBefore(): static;
 
     /**
      * Get the mutation name.
