@@ -138,7 +138,7 @@ abstract class AbstractMutation implements MutationInterface
      * @param callable $callback
      * @return $this
      */
-    public function setAfter(callable $callback): static
+    public function setAfter(callable $callback): MutationInterface
     {
         $this->after = $callback;
         return $this;
@@ -150,7 +150,7 @@ abstract class AbstractMutation implements MutationInterface
      * @param callable $callback
      * @return $this
      */
-    public function setBefore(callable $callback): static
+    public function setBefore(callable $callback): MutationInterface
     {
         $this->before = $callback;
         return $this;
@@ -181,7 +181,7 @@ abstract class AbstractMutation implements MutationInterface
      *
      * @return $this
      */
-    public function invokeAfter(): static
+    public function invokeAfter(): MutationInterface
     {
         call_user_func_array($this->after, [$this]);
         return $this;
@@ -192,7 +192,7 @@ abstract class AbstractMutation implements MutationInterface
      *
      * @return $this
      */
-    public function invokeBefore(): static
+    public function invokeBefore(): MutationInterface
     {
         call_user_func_array($this->before, [$this]);
         return $this;
