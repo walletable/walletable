@@ -7,6 +7,7 @@ use Walletable\WalletableManager;
 use Walletable\Commands\InstallCommand;
 use Walletable\Facades\Walletable;
 use Walletable\Internals\Lockers\OptimisticLocker;
+use Walletable\Internals\Mutation\MutatorManager;
 use Walletable\Money\Formatter\IntlMoneyFormatter;
 use Walletable\Money\Money;
 use Walletable\Transaction\CreditDebitAction;
@@ -22,6 +23,7 @@ class WalletableServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton(WalletableManager::class);
+        $this->app->singleton(MutatorManager::class);
     }
 
     /**
