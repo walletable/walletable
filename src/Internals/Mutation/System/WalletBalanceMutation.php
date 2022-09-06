@@ -19,12 +19,12 @@ class WalletBalanceMutation extends AbstractNamedMutation
      *
      * @param string $name
      */
-    public function __construct(string $name, Money $amount, array $extra)
+    public function __construct(string $name, Money $amount, array $extras)
     {
         parent::__construct($name);
 
         $this->value = $amount;
-        $this->extra = $extra;
+        $this->extras = $extras;
     }
 
     /**

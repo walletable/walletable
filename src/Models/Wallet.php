@@ -8,7 +8,9 @@ use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
 use Walletable\Internals\Actions\Action;
 use Walletable\Contracts\WalletInterface;
+use Walletable\Facades\Mutator;
 use Walletable\Facades\Walletable;
+use Walletable\Internals\Mutation\System\WalletBalanceMutation;
 use Walletable\Models\Traits\WalletRelations;
 use Walletable\Models\Traits\WorkWithMeta;
 use Walletable\Money\Money;
@@ -18,6 +20,7 @@ use Walletable\Traits\ConditionalUuid;
 use Walletable\WalletableManager;
 
 /**
+ * @property-read \Walletable\Money\Money $balance
  * @property-read \Walletable\Money\Money $amount
  * @property-read \Walletable\Money\Currency $currency
  */
@@ -42,12 +45,30 @@ class Wallet extends Model implements WalletInterface
      *
      * @return \Walletable\Money\Money
      */
-    public function getAmountAttribute()
+    public function getAmountAttribute($value)
     {
         return new Money(
-            $this->getRawOriginal('amount'),
+            $value,
             $this->currency
         );
+    }
+
+    /**
+     * Get the real balance object of a wallet
+     *
+     * @return \Walletable\Money\Money
+     */
+    public function getBalanceAttribute()
+    {
+        return Mutator::mutate(new WalletBalanceMutation(
+            'wallet.balance',
+            new Money(
+                $this->getRawOriginal('amount'),
+                $this->currency
+            ),
+            [
+                'wallet' => $this
+            ]))->value();
     }
 
     /**

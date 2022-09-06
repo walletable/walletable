@@ -4,7 +4,9 @@ namespace Walletable\Tests;
 
 use Walletable\Exceptions\IncompactibleWalletsException;
 use Walletable\Exceptions\InsufficientBalanceException;
+use Walletable\Facades\Mutator;
 use Walletable\Internals\Actions\Action;
+use Walletable\Money\Money;
 use Walletable\Tests\Models\Wallet;
 use Walletable\Tests\Models\Walletable;
 use Walletable\Transaction\CreditDebitAction;
@@ -189,5 +191,21 @@ class WalletTest extends TestBench
 
         $this->assertSame('100000', $wallet->testMacro());
         $this->assertSame('Wallet Macro', Wallet::testStaticMacro());
+    }
+
+    public function testWalletBalanceMutation()
+    {
+        $wallet = $this->createWallet(100000);
+
+        Mutator::mutator('wallet.balance', function ($mutation) {
+            $mutation->setValue(
+                $mutation->value()->add(
+                    Money::NGN(100000)
+                )
+            );
+        });
+
+        $this->assertSame(200000, $wallet->balance->getInt());
+        $this->assertSame(100000, $wallet->amount->getInt());
     }
 }
