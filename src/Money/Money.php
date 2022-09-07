@@ -102,7 +102,7 @@ class Money implements \JsonSerializable
      */
     private function newInstance($amount)
     {
-        return new self($amount, $this->currency);
+        return new static($amount, $this->currency);
     }
 
     /**
@@ -240,7 +240,7 @@ class Money implements \JsonSerializable
             $amount = $calculator->add($amount, $addend->amount);
         }
 
-        return new self($amount, $this->currency);
+        return new static($amount, $this->currency);
     }
 
     /**
@@ -264,7 +264,7 @@ class Money implements \JsonSerializable
             $amount = $calculator->subtract($amount, $subtrahend->amount);
         }
 
-        return new self($amount, $this->currency);
+        return new static($amount, $this->currency);
     }
 
     /**
@@ -368,7 +368,7 @@ class Money implements \JsonSerializable
     {
         $this->assertSameCurrency($divisor);
 
-        return new self($this->getCalculator()->mod($this->amount, $divisor->amount), $this->currency);
+        return new static($this->getCalculator()->mod($this->amount, $divisor->amount), $this->currency);
     }
 
     /**
