@@ -189,6 +189,8 @@ class MoneyTest extends TestCase
         $money = Money::NGN(100000);
 
         $this->assertTrue($money->negative()->isNegative());
+        $this->assertSame('-100000', $money->negative()->getAmount());
+        $this->assertSame(-100000, $money->negative()->getInt());
     }
 
     public function testIsPositive()
@@ -292,5 +294,47 @@ class MoneyTest extends TestCase
         $money = Money::USD(250000);
 
         $this->assertSame('$2,500.00', $formatter->format($money, $money->getCurrency()));
+    }
+
+    public function testMutatbleMoney()
+    {
+        $money = Money::NGN(100000);
+        $afterAdd1 = $money->mutable()->add(Money::NGN(200000));
+        $afterSubtract1 = $money->subtract(Money::NGN(100000));
+        $afterMultiply1 = $money->multiply(2);
+        $afterDivide1 = $money->divide(2);
+        $negativeValue = ($afterNegative1 = $money->negative())->getInt();
+        $afterAbsolute1 = $money->absolute();
+
+        $this->assertSame($money, $afterAdd1);
+        $this->assertSame($money, $afterSubtract1);
+        $this->assertSame($money, $afterMultiply1);
+        $this->assertSame($money, $afterDivide1);
+        $this->assertSame($money, $afterNegative1);
+        $this->assertSame($money, $afterAbsolute1);
+        $this->assertSame(-200000, $negativeValue);
+
+        $afterAdd2 = $money->immutable()->add(Money::NGN(200000));
+        $afterSubtract2 = $money->subtract(Money::NGN(100000));
+        $afterMultiply2 = $money->multiply(2);
+        $afterDivide2 = $money->divide(2);
+        $afterNegative2 = $money->negative();
+        $afterAbsolute2 = $money->absolute();
+
+        $this->assertNotSame($money, $afterAdd2);
+        $this->assertNotSame($money, $afterSubtract2);
+        $this->assertNotSame($money, $afterMultiply2);
+        $this->assertNotSame($money, $afterDivide2);
+        $this->assertNotSame($money, $afterNegative2);
+        $this->assertNotSame($money, $afterAbsolute2);
+
+        $this->assertSame(400000, $afterAdd2->getInt());
+        $this->assertSame(100000, $afterSubtract2->getInt());
+        $this->assertSame(400000, $afterMultiply2->getInt());
+        $this->assertSame(100000, $afterDivide2->getInt());
+        $this->assertSame(-200000, $afterNegative2->getInt());
+        $this->assertSame(200000, $afterAbsolute2->getInt());
+
+        $this->assertSame(200000, $money->getInt());
     }
 }
