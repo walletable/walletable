@@ -220,6 +220,8 @@ class Money implements \JsonSerializable
 
     /**
      * Returns the value represented by this object.
+     * 
+     * @deprecated deprecated since version 0.3
      *
      * @return string
      */
@@ -230,12 +232,34 @@ class Money implements \JsonSerializable
 
     /**
      * Returns the value represented by this object as integer
+     * 
+     * @deprecated deprecated since version 0.3
      *
      * @return int
      */
     public function getInt()
     {
         return (int)$this->getAmount();
+    }
+
+    /**
+     * Returns the value represented by this object.
+     *
+     * @return string
+     */
+    public function value()
+    {
+        return $this->amount;
+    }
+
+    /**
+     * Returns the value represented by this object as integer
+     *
+     * @return int
+     */
+    public function integer()
+    {
+        return (int)$this->value();
     }
 
     /**
