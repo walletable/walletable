@@ -220,7 +220,7 @@ class Money implements \JsonSerializable
 
     /**
      * Returns the value represented by this object.
-     * 
+     *
      * @deprecated deprecated since version 0.3
      *
      * @return string
@@ -232,7 +232,7 @@ class Money implements \JsonSerializable
 
     /**
      * Returns the value represented by this object as integer
-     * 
+     *
      * @deprecated deprecated since version 0.3
      *
      * @return int
@@ -582,7 +582,6 @@ class Money implements \JsonSerializable
     {
         return $this->immutable;
     }
-    
 
     /**
      * Checks if the value represented by this object is positive.
