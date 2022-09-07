@@ -208,4 +208,23 @@ class WalletTest extends TestBench
         $this->assertSame(200000, $wallet->balance->integer());
         $this->assertSame(100000, $wallet->amount->integer());
     }
+
+    public function testWalletBalanceMutationHooks()
+    {
+        $wallet = $this->createWallet(100000);
+
+        Mutator::mutator('wallet.balance', function ($mutation) {
+            $amount = $mutation->value()->add(
+                Money::NGN(100000)
+            );
+
+            $this->assertSame($amount, $mutation->value());
+        });
+
+        $amount = $wallet->balance->add(
+            Money::NGN(100000)
+        );
+
+        $this->assertNotSame($wallet->balance, $amount);
+    }
 }
