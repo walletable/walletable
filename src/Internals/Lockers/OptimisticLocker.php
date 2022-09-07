@@ -22,7 +22,7 @@ class OptimisticLocker implements LockerInterface
                     ->whereAmount($wallet->amount->getAmount());
 
                 $updated = $query->update([
-                    'amount' => ($balance = $wallet->amount->add($amount))->getInt()
+                    'amount' => ($balance = $wallet->amount->add($amount))->integer()
                 ]);
                 $transaction->forceFill([
                     'amount' => $amount->getAmount(),
@@ -47,7 +47,7 @@ class OptimisticLocker implements LockerInterface
                     ->whereAmount($wallet->amount->getAmount());
 
                 $updated = $query->update([
-                    'amount' => ($balance = $wallet->amount->subtract($amount))->getInt()
+                    'amount' => ($balance = $wallet->amount->subtract($amount))->integer()
                 ]);
                 $transaction->forceFill([
                     'amount' => $amount->getAmount(),

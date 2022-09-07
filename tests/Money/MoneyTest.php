@@ -19,7 +19,7 @@ class MoneyTest extends TestCase
         $this->assertSame($naira->getCurrency(), $naira2->getCurrency());
         $this->assertSame('NGN', $naira->getCurrency()->getCode());
         $this->assertSame('100000', $naira->getAmount());
-        $this->assertSame(100000, $naira->getInt());
+        $this->assertSame(100000, $naira->integer());
         $this->assertInstanceOf(Currency::class, $naira->getCurrency());
     }
 
@@ -35,7 +35,7 @@ class MoneyTest extends TestCase
         $naira = Money::NGN(100000);
         $naira2 = Money::NGN(100000);
 
-        $this->assertSame(200000, $naira->add($naira2)->getInt());
+        $this->assertSame(200000, $naira->add($naira2)->integer());
     }
 
     public function testAdditionOfMultipleMoney()
@@ -44,7 +44,7 @@ class MoneyTest extends TestCase
         $naira2 = Money::NGN(100000);
         $naira3 = Money::NGN(100000);
 
-        $this->assertSame(300000, $naira->add($naira2, $naira3)->getInt());
+        $this->assertSame(300000, $naira->add($naira2, $naira3)->integer());
     }
 
     public function testSumOfMoney()
@@ -53,7 +53,7 @@ class MoneyTest extends TestCase
         $naira2 = Money::NGN(100000);
         $naira3 = Money::NGN(100000);
 
-        $this->assertSame(400000, Money::sum($naira, $naira2, $naira3)->getInt());
+        $this->assertSame(400000, Money::sum($naira, $naira2, $naira3)->integer());
     }
 
     public function testSubtractionOfMoney()
@@ -61,7 +61,7 @@ class MoneyTest extends TestCase
         $naira = Money::NGN(200000);
         $naira2 = Money::NGN(100000);
 
-        $this->assertSame(100000, $naira->subtract($naira2)->getInt());
+        $this->assertSame(100000, $naira->subtract($naira2)->integer());
     }
 
     public function testSubtractionOfMultipleMoney()
@@ -70,49 +70,49 @@ class MoneyTest extends TestCase
         $naira2 = Money::NGN(100000);
         $naira3 = Money::NGN(50000);
 
-        $this->assertSame(50000, $naira->subtract($naira2, $naira3)->getInt());
+        $this->assertSame(50000, $naira->subtract($naira2, $naira3)->integer());
     }
 
     public function testDivisionOfMoney()
     {
         $naira = Money::NGN(200000);
 
-        $this->assertSame(100000, $naira->divide(2)->getInt());
+        $this->assertSame(100000, $naira->divide(2)->integer());
     }
 
     public function testDivisionOfMoneyWithDecimal()
     {
         $naira = Money::NGN(3234323);
 
-        $this->assertSame(5390538, $naira->divide(0.6)->getInt());
+        $this->assertSame(5390538, $naira->divide(0.6)->integer());
     }
 
     public function testDivisionOfMoneyWithRoundMode()
     {
         $naira = Money::NGN(3234323);
 
-        $this->assertSame(4042903, $naira->divide(0.8, Money::ROUND_DOWN)->getInt());
+        $this->assertSame(4042903, $naira->divide(0.8, Money::ROUND_DOWN)->integer());
     }
 
     public function testMultiplicationOfMoney()
     {
         $naira = Money::NGN(100000);
 
-        $this->assertSame(200000, $naira->multiply(2)->getInt());
+        $this->assertSame(200000, $naira->multiply(2)->integer());
     }
 
     public function testMultiplicationOfMoneyWithDecimal()
     {
         $naira = Money::NGN(3234323);
 
-        $this->assertSame(1940594, $naira->multiply(0.6)->getInt());
+        $this->assertSame(1940594, $naira->multiply(0.6)->integer());
     }
 
     public function testMultiplicationOfMoneyWithRoundMode()
     {
         $naira = Money::NGN(3234323);
 
-        $this->assertSame(2910890, $naira->multiply(0.9, Money::ROUND_DOWN)->getInt());
+        $this->assertSame(2910890, $naira->multiply(0.9, Money::ROUND_DOWN)->integer());
     }
 
     public function testAllocationOfMoney()
@@ -120,7 +120,7 @@ class MoneyTest extends TestCase
         $nairas = Money::NGN(200000)->allocateTo(4);
 
         foreach ($nairas as $money) {
-            $this->assertSame(50000, $money->getInt());
+            $this->assertSame(50000, $money->integer());
         }
     }
 
@@ -130,11 +130,11 @@ class MoneyTest extends TestCase
 
         foreach ($nairas as $key => $money) {
             if ($key === 0) {
-                $this->assertSame(50001, $money->getInt());
+                $this->assertSame(50001, $money->integer());
                 continue;
             }
 
-            $this->assertSame(50000, $money->getInt());
+            $this->assertSame(50000, $money->integer());
         }
     }
 
@@ -180,8 +180,8 @@ class MoneyTest extends TestCase
         $money = Money::NGN(-100000);
         $money2 = Money::NGN(100000);
 
-        $this->assertSame(100000, $money->absolute()->getInt());
-        $this->assertSame(100000, $money2->absolute()->getInt());
+        $this->assertSame(100000, $money->absolute()->integer());
+        $this->assertSame(100000, $money2->absolute()->integer());
     }
 
     public function testNegative()
@@ -190,7 +190,7 @@ class MoneyTest extends TestCase
 
         $this->assertTrue($money->negative()->isNegative());
         $this->assertSame('-100000', $money->negative()->getAmount());
-        $this->assertSame(-100000, $money->negative()->getInt());
+        $this->assertSame(-100000, $money->negative()->integer());
     }
 
     public function testIsPositive()
@@ -217,7 +217,7 @@ class MoneyTest extends TestCase
             Money::NGN(13765),
         );
 
-        $this->assertSame(3535, $money->getInt());
+        $this->assertSame(3535, $money->integer());
     }
 
     public function testMax()
@@ -230,7 +230,7 @@ class MoneyTest extends TestCase
             Money::NGN(13765),
         );
 
-        $this->assertSame(13765, $money->getInt());
+        $this->assertSame(13765, $money->integer());
     }
 
     public function testAverage()
@@ -243,7 +243,7 @@ class MoneyTest extends TestCase
             Money::NGN(700),
         );
 
-        $this->assertSame(530, $money->getInt());
+        $this->assertSame(530, $money->integer());
     }
 
     public function testAddAndRemoveCurrency()
@@ -303,7 +303,7 @@ class MoneyTest extends TestCase
         $afterSubtract1 = $money->subtract(Money::NGN(100000));
         $afterMultiply1 = $money->multiply(2);
         $afterDivide1 = $money->divide(2);
-        $negativeValue = ($afterNegative1 = $money->negative())->getInt();
+        $negativeValue = ($afterNegative1 = $money->negative())->integer();
         $afterAbsolute1 = $money->absolute();
 
         $this->assertSame($money, $afterAdd1);
@@ -328,13 +328,13 @@ class MoneyTest extends TestCase
         $this->assertNotSame($money, $afterNegative2);
         $this->assertNotSame($money, $afterAbsolute2);
 
-        $this->assertSame(400000, $afterAdd2->getInt());
-        $this->assertSame(100000, $afterSubtract2->getInt());
-        $this->assertSame(400000, $afterMultiply2->getInt());
-        $this->assertSame(100000, $afterDivide2->getInt());
-        $this->assertSame(-200000, $afterNegative2->getInt());
-        $this->assertSame(200000, $afterAbsolute2->getInt());
+        $this->assertSame(400000, $afterAdd2->integer());
+        $this->assertSame(100000, $afterSubtract2->integer());
+        $this->assertSame(400000, $afterMultiply2->integer());
+        $this->assertSame(100000, $afterDivide2->integer());
+        $this->assertSame(-200000, $afterNegative2->integer());
+        $this->assertSame(200000, $afterAbsolute2->integer());
 
-        $this->assertSame(200000, $money->getInt());
+        $this->assertSame(200000, $money->integer());
     }
 }

@@ -29,8 +29,8 @@ class TransactionTest extends TestBench
             'created_at' => now(),
         ])->save();
 
-        $this->assertSame(100000, $transaction->amount->getInt());
-        $this->assertSame(100000, $transaction->balance->getInt());
+        $this->assertSame(100000, $transaction->amount->integer());
+        $this->assertSame(100000, $transaction->balance->integer());
         $this->assertInstanceOf(ActionManager::class, $transaction->action);
         $this->assertInstanceOf(Currency::class, $transaction->currency);
         $this->assertSame('Test Credit', $transaction->title);

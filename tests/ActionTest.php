@@ -23,9 +23,9 @@ class ActionTest extends TestBench
 
         $action->credit(100000, new ActionData($wallet), 'Test Credit');
 
-        $this->assertSame(100000, $wallet->refresh()->amount->getInt());
+        $this->assertSame(100000, $wallet->refresh()->amount->integer());
         $this->assertCount(1, $wallet->transactions);
-        $this->assertSame(100000, $wallet->transactions->first()->amount->getInt());
+        $this->assertSame(100000, $wallet->transactions->first()->amount->integer());
         $this->assertSame('Test Credit', $wallet->transactions->first()->remarks);
         $this->assertSame('Credit', $wallet->transactions->first()->title);
         $this->assertSame('credit', $wallet->transactions->first()->type);
@@ -43,9 +43,9 @@ class ActionTest extends TestBench
 
         $action->debit(100000, new ActionData($wallet), 'Test Debit');
 
-        $this->assertSame(0, $wallet->refresh()->amount->getInt());
+        $this->assertSame(0, $wallet->refresh()->amount->integer());
         $this->assertCount(1, $wallet->transactions);
-        $this->assertSame(100000, $wallet->transactions->first()->amount->getInt());
+        $this->assertSame(100000, $wallet->transactions->first()->amount->integer());
         $this->assertSame('Test Debit', $wallet->transactions->first()->remarks);
         $this->assertSame('Debit', $wallet->transactions->first()->title);
         $this->assertSame('debit', $wallet->transactions->first()->type);
