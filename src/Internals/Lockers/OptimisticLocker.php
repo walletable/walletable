@@ -19,14 +19,14 @@ class OptimisticLocker implements LockerInterface
             do {
                 $wallet->refresh();
                 $query = config('walletable.models.wallet')::whereId($wallet->getKey())
-                    ->whereAmount($wallet->amount->getAmount());
+                    ->whereAmount($wallet->amount->value());
 
                 $updated = $query->update([
-                    'amount' => ($balance = $wallet->amount->add($amount))->getInt()
+                    'amount' => ($balance = $wallet->amount->add($amount))->integer()
                 ]);
                 $transaction->forceFill([
-                    'amount' => $amount->getAmount(),
-                    'balance' => $balance->getAmount(),
+                    'amount' => $amount->value(),
+                    'balance' => $balance->value(),
                 ]);
             } while (!$updated);
         });
@@ -44,14 +44,14 @@ class OptimisticLocker implements LockerInterface
             do {
                 $wallet->refresh();
                 $query = config('walletable.models.wallet')::whereId($wallet->getKey())
-                    ->whereAmount($wallet->amount->getAmount());
+                    ->whereAmount($wallet->amount->value());
 
                 $updated = $query->update([
-                    'amount' => ($balance = $wallet->amount->subtract($amount))->getInt()
+                    'amount' => ($balance = $wallet->amount->subtract($amount))->integer()
                 ]);
                 $transaction->forceFill([
-                    'amount' => $amount->getAmount(),
-                    'balance' => $balance->getAmount(),
+                    'amount' => $amount->value(),
+                    'balance' => $balance->value(),
                 ]);
             } while (!$updated);
         });

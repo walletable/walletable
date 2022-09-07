@@ -72,6 +72,13 @@ class Money implements \JsonSerializable
     ];
 
     /**
+     * Determines if the internal value can be changed.
+     *
+     * @var bool
+     */
+    private $immutable = true;
+
+    /**
      * @param int|string $amount Amount, expressed in the smallest units of $currency (eg cents)
      *
      * @throws \InvalidArgumentException If amount is not integer
@@ -102,7 +109,27 @@ class Money implements \JsonSerializable
      */
     private function newInstance($amount)
     {
-        return new self($amount, $this->currency);
+        return new static($amount, $this->currency);
+    }
+
+    /**
+     * Returns a new Money instance based on the current one using the Currency.
+     *
+     * @param int|string $amount
+     *
+     * @return Money
+     *
+     * @throws \InvalidArgumentException If amount is not integer
+     */
+    private function newInstanceIfImmutable($amount)
+    {
+        if ($this->isImmutable()) {
+            return new static($amount, $this->currency);
+        } else {
+            $this->amount = (string)$amount;
+        }
+
+        return $this;
     }
 
     /**
@@ -193,6 +220,8 @@ class Money implements \JsonSerializable
 
     /**
      * Returns the value represented by this object.
+     * 
+     * @deprecated deprecated since version 0.3
      *
      * @return string
      */
@@ -203,12 +232,34 @@ class Money implements \JsonSerializable
 
     /**
      * Returns the value represented by this object as integer
+     * 
+     * @deprecated deprecated since version 0.3
      *
      * @return int
      */
     public function getInt()
     {
         return (int)$this->getAmount();
+    }
+
+    /**
+     * Returns the value represented by this object.
+     *
+     * @return string
+     */
+    public function value()
+    {
+        return $this->amount;
+    }
+
+    /**
+     * Returns the value represented by this object as integer
+     *
+     * @return int
+     */
+    public function integer()
+    {
+        return (int)$this->value();
     }
 
     /**
@@ -240,7 +291,7 @@ class Money implements \JsonSerializable
             $amount = $calculator->add($amount, $addend->amount);
         }
 
-        return new self($amount, $this->currency);
+        return $this->newInstanceIfImmutable($amount);
     }
 
     /**
@@ -264,7 +315,7 @@ class Money implements \JsonSerializable
             $amount = $calculator->subtract($amount, $subtrahend->amount);
         }
 
-        return new self($amount, $this->currency);
+        return $this->newInstanceIfImmutable($amount);
     }
 
     /**
@@ -329,7 +380,7 @@ class Money implements \JsonSerializable
 
         $product = $this->round($this->getCalculator()->multiply($this->amount, $multiplier), $roundingMode);
 
-        return $this->newInstance($product);
+        return $this->newInstanceIfImmutable($product);
     }
 
     /**
@@ -354,7 +405,7 @@ class Money implements \JsonSerializable
 
         $quotient = $this->round($this->getCalculator()->divide($this->amount, $divisor), $roundingMode);
 
-        return $this->newInstance($quotient);
+        return $this->newInstanceIfImmutable($quotient);
     }
 
     /**
@@ -368,7 +419,7 @@ class Money implements \JsonSerializable
     {
         $this->assertSameCurrency($divisor);
 
-        return new self($this->getCalculator()->mod($this->amount, $divisor->amount), $this->currency);
+        return new static($this->getCalculator()->mod($this->amount, $divisor->amount), $this->currency);
     }
 
     /**
@@ -479,7 +530,7 @@ class Money implements \JsonSerializable
      */
     public function absolute()
     {
-        return $this->newInstance($this->getCalculator()->absolute($this->amount));
+        return $this->newInstanceIfImmutable($this->getCalculator()->absolute($this->amount));
     }
 
     /**
@@ -487,7 +538,29 @@ class Money implements \JsonSerializable
      */
     public function negative()
     {
-        return $this->newInstance(0)->subtract($this);
+        return $this->newInstanceIfImmutable($this->getCalculator()->subtract(0, $this->amount));
+    }
+
+    /**
+     * Make the money object immutatble
+     * @return $this
+     */
+    public function immutable()
+    {
+        $this->immutable = true;
+
+        return $this;
+    }
+
+    /**
+     * Make the money object mutatble
+     * @return $this
+     */
+    public function mutable()
+    {
+        $this->immutable = false;
+
+        return $this;
     }
 
     /**
@@ -499,6 +572,17 @@ class Money implements \JsonSerializable
     {
         return $this->getCalculator()->compare($this->amount, 0) === 0;
     }
+
+    /**
+     * Checks if the internal value can be changed.
+     *
+     * @return bool
+     */
+    public function isImmutable()
+    {
+        return $this->immutable;
+    }
+    
 
     /**
      * Checks if the value represented by this object is positive.
@@ -648,7 +732,7 @@ class Money implements \JsonSerializable
     }
 
     /**
-     * @return Calculator
+     * @return CalculatorInterface
      */
     private function getCalculator(): CalculatorInterface
     {

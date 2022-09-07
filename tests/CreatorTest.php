@@ -75,7 +75,7 @@ class CreatorTest extends TestBench
 
         $this->assertInstanceOf(Wallet::class, $wallet = $creator->create());
         $this->assertInstanceOf(ModelsWallet::class, $wallet);
-        $this->assertSame(0, $wallet->refresh()->amount->getInt());
+        $this->assertSame(0, $wallet->refresh()->amount->integer());
 
         Event::assertDispatched(CreatingWallet::class);
         Event::assertDispatched(CreatedWallet::class);

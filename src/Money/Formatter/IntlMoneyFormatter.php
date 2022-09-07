@@ -27,7 +27,7 @@ class IntlMoneyFormatter implements MoneyFormatter
      */
     public function format(Money $money, Currency $currency)
     {
-        $valueBase = $money->getAmount();
+        $valueBase = $money->value();
         $negative = false;
 
         if ($valueBase[0] === '-') {

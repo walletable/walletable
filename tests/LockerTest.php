@@ -20,15 +20,15 @@ class LockerTest extends TestBench
             'currency' => 'NGN',
         ]);
 
-        $this->assertSame(0, $wallet->refresh()->amount->getInt());
+        $this->assertSame(0, $wallet->refresh()->amount->integer());
 
         $locker->creditLock($wallet, Money::NGN(100000), $transaction);
 
         $transaction->syncOriginal();
 
-        $this->assertSame(100000, $wallet->refresh()->amount->getInt());
-        $this->assertSame(100000, $transaction->amount->getInt());
-        $this->assertSame(100000, $transaction->balance->getInt());
+        $this->assertSame(100000, $wallet->refresh()->amount->integer());
+        $this->assertSame(100000, $transaction->amount->integer());
+        $this->assertSame(100000, $transaction->balance->integer());
     }
 
     public function testOptimisticLockerDebit()
@@ -43,14 +43,14 @@ class LockerTest extends TestBench
             'currency' => 'NGN',
         ]);
 
-        $this->assertSame(100000, $wallet->refresh()->amount->getInt());
+        $this->assertSame(100000, $wallet->refresh()->amount->integer());
 
         $locker->debitLock($wallet, Money::NGN(100000), $transaction);
 
         $transaction->syncOriginal();
 
-        $this->assertSame(0, $wallet->refresh()->amount->getInt());
-        $this->assertSame(100000, $transaction->amount->getInt());
-        $this->assertSame(0, $transaction->balance->getInt());
+        $this->assertSame(0, $wallet->refresh()->amount->integer());
+        $this->assertSame(100000, $transaction->amount->integer());
+        $this->assertSame(0, $transaction->balance->integer());
     }
 }

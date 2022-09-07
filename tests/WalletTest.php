@@ -48,11 +48,11 @@ class WalletTest extends TestBench
         $transfer = $wallet->transfer($wallet2, 50000, 'Test transfer');
 
         $this->assertSame(2, $transfer->getTransactions()->count());
-        $this->assertSame(50000, $transfer->getAmount()->getInt());
+        $this->assertSame(50000, $transfer->getAmount()->integer());
         $this->assertTrue($transfer->successful());
 
-        $this->assertSame(50000, $wallet->refresh()->amount->getInt());
-        $this->assertSame(50000, $wallet2->refresh()->amount->getInt());
+        $this->assertSame(50000, $wallet->refresh()->amount->integer());
+        $this->assertSame(50000, $wallet2->refresh()->amount->integer());
 
         $this->assertSame(1, $wallet->transactions()->count());
         $this->assertSame(1, $wallet2->transactions()->count());
@@ -118,9 +118,9 @@ class WalletTest extends TestBench
         $credit = $wallet->credit(50000, 'Test Credit', 'Crediting in test runtime');
 
         $this->assertSame(1, $credit->getTransactions()->count());
-        $this->assertSame(50000, $credit->getAmount()->getInt());
+        $this->assertSame(50000, $credit->getAmount()->integer());
 
-        $this->assertSame(50000, $wallet->refresh()->amount->getInt());
+        $this->assertSame(50000, $wallet->refresh()->amount->integer());
 
         $this->assertSame(1, $wallet->transactions()->count());
 
@@ -139,9 +139,9 @@ class WalletTest extends TestBench
         $debit = $wallet->debit(50000, 'Test Debit', 'Debiting in test runtime');
 
         $this->assertSame(1, $debit->getTransactions()->count());
-        $this->assertSame(50000, $debit->getAmount()->getInt());
+        $this->assertSame(50000, $debit->getAmount()->integer());
 
-        $this->assertSame(0, $wallet->refresh()->amount->getInt());
+        $this->assertSame(0, $wallet->refresh()->amount->integer());
 
         $this->assertSame(1, $wallet->transactions()->count());
 
@@ -180,7 +180,7 @@ class WalletTest extends TestBench
             /**
              * @var Wallet $this
              */
-            return $this->amount->getAmount();
+            return $this->amount->value();
         });
 
         Wallet::macro('testStaticMacro', function () {
@@ -205,7 +205,7 @@ class WalletTest extends TestBench
             );
         });
 
-        $this->assertSame(200000, $wallet->balance->getInt());
-        $this->assertSame(100000, $wallet->amount->getInt());
+        $this->assertSame(200000, $wallet->balance->integer());
+        $this->assertSame(100000, $wallet->amount->integer());
     }
 }
