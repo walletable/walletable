@@ -180,7 +180,7 @@ class WalletTest extends TestBench
             /**
              * @var Wallet $this
              */
-            return $this->amount->getAmount();
+            return $this->amount->value();
         });
 
         Wallet::macro('testStaticMacro', function () {

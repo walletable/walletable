@@ -85,7 +85,7 @@ class TransactionTest extends TestBench
             /**
              * @var Transaction $this
              */
-            return $this->amount->getAmount();
+            return $this->amount->value();
         });
 
         Transaction::macro('testStaticMacro', function () {

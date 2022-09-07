@@ -18,7 +18,7 @@ class MoneyTest extends TestCase
 
         $this->assertSame($naira->getCurrency(), $naira2->getCurrency());
         $this->assertSame('NGN', $naira->getCurrency()->getCode());
-        $this->assertSame('100000', $naira->getAmount());
+        $this->assertSame('100000', $naira->value());
         $this->assertSame(100000, $naira->integer());
         $this->assertInstanceOf(Currency::class, $naira->getCurrency());
     }
@@ -189,7 +189,7 @@ class MoneyTest extends TestCase
         $money = Money::NGN(100000);
 
         $this->assertTrue($money->negative()->isNegative());
-        $this->assertSame('-100000', $money->negative()->getAmount());
+        $this->assertSame('-100000', $money->negative()->value());
         $this->assertSame(-100000, $money->negative()->integer());
     }
 
