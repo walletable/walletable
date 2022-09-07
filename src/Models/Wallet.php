@@ -68,7 +68,8 @@ class Wallet extends Model implements WalletInterface
             ),
             [
                 'wallet' => $this
-            ]))->value();
+            ]
+        ))->value();
     }
 
     /**

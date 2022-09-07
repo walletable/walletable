@@ -28,12 +28,22 @@ class WalletBalanceMutation extends AbstractNamedMutation
     }
 
     /**
-     * Get the mutation name.
+     * Balance wallet balance mutation
      *
-     * @return string
+     * @return void
      */
-    public function getName()
+    public function before()
     {
-        return $this->name;
+        $this->value->mutable();
+    }
+
+    /**
+     * After wallet balance mutation
+     *
+     * @return void
+     */
+    public function after()
+    {
+        $this->value->immutable();
     }
 }
