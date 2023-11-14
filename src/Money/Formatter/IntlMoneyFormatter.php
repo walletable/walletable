@@ -54,11 +54,15 @@ class IntlMoneyFormatter implements MoneyFormatter
         }
 
         return str_replace(
-            $money->getCurrency()->getCode(),
-            $money->getCurrency()->getSymbol(),
-            $this->formatter->formatCurrency(
-                $formatted,
-                $money->getCurrency()->getCode()
+            "\u{00a0}"
+            '',
+            str_replace(
+                $money->getCurrency()->getCode(),
+                $money->getCurrency()->getSymbol(),
+                $this->formatter->formatCurrency(
+                    $formatted,
+                    $money->getCurrency()->getCode()
+                )
             )
         );
     }
