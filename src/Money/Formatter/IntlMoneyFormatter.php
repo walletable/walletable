@@ -54,7 +54,7 @@ class IntlMoneyFormatter implements MoneyFormatter
         }
 
         return str_replace(
-            "\u{00a0}"
+            "\u{00a0}",
             '',
             str_replace(
                 $money->getCurrency()->getCode(),
