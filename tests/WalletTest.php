@@ -89,7 +89,7 @@ class WalletTest extends TestBench
     {
         $this->expectException(InsufficientBalanceException::class);
         $this->expectExceptionMessage(
-            "Insufficient wallet balance, The wallet ballance is less than ₦\u{00a0}5,000.00"
+            "Insufficient wallet balance, The wallet ballance is less than ₦5,000.00"
         );
 
         $wallet = $this->createWallet(100000);
@@ -157,7 +157,7 @@ class WalletTest extends TestBench
     {
         $this->expectException(InsufficientBalanceException::class);
         $this->expectExceptionMessage(
-            "Insufficient wallet balance, The wallet ballance is less than ₦\u{00a0}500.00"
+            "Insufficient wallet balance, The wallet ballance is less than ₦500.00"
         );
 
         $wallet = $this->createWallet(0);
