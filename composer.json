@@ -39,7 +39,7 @@
          }
      },
      "scripts": {
-         "test": "./vendor/bin/phpunit --verbose"
+         "test": "./vendor/bin/phpunit"
      },
     "extra": {
         "laravel": {
