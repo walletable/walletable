@@ -18,11 +18,11 @@
 	"require": {
 		"php": ">=7.1",
         "ext-intl": "*",
-        "laravel/framework": "^7.0|^8.0|^9.0|^10.0"
+        "laravel/framework": "^7.0|^8.0|^9.0|^10.0|^11.0"
 	},
     "require-dev": {
-        "orchestra/testbench": "^4.0|^5.0|^6.0|^7.0",
-        "phpunit/phpunit": "~8.0|~9.0",
+        "orchestra/testbench": "^4.0|^5.0|^6.0|^7.0|^8.0|^9.0",
+        "phpunit/phpunit": "~8.0|~9.0|^10.5|^11.0.1",
         "mockery/mockery": "~1.4"
     },
     "autoload": {
@@ -39,7 +39,7 @@
          }
      },
      "scripts": {
-         "test": "./vendor/bin/phpunit --verbose"
+         "test": "./vendor/bin/phpunit"
      },
     "extra": {
         "laravel": {
