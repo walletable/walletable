@@ -263,6 +263,42 @@ class Money implements \JsonSerializable
     }
 
     /**
+     * Get the amount in major unit
+     *
+     * @return string
+     */
+    public function whole()
+    {
+        $valueBase = $this->value();
+        $negative = false;
+
+        if ($valueBase[0] === '-') {
+            $negative = true;
+            $valueBase = substr($valueBase, 1);
+        }
+
+        $subunit = $this->currency->subunitLength();
+        $valueLength = strlen($valueBase);
+
+        if ($valueLength > $subunit) {
+            $formatted = substr($valueBase, 0, $valueLength - $subunit);
+            $decimalDigits = substr($valueBase, $valueLength - $subunit);
+
+            if (strlen($decimalDigits) > 0) {
+                $formatted .= '.' . $decimalDigits;
+            }
+        } else {
+            $formatted = '0.' . str_pad('', $subunit - $valueLength, '0') . $valueBase;
+        }
+
+        if ($negative === true) {
+            $formatted = '-' . $formatted;
+        }
+
+        return $formatted;
+    }
+
+    /**
      * Returns the currency of this object.
      *
      * @return Currency
@@ -608,11 +644,12 @@ class Money implements \JsonSerializable
      *
      * @return array
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return [
             'amount' => $this->amount,
             'display' => $this->display(),
+            'whole' => $this->whole(),
             'symbol' => $this->currency->getSymbol(),
             'currency' => $this->currency->jsonSerialize(),
         ];

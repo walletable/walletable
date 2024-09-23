@@ -15,11 +15,16 @@ class MoneyTest extends TestCase
         $this->setUpCurrencies();
         $naira = Money::NGN(100000);
         $naira2 = new Money(100000, Money::currency('NGN'));
+        $naira3 = new Money(-100000, Money::currency('NGN'));
 
         $this->assertSame($naira->getCurrency(), $naira2->getCurrency());
         $this->assertSame('NGN', $naira->getCurrency()->getCode());
         $this->assertSame('100000', $naira->value());
+        $this->assertSame('1000.00', $naira->whole());
+        $this->assertSame('₦1,000.00', $naira->display());
         $this->assertSame(100000, $naira->integer());
+        $this->assertSame('-1000.00', $naira3->whole());
+        $this->assertSame('-₦1,000.00', $naira3->display());
         $this->assertInstanceOf(Currency::class, $naira->getCurrency());
     }
 
