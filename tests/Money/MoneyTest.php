@@ -15,16 +15,16 @@ class MoneyTest extends TestCase
         $this->setUpCurrencies();
         $naira = Money::NGN(100000);
         $naira2 = new Money(100000, Money::currency('NGN'));
-        $naira3 = new Money(-100000, Money::currency('NGN'));
+        $naira3 = new Money(-100002, Money::currency('NGN'));
 
         $this->assertSame($naira->getCurrency(), $naira2->getCurrency());
         $this->assertSame('NGN', $naira->getCurrency()->getCode());
         $this->assertSame('100000', $naira->value());
-        $this->assertSame('1000.00', $naira->whole());
-        $this->assertSame('₦1,000.00', $naira->display());
+        $this->assertSame('1000', $naira->whole());
+        $this->assertSame('₦1,000', $naira->display());
         $this->assertSame(100000, $naira->integer());
-        $this->assertSame('-1000.00', $naira3->whole());
-        $this->assertSame('-₦1,000.00', $naira3->display());
+        $this->assertSame('-1000.02', $naira3->whole());
+        $this->assertSame('-₦1,000.02', $naira3->display());
         $this->assertInstanceOf(Currency::class, $naira->getCurrency());
     }
 
@@ -298,7 +298,7 @@ class MoneyTest extends TestCase
         );
         $money = Money::USD(250000);
 
-        $this->assertSame('$2,500.00', $formatter->format($money, $money->getCurrency()));
+        $this->assertSame('$2,500', $formatter->format($money, $money->getCurrency()));
     }
 
     public function testMutatbleMoney()

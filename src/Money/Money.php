@@ -295,7 +295,7 @@ class Money implements \JsonSerializable
             $formatted = '-' . $formatted;
         }
 
-        return $formatted;
+        return str_replace(".00", '', $formatted);
     }
 
     /**
