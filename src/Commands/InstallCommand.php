@@ -55,15 +55,13 @@ class InstallCommand extends Command
             '--tag' => 'walletable.models'
         ]);
 
-        $role = select(
+        $this->configureUuid(ModelID::from(select(
             label: 'Choose your model ID?',
             options: ['default', 'uuid', 'ulid'],
             default: 'default',
             hint: 'What will u like to use for Walletable primary key.',
             required: true
-        );
-
-        $this->configureUuid(ModelID::from($role));
+        )));
 
         $this->line("");
 
