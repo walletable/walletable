@@ -16,7 +16,7 @@ use Walletable\Models\Traits\WorkWithMeta;
 use Walletable\Money\Money;
 use Walletable\Transaction\CreditDebit;
 use Walletable\Transaction\Transfer;
-use Walletable\Traits\ConditionalUuid;
+use Walletable\Traits\ConditionalID;
 use Walletable\WalletableManager;
 
 /**
@@ -26,7 +26,7 @@ use Walletable\WalletableManager;
  */
 class Wallet extends Model implements WalletInterface
 {
-    use ConditionalUuid;
+    use ConditionalID;
     use WalletRelations;
     use WorkWithMeta;
     use Macroable {

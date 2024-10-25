@@ -33,11 +33,23 @@ return [
     |--------------------------------------------------------------------------
     |
     | By default, Walletable uses auto-incrementing primary keys when assigning
-    | IDs to clients. However, if Walletable is instaalling you will be asked
-    | to choose if you want to use uuid instead, this will be set to "true" and
-    | UUIDs will be used.
+    | IDs to clients. However, when installing Walletable you will be asked
+    | to choose which model ID to use. Accepted values are 'default', 'uuid' and 'ulid'
+    | If you want to auto-increment leave it at default
     |
     */
-    'model_uuids' => false,
+    'model_id' => 'default',
 
+    /*
+    |--------------------------------------------------------------------------
+    | UUID Generation Driver
+    |--------------------------------------------------------------------------
+    |
+    | By default, Walletable use Illuminate\Support\Str::orderedUuid() to generate
+    | "ordered" UUIDs for walletable models If you choose to use 'uuid'. These UUIDs 
+    | are more efficient for indexed database storage because they can be sorted 
+    | lexicographically. You can override this behaviour by defining a new driver here. 
+    |
+    */
+    'uuid_driver' => '\Illuminate\Support\Str::orderedUuid()',
 ];

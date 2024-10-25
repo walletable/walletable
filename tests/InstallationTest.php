@@ -123,7 +123,7 @@ class InstallationTest extends TestBench
         );
 
         $this->assertStringContainsString(
-            '\'model_uuids\' => true',
+            '\'model_id\' => default',
             file_get_contents(config_path('walletable.php'))
         );
         $this->assertStringContainsString(
