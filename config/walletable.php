@@ -51,5 +51,5 @@ return [
     | lexicographically. You can override this behaviour by defining a new driver here. 
     |
     */
-    'uuid_driver' => '\Illuminate\Support\Str::orderedUuid()',
+    'uuid_driver' => \Illuminate\Support\Str::orderedUuid(),
 ];

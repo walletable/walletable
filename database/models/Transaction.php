@@ -13,7 +13,14 @@ class Transaction extends Model
      * @var array
      */
     protected $fillable = [
-        //
+        'wallet_id',
+        'session',
+        'type',
+        'amount',
+        'balance',
+        'currency',
+        'action',
+        'remarks',
     ];
 
     /**

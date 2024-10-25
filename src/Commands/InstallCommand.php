@@ -82,7 +82,7 @@ class InstallCommand extends Command
         if ($modelID !== ModelID::DEFAULT) {
 
             // Replace in file for config
-            $this->replaceInFile(config_path('walletable.php'), '\'model_id\' => default', '\'model_id\' => ' . $modelID->value);
+            $this->replaceInFile(config_path('walletable.php'), '\'model_id\' => \'default\'', '\'model_id\' => \'' . $modelID->value . '\'');
 
             $table = match ($modelID) {
                 ModelID::UUID => ['$table->uuid(\'id\')->primary();', '$table->uuid(\'wallet_id\')->index();'],

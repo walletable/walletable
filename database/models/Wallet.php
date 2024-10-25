@@ -20,6 +20,8 @@ class Wallet extends Model
         'meta',
         'driver',
         'status',
+        'walletable_id',
+        'walletable_type'
     ];
 
     /**

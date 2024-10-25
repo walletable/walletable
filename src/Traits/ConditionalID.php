@@ -21,7 +21,7 @@ trait ConditionalID
             if ($model_id !== 'default' && empty($model->{$model->getKeyName()})) {
                 
                 $modelId = match ($model_id) {
-                    'uuid' => (string) call_user_func(config('walletable.uuid_driver')),
+                    'uuid' => (string) config('walletable.uuid_driver'),
                     'ulid' => strtolower((string) Str::ulid())
                 };
 
