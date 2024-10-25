@@ -2,10 +2,11 @@
 
 namespace Walletable\Commands;
 
-use Illuminate\Console\Command;
 use Walletable\Enums\ModelID;
-
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\File;
 use function Laravel\Prompts\select;
+use function Laravel\Prompts\confirm;
 
 class InstallCommand extends Command
 {
@@ -40,19 +41,28 @@ class InstallCommand extends Command
      */
     public function handle()
     {
-        $this->line("<info>Setting up Walletable</info>");
-        $this->line("");
+        $this->line('<info>Setting up Walletable</info>');
+
+        $overwrite = $this->checkIfAlreadyInstalled();
+
+        if ($overwrite && !confirm('It seems Walletable was installed before. Do you want to overwrite existing settings?')) {
+            $this->line('<info>Installation aborted.</info>');
+            return;
+        }
 
         $this->call('vendor:publish', [
-            '--tag' => 'walletable.config'
+            '--tag' => 'walletable.config',
+            '--force' => $overwrite,
         ]);
 
         $this->call('vendor:publish', [
-            '--tag' => 'walletable.migrations'
+            '--tag' => 'walletable.migrations',
+            '--force' => $overwrite,
         ]);
 
         $this->call('vendor:publish', [
-            '--tag' => 'walletable.models'
+            '--tag' => 'walletable.models',
+            '--force' => $overwrite,
         ]);
 
         $this->configureUuid(ModelID::from(select(
@@ -63,9 +73,22 @@ class InstallCommand extends Command
             required: true
         )));
 
-        $this->line("");
-
-        $this->line("<info>Walletable installed sucessfully!!</info>");
+        $this->line('<info>Walletable installed sucessfully!!!</info>');
+        return;
+    }
+    
+    /**
+     * Check if Walletable was already installed
+     *
+     * @return bool
+     */
+    private function checkIfAlreadyInstalled(): bool
+    {
+        return File::exists(config_path('walletable.php')) ||
+                File::exists(app_path('Models/Wallet.php')) ||
+                File::exists(app_path('Models/Transaction.php')) ||
+                File::exists(database_path('migrations/2020_12_25_001500_create_wallets_table.php')) ||
+                File::exists(database_path('migrations/2020_12_25_001600_create_transactions_table.php'));
     }
 
     /**
