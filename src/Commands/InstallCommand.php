@@ -5,8 +5,6 @@ namespace Walletable\Commands;
 use Walletable\Enums\ModelID;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
-use function Laravel\Prompts\select;
-use function Laravel\Prompts\confirm;
 
 class InstallCommand extends Command
 {
@@ -45,7 +43,7 @@ class InstallCommand extends Command
 
         $overwrite = $this->checkIfAlreadyInstalled();
 
-        if ($overwrite && !confirm('It seems Walletable was installed before. Do you want to overwrite existing settings?')) {
+        if ($overwrite && !$this->confirm('It seems Walletable was installed before. Do you want to overwrite existing settings?')) {
             $this->line('<info>Installation aborted.</info>');
             return;
         }
@@ -65,15 +63,10 @@ class InstallCommand extends Command
             '--force' => $overwrite,
         ]);
 
-        $this->configureUuid(ModelID::from(select(
-            label: 'Choose your model ID?',
-            options: ['default', 'uuid', 'ulid'],
-            default: 'default',
-            hint: 'What will u like to use for Walletable primary key.',
-            required: true
-        )));
+        $this->configureUuid(ModelID::from($this->choice('Choose your model ID for Walletable primary key', ['default', 'uuid', 'ulid'], 'default')));
 
         $this->line('<info>Walletable installed sucessfully!!!</info>');
+
         return;
     }
     
@@ -94,22 +87,24 @@ class InstallCommand extends Command
     /**
      * Configure Walletable migration to use uuid primary keys.
      *
-     * @param \Walletable\Enums\ModelID $modelID
+     * @param string $modelID
      * 
      * @return void
      */
-    private function configureUuid(ModelID $modelID)
+    private function configureUuid(string $modelID)
     {
-        if ($modelID !== ModelID::DEFAULT) {
+        if ($modelID !== 'default') {
 
             // Replace in file for config
-            $this->replaceInFile(config_path('walletable.php'), '\'model_id\' => \'default\'', '\'model_id\' => \'' . $modelID->value . '\'');
+            $this->replaceInFile(config_path('walletable.php'), '\'model_id\' => \'default\'', '\'model_id\' => \'' . $modelID . '\'');
 
-            $table = match ($modelID) {
-                ModelID::UUID => ['$table->uuid(\'id\')->primary();', '$table->uuid(\'wallet_id\')->index();'],
-                ModelID::ULID => ['$table->ulid(\'id\')->primary();', '$table->ulid(\'wallet_id\')->index();'],
-                default => ['$table->id();', '$table->unsignedBigInteger(\'wallet_id\')->index();']
-            };
+            if ($modelID === 'uuid') {
+                $table = ['$table->uuid(\'id\')->primary();', '$table->uuid(\'wallet_id\')->index();'];
+            } else if ($modelID === 'ulid') {
+                $table = ['$table->ulid(\'id\')->primary();', '$table->ulid(\'wallet_id\')->index();'];
+            } else {
+                $table = ['$table->id();', '$table->unsignedBigInteger(\'wallet_id\')->index();'];
+            }
 
             // Replace in file for Wallet migration
             $this->replaceInFile(

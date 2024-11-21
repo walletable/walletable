@@ -20,10 +20,7 @@ trait ConditionalID
 
             if ($model_id !== 'default' && empty($model->{$model->getKeyName()})) {
                 
-                $modelId = match ($model_id) {
-                    'uuid' => (string) config('walletable.uuid_driver'),
-                    'ulid' => strtolower((string) Str::ulid())
-                };
+                $modelId = ($model_id === 'uuid') ? (string) config('walletable.uuid_driver') : strtolower((string) Str::ulid());
 
                 $model->{$model->getKeyName()} = $modelId;
             }
@@ -70,11 +67,7 @@ trait ConditionalID
 
         if ($model_id !== 'default') {
 
-            $value_is = match ($model_id) {
-                'uuid' => Str::isUuid($value),
-                'ulid' => Str::isUlid($value),
-                default => false,
-            };
+            $value_is = ($model_id === 'uuid') ? Str::isUuid($value) : Str::isUlid($value);
 
             if ($field && in_array($field, $this->uniqueIds()) && ! $value_is) {
                 throw (new ModelNotFoundException)->setModel(get_class($this), $value);
