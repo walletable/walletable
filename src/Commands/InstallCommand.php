@@ -2,7 +2,9 @@
 
 namespace Walletable\Commands;
 
+use Walletable\Enums\ModelID;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\File;
 
 class InstallCommand extends Command
 {
@@ -37,57 +39,92 @@ class InstallCommand extends Command
      */
     public function handle()
     {
-        $this->line("<info>Setting up Walletable</info>");
-        $this->line("");
+        $this->line('<info>Setting up Walletable</info>');
 
-        $this->call('vendor:publish', [
-            '--tag' => 'walletable.config'
-        ]);
+        $overwrite = $this->checkIfAlreadyInstalled();
 
-        $this->call('vendor:publish', [
-            '--tag' => 'walletable.migrations'
-        ]);
-
-        $this->call('vendor:publish', [
-            '--tag' => 'walletable.models'
-        ]);
-
-        if ($this->confirm('Use uuid for walletable models?')) {
-            $this->configureUuid();
+        if ($overwrite && !$this->confirm('It seems Walletable was installed before. Do you want to overwrite existing settings?')) {
+            $this->line('<info>Installation aborted.</info>');
+            return;
         }
 
-        $this->line("");
-        $this->line("<info>Walletable installed sucessfully!!</info>");
+        $this->call('vendor:publish', [
+            '--tag' => 'walletable.config',
+            '--force' => $overwrite,
+        ]);
+
+        $this->call('vendor:publish', [
+            '--tag' => 'walletable.migrations',
+            '--force' => $overwrite,
+        ]);
+
+        $this->call('vendor:publish', [
+            '--tag' => 'walletable.models',
+            '--force' => $overwrite,
+        ]);
+
+        $this->configureUuid(ModelID::from($this->choice('Choose your model ID for Walletable primary key', ['default', 'uuid', 'ulid'], 'default')));
+
+        $this->line('<info>Walletable installed sucessfully!!!</info>');
+
+        return;
+    }
+    
+    /**
+     * Check if Walletable was already installed
+     *
+     * @return bool
+     */
+    private function checkIfAlreadyInstalled(): bool
+    {
+        return File::exists(config_path('walletable.php')) ||
+                File::exists(app_path('Models/Wallet.php')) ||
+                File::exists(app_path('Models/Transaction.php')) ||
+                File::exists(database_path('migrations/2020_12_25_001500_create_wallets_table.php')) ||
+                File::exists(database_path('migrations/2020_12_25_001600_create_transactions_table.php'));
     }
 
     /**
      * Configure Walletable migration to use uuid primary keys.
      *
+     * @param string $modelID
+     * 
      * @return void
      */
-    public function configureUuid()
+    private function configureUuid(string $modelID)
     {
-        // Replace in file for config
-        $this->replaceInFile(config_path('walletable.php'), '\'model_uuids\' => false', '\'model_uuids\' => true');
+        if ($modelID !== 'default') {
 
-        // Replace in file for Wallet migration
-        $this->replaceInFile(
-            database_path('migrations/2020_12_25_001500_create_wallets_table.php'),
-            '$table->id();',
-            '$table->uuid(\'id\')->primary();'
-        );
+            // Replace in file for config
+            $this->replaceInFile(config_path('walletable.php'), '\'model_id\' => \'default\'', '\'model_id\' => \'' . $modelID . '\'');
 
-        // Replace in file for Transaction migration
-        $this->replaceInFile(
-            database_path('migrations/2020_12_25_001600_create_transactions_table.php'),
-            '$table->id();',
-            '$table->uuid(\'id\')->primary();'
-        );
-        $this->replaceInFile(
-            database_path('migrations/2020_12_25_001600_create_transactions_table.php'),
-            '$table->unsignedBigInteger(\'wallet_id\')->index();',
-            '$table->uuid(\'wallet_id\')->index();'
-        );
+            if ($modelID === 'uuid') {
+                $table = ['$table->uuid(\'id\')->primary();', '$table->uuid(\'wallet_id\')->index();'];
+            } else if ($modelID === 'ulid') {
+                $table = ['$table->ulid(\'id\')->primary();', '$table->ulid(\'wallet_id\')->index();'];
+            } else {
+                $table = ['$table->id();', '$table->unsignedBigInteger(\'wallet_id\')->index();'];
+            }
+
+            // Replace in file for Wallet migration
+            $this->replaceInFile(
+                database_path('migrations/2020_12_25_001500_create_wallets_table.php'),
+                '$table->id();',
+                $table[0]
+            );
+
+            // Replace in file for Transaction migration
+            $this->replaceInFile(
+                database_path('migrations/2020_12_25_001600_create_transactions_table.php'),
+                '$table->id();',
+                $table[0]
+            );
+            $this->replaceInFile(
+                database_path('migrations/2020_12_25_001600_create_transactions_table.php'),
+                '$table->unsignedBigInteger(\'wallet_id\')->index();',
+                $table[1]
+            );
+        }
     }
 
     /**
@@ -98,7 +135,7 @@ class InstallCommand extends Command
      * @param  string  $replace
      * @return void
      */
-    protected function replaceInFile($path, $search, $replace)
+    protected function replaceInFile(string $path, string $search, string $replace)
     {
         file_put_contents(
             $path,

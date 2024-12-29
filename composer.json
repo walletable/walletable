@@ -15,7 +15,7 @@
             "email": "horlwaley001@gmail.com"
         }
     ],
-	"require": {
+ 	"require": {
 		"php": ">=7.1",
         "ext-intl": "*",
         "laravel/framework": "^7.0|^8.0|^9.0|^10.0|^11.0"
