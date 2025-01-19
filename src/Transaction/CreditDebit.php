@@ -93,12 +93,21 @@ class CreditDebit
      */
     protected $actionData;
 
+    /**
+     * Execution Options
+     *
+     * @var array
+     */
+    protected $options;
+
     public function __construct(
         string $type,
         Wallet $wallet,
         Money $amount,
         string $title = null,
-        string $remarks = null
+        string $remarks = null,
+        LockerInterface $locker = null,
+        array $options = []
     ) {
         if (!in_array($type, ['credit', 'debit'])) {
             throw new InvalidArgumentException('Argument 1 value can only be "credit" or "debit"');
@@ -109,6 +118,8 @@ class CreditDebit
         $this->amount = $amount;
         $this->title = $title;
         $this->remarks = $remarks;
+        $this->locker = $locker;
+        $this->options = $options;
         $this->session = Str::uuid();
         $this->bag = new TransactionBag();
     }
@@ -121,10 +132,9 @@ class CreditDebit
     public function execute(): self
     {
         $this->checks();
+        $locker = $this->locker();
 
         try {
-            DB::beginTransaction();
-
             $transaction = $this->bag->new($this->wallet, [
                 'type' => $this->type,
                 'session' => $this->session,
@@ -136,6 +146,13 @@ class CreditDebit
 
             if (!$action->{'support' . ucfirst($this->type) }()) {
                 throw new Exception('This action does not support ' . $this->type . ' operations', 1);
+            }
+            $shouldInitiateTransaction = 
+                $locker->shouldInitiateTransaction($this->wallet, $this->amount, $transaction) ||
+                ($this->options['should_initiate_transaction'] ?? false);
+
+            if ($shouldInitiateTransaction) {
+                DB::beginTransaction();
             }
 
             if ($this->locker()->$method($this->wallet, $this->amount, $transaction)) {
@@ -157,9 +174,13 @@ class CreditDebit
                 });
             }
 
-            DB::commit();
+            if ($shouldInitiateTransaction) {
+                DB::commit();
+            }
         } catch (\Throwable $th) {
-            DB::rollBack();
+            if ($shouldInitiateTransaction) {
+                DB::rollBack();
+            }
             throw $th;
         }
 

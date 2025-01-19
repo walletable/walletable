@@ -21,7 +21,7 @@ use Walletable\WalletableManager;
 
 /**
  * @property-read \Walletable\Money\Money $balance
- * @property-read \Walletable\Money\Money $amount
+ * @property \Walletable\Money\Money $amount
  * @property-read \Walletable\Money\Currency $currency
  */
 class Wallet extends Model implements WalletInterface
