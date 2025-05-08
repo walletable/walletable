@@ -69,7 +69,7 @@ class InstallCommand extends Command
 
         return;
     }
-    
+
     /**
      * Check if Walletable was already installed
      *

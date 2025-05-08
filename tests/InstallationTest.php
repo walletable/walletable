@@ -9,7 +9,7 @@ class InstallationTest extends TestBench
     public function testInstallation()
     {
         $this->confirmInstallation('default');
-        
+
         // Assert that the original contents are present
         $this->assertEquals(
             file_get_contents(__DIR__ . '/../config/walletable.php'),
@@ -144,13 +144,13 @@ class InstallationTest extends TestBench
     private function cleanUpInstallation()
     {
         (!File::exists(config_path('walletable.php'))) || unlink(config_path('walletable.php'));
-        
+
         (!File::exists(app_path('Models/Wallet.php'))) || unlink(app_path('Models/Wallet.php'));
-        
+
         (!File::exists(app_path('Models/Transaction.php'))) || unlink(app_path('Models/Transaction.php'));
-        
+
         (!File::exists(database_path('migrations/2020_12_25_001500_create_wallets_table.php'))) || unlink(database_path('migrations/2020_12_25_001500_create_wallets_table.php'));
-        
+
         (!File::exists(database_path('migrations/2020_12_25_001600_create_transactions_table.php'))) || unlink(database_path('migrations/2020_12_25_001600_create_transactions_table.php'));
     }
 
@@ -166,7 +166,7 @@ class InstallationTest extends TestBench
 
         $command = $this->artisan('walletable:install');
 
-        $command->expectsChoice('Choose your model ID?',$model_id, ['default', 'uuid', 'ulid']);
+        $command->expectsChoice('Choose your model ID for Walletable primary key', $model_id, ['default', 'uuid', 'ulid']);
 
         $command->execute();
 
@@ -175,13 +175,13 @@ class InstallationTest extends TestBench
         // $command->expectsOutput('Walletable installed sucessfully!!!');
 
         $this->assertTrue(File::exists(config_path('walletable.php')));
-        
+
         $this->assertTrue(File::exists(app_path('Models/Wallet.php')));
-        
+
         $this->assertTrue(File::exists(app_path('Models/Transaction.php')));
-        
+
         $this->assertTrue(File::exists(database_path('migrations/2020_12_25_001500_create_wallets_table.php')));
-        
+
         $this->assertTrue(File::exists(database_path('migrations/2020_12_25_001600_create_transactions_table.php')));
     }
 
@@ -193,7 +193,7 @@ class InstallationTest extends TestBench
         $command = $this->artisan('walletable:install');
 
         $command->expectsConfirmation('It seems Walletable was installed before. Do you want to overwrite existing settings?', 'no');
-        
+
         $command->execute();
 
         $command->expectsOutput('Setting up Walletable');
@@ -213,8 +213,8 @@ class InstallationTest extends TestBench
         $command = $this->artisan('walletable:install');
 
         $command->expectsConfirmation('It seems Walletable was installed before. Do you want to overwrite existing settings?', 'yes');
-        
-        $command->expectsChoice('Choose your model ID?','default', ['default', 'uuid', 'ulid']);
+
+        $command->expectsChoice('Choose your model ID for Walletable primary key', 'default', ['default', 'uuid', 'ulid']);
 
         $command->execute();
 
@@ -225,13 +225,13 @@ class InstallationTest extends TestBench
         $command->assertExitCode(0);
 
         $this->assertTrue(File::exists(config_path('walletable.php')));
-        
+
         $this->assertTrue(File::exists(app_path('Models/Wallet.php')));
-        
+
         $this->assertTrue(File::exists(app_path('Models/Transaction.php')));
-        
+
         $this->assertTrue(File::exists(database_path('migrations/2020_12_25_001500_create_wallets_table.php')));
-        
+
         $this->assertTrue(File::exists(database_path('migrations/2020_12_25_001600_create_transactions_table.php')));
 
         $this->cleanUpInstallation();
