@@ -133,23 +133,21 @@ class CreditDebit
     {
         $this->checks();
         $locker = $this->locker();
+        $transaction = $this->bag->new($this->wallet, [
+            'type' => $this->type,
+            'session' => $this->session,
+            'remarks' => $this->remarks
+        ]);
+        $shouldInitiateTransaction = $locker->shouldInitiateTransaction($this->wallet, $this->amount, $transaction) ||
+            ($this->options['should_initiate_transaction'] ?? false);
 
         try {
-            $transaction = $this->bag->new($this->wallet, [
-                'type' => $this->type,
-                'session' => $this->session,
-                'remarks' => $this->remarks
-            ]);
-
             $method = $this->type . 'Lock';
             $action = $this->action ?? Walletable::action('credit_debit');
 
             if (!$action->{'support' . ucfirst($this->type) }()) {
                 throw new Exception('This action does not support ' . $this->type . ' operations', 1);
             }
-            $shouldInitiateTransaction = 
-                $locker->shouldInitiateTransaction($this->wallet, $this->amount, $transaction) ||
-                ($this->options['should_initiate_transaction'] ?? false);
 
             if ($shouldInitiateTransaction) {
                 DB::beginTransaction();
