@@ -2,6 +2,8 @@
 
 namespace Walletable\Tests;
 
+use Illuminate\Support\Facades\Event;
+use Walletable\Events\CreatingTransaction;
 use Walletable\Tests\Models\Transaction;
 use Walletable\Transaction\TransactionBag;
 
@@ -24,6 +26,9 @@ class TransactionBagTest extends TestBench
 
     public function testAdd()
     {
+        Event::fake([
+            CreatingTransaction::class,
+        ]);
         $wallet = $this->createWallet(100000);
         $bag = new TransactionBag();
 
@@ -46,6 +51,7 @@ class TransactionBagTest extends TestBench
 
         $this->assertInstanceOf(TransactionBag::class, $bag->add($transaction));
 
+        Event::assertDispatched(CreatingTransaction::class);
         $this->assertSame(2, $bag->count());
     }
 

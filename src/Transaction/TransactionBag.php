@@ -5,6 +5,7 @@ namespace Walletable\Transaction;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Traits\ForwardsCalls;
+use Walletable\Events\CreatingTransaction;
 use Walletable\Models\Transaction;
 use Walletable\Models\Wallet;
 
@@ -38,6 +39,10 @@ class TransactionBag
             'wallet_id' => $wallet->getKey(),
             'currency' => $wallet->getRawOriginal('currency')
         ] + $data);
+        App::make('events')->dispatch(new CreatingTransaction(
+            $wallet,
+            $trasanction
+        ));
         $this->transactions->add($trasanction);
         return $trasanction;
     }
