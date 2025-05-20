@@ -17,6 +17,10 @@ use Walletable\Money\Money;
 use Walletable\Transaction\CreditDebit;
 use Walletable\Transaction\Transfer;
 use Walletable\Traits\ConditionalID;
+use Walletable\Transaction\TransactionBag;
+use Illuminate\Support\Str;
+use Walletable\Transaction\Confirmation;
+use Walletable\Transaction\UnconfirmedCreditDebit;
 use Walletable\WalletableManager;
 
 /**
@@ -99,7 +103,7 @@ class Wallet extends Model implements WalletInterface
      * @param int|\Walletable\Money\Money $amount
      * @param string|null $remarks
      */
-    public function transfer(self $wallet, $amount, string $remarks = null): Transfer
+    public function transfer(self $wallet, $amount, string|null $remarks = null): Transfer
     {
         if (!is_int($amount) && !($amount instanceof Money)) {
             throw new InvalidArgumentException('Argument 2 must be of type ' . Money::class . ' or Integer');
@@ -113,13 +117,67 @@ class Wallet extends Model implements WalletInterface
     }
 
     /**
+     * Confirmation
+     *
+     * @param int|\Walletable\Models\Transaction $amount
+     */
+    public function confirm(Transaction $transaction): Confirmation
+    {
+        if ($this->getKey() != $transaction->wallet_id) {
+            throw new InvalidArgumentException('The transaction can only be confirmed from the same wallet.');
+        }
+
+        return (new Confirmation($this, $transaction))->execute();
+    }
+
+    /**
+     * Unconfirmed Credit the wallet
+     *
+     * @param int|\Walletable\Money\Money $amount
+     * @param string|null $title
+     * @param string|null $remarks
+     */
+    public function unconfirmedCredit($amount, string|null $title = null, string|null $remarks = null): UnconfirmedCreditDebit
+    {
+        if (!is_int($amount) && !($amount instanceof Money)) {
+            throw new InvalidArgumentException('Argument 1 must be of type ' . Money::class . ' or Integer');
+        }
+
+        if (is_int($amount)) {
+            $amount = $this->money($amount);
+        }
+
+        return (new UnconfirmedCreditDebit('credit', $this, $amount, $title, $remarks))->execute();
+    }
+
+    /**
+     * Unconfirmed Debit the wallet
+     *
+     * @param int|\Walletable\Money\Money $amount
+     * @param string|null $title
+     * @param string|null $remarks
+     */
+    public function unconfirmedDebit($amount, string|null $title = null, string|null $remarks = null): UnconfirmedCreditDebit
+    {
+        if (!is_int($amount) && !($amount instanceof Money)) {
+            throw new InvalidArgumentException('Argument 1 must be of type ' . Money::class . ' or Integer');
+        }
+
+        if (is_int($amount)) {
+            $amount = $this->money($amount);
+        }
+
+        return (new UnconfirmedCreditDebit('debit', $this, $amount, $title, $remarks))->execute();
+    }
+
+    /**
      * Credit the wallet
      *
      * @param int|\Walletable\Money\Money $amount
      * @param string|null $title
      * @param string|null $remarks
      */
-    public function credit($amount, string $title = null, string $remarks = null): CreditDebit
+    public function credit($amount, string|null $title = null, string|null $remarks = null): CreditDebit
     {
         if (!is_int($amount) && !($amount instanceof Money)) {
             throw new InvalidArgumentException('Argument 1 must be of type ' . Money::class . ' or Integer');
@@ -139,7 +197,7 @@ class Wallet extends Model implements WalletInterface
      * @param string|null $title
      * @param string|null $remarks
      */
-    public function debit($amount, string $title = null, string $remarks = null): CreditDebit
+    public function debit($amount, string|null $title = null, string|null $remarks = null): CreditDebit
     {
         if (!is_int($amount) && !($amount instanceof Money)) {
             throw new InvalidArgumentException('Argument 1 must be of type ' . Money::class . ' or Integer');

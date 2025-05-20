@@ -104,9 +104,9 @@ class CreditDebit
         string $type,
         Wallet $wallet,
         Money $amount,
-        string $title = null,
-        string $remarks = null,
-        LockerInterface $locker = null,
+        string|null $title = null,
+        string|null $remarks = null,
+        LockerInterface|null $locker = null,
         array $options = []
     ) {
         if (!in_array($type, ['credit', 'debit'])) {
@@ -167,7 +167,9 @@ class CreditDebit
 
                 $this->bag->each(function ($item) {
                     $item->forceFill([
-                        'created_at' => now()
+                        'confirmed' => true,
+                        'confirmed_at' => now(),
+                        'created_at' => now(),
                     ])->save();
                 });
             }
