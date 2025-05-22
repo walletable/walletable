@@ -25,7 +25,6 @@ class CreateTransactionsTable extends Migration
             $table->unsignedBigInteger('wallet_id')->index();
             $table->string('session', 100)->index();
             $table->enum('type', ['credit', 'debit'])->index();
-            $table->boolean('confirmed')->default(true);
             $table->unsignedBigInteger('amount');
             $table->bigInteger('balance');
             $table->string('currency', 10);
@@ -34,7 +33,6 @@ class CreateTransactionsTable extends Migration
             $table->string('method_type', 45)->nullable();
             $table->string('remarks', 200)->nullable()->index();
             $table->json('meta')->nullable();
-            $table->dateTime('confirmed_at')->nullable();
             $table->dateTime('created_at')->nullable();
 
             $table->index(['method_id', 'method_type']);
