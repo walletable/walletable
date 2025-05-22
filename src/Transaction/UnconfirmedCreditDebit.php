@@ -2,19 +2,16 @@
 
 namespace Walletable\Transaction;
 
-use Exception;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Walletable\Internals\Actions\ActionInterface;
-use Walletable\Exceptions\InsufficientBalanceException;
 use Walletable\Facades\Walletable;
 use Walletable\Internals\Actions\ActionData;
-use Walletable\Internals\Lockers\LockerInterface;
+use Walletable\Models\Transaction;
 use Walletable\Models\Wallet;
 use Walletable\Money\Money;
 
-class CreditDebit
+class UnconfirmedCreditDebit
 {
     /**
      * Transaction type
@@ -40,16 +37,9 @@ class CreditDebit
     /**
      * Trasanction bads
      *
-     * @var \Walletable\Transaction\TransactionBag
+     * @var \Walletable\Transaction\TransactionBag|\Illuminate\Support\Collection
      */
     protected $bag;
-
-    /**
-     * Transfer status
-     *
-     * @var bool
-     */
-    protected $successful = false;
 
     /**
      * Title of the
@@ -73,13 +63,6 @@ class CreditDebit
     protected $session;
 
     /**
-     * The transfer locker
-     *
-     * @var \Walletable\Internals\Lockers\OptimisticLocker
-     */
-    protected $locker;
-
-    /**
      * Action of the transaction
      *
      * @var \Walletable\Internals\Actions\ActionInterface
@@ -93,21 +76,12 @@ class CreditDebit
      */
     protected $actionData;
 
-    /**
-     * Execution Options
-     *
-     * @var array
-     */
-    protected $options;
-
     public function __construct(
         string $type,
         Wallet $wallet,
         Money $amount,
         string|null $title = null,
         string|null $remarks = null,
-        LockerInterface|null $locker = null,
-        array $options = []
     ) {
         if (!in_array($type, ['credit', 'debit'])) {
             throw new InvalidArgumentException('Argument 1 value can only be "credit" or "debit"');
@@ -118,8 +92,6 @@ class CreditDebit
         $this->amount = $amount;
         $this->title = $title;
         $this->remarks = $remarks;
-        $this->locker = $locker;
-        $this->options = $options;
         $this->session = Str::uuid();
         $this->bag = new TransactionBag();
     }
@@ -131,75 +103,43 @@ class CreditDebit
      */
     public function execute(): self
     {
-        $this->checks();
-        $locker = $this->locker();
         $transaction = $this->bag->new($this->wallet, [
             'type' => $this->type,
+            'amount' => $this->amount->integer(),
+            'balance' => $this->wallet->amount->integer(),
             'session' => $this->session,
             'remarks' => $this->remarks
         ]);
-        $shouldInitiateTransaction = $locker->shouldInitiateTransaction($this->wallet, $this->amount, $transaction) ||
-            ($this->options['should_initiate_transaction'] ?? false);
 
-        try {
-            $method = $this->type . 'Lock';
-            $action = $this->action ?? Walletable::action('credit_debit');
+        $action = $this->action ?? Walletable::action('credit_debit');
 
-            if (!$action->{'support' . ucfirst($this->type) }()) {
-                throw new Exception('This action does not support ' . $this->type . ' operations', 1);
-            }
+        Walletable::applyAction(
+            $action,
+            $this->bag,
+            $this->actionData ??  new ActionData(
+                $this->wallet,
+                $this->title
+            )
+        );
 
-            if ($shouldInitiateTransaction) {
-                DB::beginTransaction();
-            }
-
-            if ($this->locker()->$method($this->wallet, $this->amount, $transaction)) {
-                $this->successful = true;
-
-                Walletable::applyAction(
-                    $action,
-                    $this->bag,
-                    $this->actionData ??  new ActionData(
-                        $this->wallet,
-                        $this->title
-                    )
-                );
-
-                $this->bag->each(function ($item) {
-                    $item->forceFill([
-                        'confirmed' => true,
-                        'confirmed_at' => now(),
-                        'created_at' => now(),
-                    ])->save();
-                });
-            }
-
-            if ($shouldInitiateTransaction) {
-                DB::commit();
-            }
-        } catch (\Throwable $th) {
-            if ($shouldInitiateTransaction) {
-                DB::rollBack();
-            }
-            throw $th;
-        }
+        $this->bag->each(function ($item) {
+            $item->forceFill([
+                'confirmed' => false,
+                'created_at' => now()
+            ])->save();
+        });
 
         return $this;
     }
 
     /**
-     * Run some compulsory checks
+     * Get transaction
      *
-     * @return void
+     * @return \Walletable\Models\Transaction
      */
-    protected function checks()
+    public function transaction(): Transaction
     {
-        if (
-            $this->type === 'debit' &&
-            $this->wallet->amount->lessThan($this->amount)
-        ) {
-            throw new InsufficientBalanceException($this->wallet, $this->amount);
-        }
+        return $this->bag->first();
     }
 
     /**
@@ -246,16 +186,5 @@ class CreditDebit
         $this->actionData = $actionData;
 
         return $this;
-    }
-
-    /**
-     * Get the locker for the transfer
-     */
-    protected function locker(): LockerInterface
-    {
-        if ($this->locker) {
-            return $this->locker;
-        }
-        return $this->locker = Walletable::locker(config('walletable.locker'));
     }
 }

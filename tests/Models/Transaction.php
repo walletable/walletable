@@ -22,6 +22,8 @@ class Transaction extends Model
      */
     protected $casts = [
         'meta' => 'array',
-        'created_at' => 'datetime'
+        'confirmed' => 'boolean',
+        'confirmed_at' => 'datetime',
+        'created_at' => 'datetime',
     ];
 }

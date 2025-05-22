@@ -15,12 +15,14 @@ class Transaction extends Model
     protected $fillable = [
         'wallet_id',
         'session',
+        'confirmed',
         'type',
         'amount',
         'balance',
         'currency',
         'action',
         'remarks',
+        'confirmed_at'
     ];
 
     /**
@@ -30,6 +32,8 @@ class Transaction extends Model
      */
     protected $casts = [
         'meta' => 'array',
-        'created_at' => 'datetime'
+        'confirmed' => 'boolean',
+        'confirmed_at' => 'datetime',
+        'created_at' => 'datetime',
     ];
 }

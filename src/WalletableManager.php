@@ -21,6 +21,13 @@ class WalletableManager
     use HasActions;
 
     /**
+     * Class map array
+     *
+     * @var array
+     */
+    protected $classMap = [];
+
+    /**
      * Create a new wallet
      *
      * @param \Walletable\Contracts\Walletable $walletable
