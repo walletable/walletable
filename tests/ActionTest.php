@@ -34,6 +34,72 @@ class ActionTest extends TestBench
         $this->assertTrue($actionObj->supportDebit());
     }
 
+    public function testUnconfirmedCredit()
+    {
+        $this->setUpCurrencies();
+        $wallet = $this->createWallet();
+
+        $action = new Action($wallet, $actionObj = new CreditDebitAction());
+
+        $action->unconfirmedCredit(100000, new ActionData($wallet), 'Test Unconfirmed Credit');
+        $transaction = $wallet->transactions()->first();
+
+        $this->assertSame(0, $wallet->refresh()->amount->integer());
+        $this->assertCount(1, $wallet->transactions);
+        $this->assertSame(100000, $transaction->amount->integer());
+        $this->assertSame(0, $transaction->balance->integer());
+        $this->assertSame('Test Unconfirmed Credit', $transaction->remarks);
+        $this->assertSame('Credit', $transaction->title);
+        $this->assertSame('credit', $transaction->type);
+        $this->assertNull($transaction->confirmed_at);
+        $this->assertFalse($transaction->confirmed);
+
+        $this->assertTrue($actionObj->supportCredit());
+        $this->assertTrue($actionObj->supportDebit());
+
+        $wallet->confirm($transaction);
+        $this->assertSame(100000, $wallet->refresh()->amount->integer());
+        $this->assertCount(1, $wallet->transactions()->get());
+        $transaction = $wallet->transactions()->first();
+        $this->assertSame(100000, $transaction->amount->integer());
+        $this->assertSame(100000, $transaction->balance->integer());
+        $this->assertNotNull($transaction->confirmed_at);
+        $this->assertTrue($transaction->confirmed);
+    }
+
+    public function testUnconfirmedDebit()
+    {
+        $this->setUpCurrencies();
+        $wallet = $this->createWallet(1000000);
+
+        $action = new Action($wallet, $actionObj = new CreditDebitAction());
+
+        $action->unconfirmedDebit(500000, new ActionData($wallet), 'Test Unconfirmed Debit');
+        $transaction = $wallet->transactions()->first();
+
+        $this->assertSame(1000000, $wallet->refresh()->amount->integer());
+        $this->assertCount(1, $wallet->transactions);
+        $this->assertSame(500000, $transaction->amount->integer());
+        $this->assertSame(1000000, $transaction->balance->integer());
+        $this->assertSame('Test Unconfirmed Debit', $transaction->remarks);
+        $this->assertSame('Debit', $transaction->title);
+        $this->assertSame('debit', $transaction->type);
+        $this->assertFalse($transaction->confirmed);
+        $this->assertNull($transaction->confirmed_at);
+
+        $this->assertTrue($actionObj->supportCredit());
+        $this->assertTrue($actionObj->supportDebit());
+
+        $wallet->confirm($transaction);
+        $this->assertSame(500000, $wallet->refresh()->amount->integer());
+        $this->assertCount(1, $wallet->transactions()->get());
+        $transaction = $wallet->transactions()->first();
+        $this->assertSame(500000, $transaction->amount->integer());
+        $this->assertSame(500000, $transaction->balance->integer());
+        $this->assertNotNull($transaction->confirmed_at);
+        $this->assertTrue($transaction->confirmed);
+    }
+
     public function testDebit()
     {
         $this->setUpCurrencies();
