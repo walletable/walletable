@@ -2,12 +2,12 @@
 
 namespace Walletable\Transaction;
 
-use App\Models\Transaction;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Walletable\Exceptions\InsufficientBalanceException;
 use Walletable\Facades\Walletable;
 use Walletable\Internals\Lockers\LockerInterface;
+use Walletable\Models\Transaction;
 use Walletable\Models\Wallet;
 use Walletable\Money\Money;
 

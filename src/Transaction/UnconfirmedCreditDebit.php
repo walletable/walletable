@@ -105,6 +105,8 @@ class UnconfirmedCreditDebit
     {
         $transaction = $this->bag->new($this->wallet, [
             'type' => $this->type,
+            'amount' => $this->amount->integer(),
+            'balance' => $this->wallet->amount->integer(),
             'session' => $this->session,
             'remarks' => $this->remarks
         ]);
