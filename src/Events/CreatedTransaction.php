@@ -1,6 +1,7 @@
 <?php
 
 namespace Walletable\Events;
+
 use Illuminate\Queue\SerializesModels;
 use Walletable\Models\Transaction;
 
@@ -27,5 +28,4 @@ class CreatedTransaction
     {
         $this->transaction = $transaction;
     }
-
 }

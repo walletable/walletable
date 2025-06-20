@@ -2,13 +2,12 @@
 
 namespace Walletable\Events;
 
-use App\Models\Transaction;
 use Illuminate\Queue\SerializesModels;
+use Walletable\Models\Transaction;
 
 class ConfirmedTransaction
 {
     use SerializesModels;
-
 
     /**
      * The owner of the created wallet.
