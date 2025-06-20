@@ -2,6 +2,9 @@
 
 namespace Walletable\Tests;
 
+use Illuminate\Support\Facades\Event;
+use Walletable\Events\ConfirmedTransaction;
+use Walletable\Events\CreatedTransaction;
 use Walletable\Exceptions\IncompactibleWalletsException;
 use Walletable\Exceptions\InsufficientBalanceException;
 use Walletable\Facades\Mutator;
@@ -38,7 +41,10 @@ class WalletTest extends TestBench
 
     public function testTransfer()
     {
-
+        Event::fake([
+            CreatedTransaction::class,
+            ConfirmedTransaction::class,
+        ]);
         $wallet = $this->createWallet(100000);
         $wallet2 = $this->createWallet(0, 'NGN', Walletable::create([
             'name' => 'Abisade Ilesanmi',
@@ -83,10 +89,17 @@ class WalletTest extends TestBench
 
         $this->assertSame($wallet->walletable->id, $trx2->method->id);
         $this->assertSame($wallet2->walletable->id, $trx1->method->id);
+
+        Event::assertDispatchedTimes(CreatedTransaction::class, 2);
+        Event::assertDispatchedTimes(ConfirmedTransaction::class, 2);
     }
 
     public function testTransferInsuficientFund()
     {
+        Event::fake([
+            CreatedTransaction::class,
+            ConfirmedTransaction::class,
+        ]);
         $this->expectException(InsufficientBalanceException::class);
         $this->expectExceptionMessage(
             "Insufficient wallet balance, The wallet ballance is less than ₦5,000"
@@ -96,10 +109,17 @@ class WalletTest extends TestBench
         $wallet2 = $this->createWallet();
 
         $wallet->transfer($wallet2, 500000, 'Test transfer');
+
+        Event::assertDispatchedTimes(CreatedTransaction::class, 0);
+        Event::assertDispatchedTimes(ConfirmedTransaction::class, 0);
     }
 
     public function testTransferIncompactable()
     {
+        Event::fake([
+            CreatedTransaction::class,
+            ConfirmedTransaction::class,
+        ]);
         $this->expectException(IncompactibleWalletsException::class);
         $this->expectExceptionMessage(
             'Can`t perform any operations between two incompactible wallets'
@@ -109,10 +129,17 @@ class WalletTest extends TestBench
         $wallet2 = $this->createWallet(0, 'USD');
 
         $wallet->transfer($wallet2, 50000, 'Test transfer');
+
+        Event::assertDispatchedTimes(CreatedTransaction::class, 0);
+        Event::assertDispatchedTimes(ConfirmedTransaction::class, 0);
     }
 
     public function testCredit()
     {
+        Event::fake([
+            CreatedTransaction::class,
+            ConfirmedTransaction::class,
+        ]);
         $wallet = $this->createWallet(0);
 
         $credit = $wallet->credit(50000, 'Test Credit', 'Crediting in test runtime');
@@ -130,10 +157,17 @@ class WalletTest extends TestBench
         $this->assertSame('Crediting in test runtime', $trx->remarks);
 
         $this->assertSame('credit', $trx->type);
+
+        Event::assertDispatchedTimes(CreatedTransaction::class, 1);
+        Event::assertDispatchedTimes(ConfirmedTransaction::class, 1);
     }
 
     public function testDebit()
     {
+        Event::fake([
+            CreatedTransaction::class,
+            ConfirmedTransaction::class,
+        ]);
         $wallet = $this->createWallet(50000);
 
         $debit = $wallet->debit(50000, 'Test Debit', 'Debiting in test runtime');
@@ -151,6 +185,9 @@ class WalletTest extends TestBench
         $this->assertSame('Debiting in test runtime', $trx->remarks);
 
         $this->assertSame('debit', $trx->type);
+
+        Event::assertDispatchedTimes(CreatedTransaction::class, 1);
+        Event::assertDispatchedTimes(ConfirmedTransaction::class, 1);
     }
 
     public function testDebitInsuficientBalance()
