@@ -2,6 +2,9 @@
 
 namespace Walletable\Tests;
 
+use Illuminate\Support\Facades\Event;
+use Walletable\Events\ConfirmedTransaction;
+use Walletable\Events\CreatedTransaction;
 use Walletable\Internals\Actions\Action;
 use Walletable\Internals\Actions\ActionData;
 use Walletable\Internals\Actions\ActionManager;
@@ -16,6 +19,10 @@ class ActionTest extends TestBench
 {
     public function testCredit()
     {
+        Event::fake([
+            CreatedTransaction::class,
+            ConfirmedTransaction::class,
+        ]);
         $this->setUpCurrencies();
         $wallet = $this->createWallet();
 
@@ -32,10 +39,17 @@ class ActionTest extends TestBench
 
         $this->assertTrue($actionObj->supportCredit());
         $this->assertTrue($actionObj->supportDebit());
+
+        Event::assertDispatchedTimes(CreatedTransaction::class, 1);
+        Event::assertDispatchedTimes(ConfirmedTransaction::class, 1);
     }
 
     public function testUnconfirmedCredit()
     {
+        Event::fake([
+            CreatedTransaction::class,
+            ConfirmedTransaction::class,
+        ]);
         $this->setUpCurrencies();
         $wallet = $this->createWallet();
 
@@ -57,6 +71,9 @@ class ActionTest extends TestBench
         $this->assertTrue($actionObj->supportCredit());
         $this->assertTrue($actionObj->supportDebit());
 
+        Event::assertDispatchedTimes(CreatedTransaction::class, 1);
+        Event::assertDispatchedTimes(ConfirmedTransaction::class, 0);
+
         $wallet->confirm($transaction);
         $this->assertSame(100000, $wallet->refresh()->amount->integer());
         $this->assertCount(1, $wallet->transactions()->get());
@@ -65,10 +82,15 @@ class ActionTest extends TestBench
         $this->assertSame(100000, $transaction->balance->integer());
         $this->assertNotNull($transaction->confirmed_at);
         $this->assertTrue($transaction->confirmed);
+        Event::assertDispatchedTimes(ConfirmedTransaction::class, 1);
     }
 
     public function testUnconfirmedDebit()
     {
+        Event::fake([
+            CreatedTransaction::class,
+            ConfirmedTransaction::class,
+        ]);
         $this->setUpCurrencies();
         $wallet = $this->createWallet(1000000);
 
@@ -90,6 +112,9 @@ class ActionTest extends TestBench
         $this->assertTrue($actionObj->supportCredit());
         $this->assertTrue($actionObj->supportDebit());
 
+        Event::assertDispatchedTimes(CreatedTransaction::class, 1);
+        Event::assertDispatchedTimes(ConfirmedTransaction::class, 0);
+
         $wallet->confirm($transaction);
         $this->assertSame(500000, $wallet->refresh()->amount->integer());
         $this->assertCount(1, $wallet->transactions()->get());
@@ -98,6 +123,7 @@ class ActionTest extends TestBench
         $this->assertSame(500000, $transaction->balance->integer());
         $this->assertNotNull($transaction->confirmed_at);
         $this->assertTrue($transaction->confirmed);
+        Event::assertDispatchedTimes(ConfirmedTransaction::class, 1);
     }
 
     public function testDebit()

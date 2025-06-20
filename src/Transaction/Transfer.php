@@ -2,8 +2,11 @@
 
 namespace Walletable\Transaction;
 
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Walletable\Events\ConfirmedTransaction;
+use Walletable\Events\CreatedTransaction;
 use Walletable\Exceptions\IncompactibleWalletsException;
 use Walletable\Exceptions\InsufficientBalanceException;
 use Walletable\Facades\Walletable;
@@ -109,8 +112,17 @@ class Transfer
                     ));
                     $this->bag->each(function ($item) {
                         $item->forceFill([
-                            'created_at' => now()
+                            'created_at' => now(),
+                            'confirmed' => true,
+                            'confirmed_at' => now(),
+                            'status' => 'completed'
                         ])->save();
+                        App::make('events')->dispatch(new ConfirmedTransaction(
+                            $item
+                        ));
+                        App::make('events')->dispatch(new CreatedTransaction(
+                            $item
+                        ));
                     });
                 }
             }

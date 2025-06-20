@@ -55,12 +55,16 @@ class TestBench extends BaseTestCase
         include_once __DIR__ . '/../database/migrations/2020_12_25_001500_create_wallets_table.php';
         // import the CreateTransactionsTable class from the migration
         include_once __DIR__ . '/../database/migrations/2020_12_25_001600_create_transactions_table.php';
+        // import the AddConfirmationTransaction class from the migration
         $addConfirmationTransaction = require __DIR__ . '/../database/migrations/2025_05_22_182008_add_confirmation_to_transactions_table.php';
+        // import the AddStatusToTransaction class from the migration
+        $addStatusToTransaction = require __DIR__ . '/../database/migrations/2025_05_22_182009_add_status_to_transactions_table.php';
 
         // run the up() method of that migration class
         (new \CreateWalletsTable())->up();
         (new \CreateTransactionsTable())->up();
         $addConfirmationTransaction->up();
+        $addStatusToTransaction->up();
 
 
         Schema::create('walletables', function (Blueprint $table) {

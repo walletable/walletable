@@ -3,7 +3,10 @@
 namespace Walletable\Transaction;
 
 use Exception;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
+use Walletable\Events\ConfirmedTransaction;
+use Walletable\Events\CreatedTransaction;
 use Walletable\Exceptions\InsufficientBalanceException;
 use Walletable\Facades\Walletable;
 use Walletable\Internals\Lockers\LockerInterface;
@@ -74,7 +77,7 @@ class Confirmation
             $method = $this->transaction->type . 'Lock';
             $action = Walletable::action($this->transaction->getRawOriginal('action') ?? 'credit_debit');
 
-            if (!$action->{'support' . ucfirst($this->transaction->type) }()) {
+            if (!$action->{'support' . ucfirst($this->transaction->type)}()) {
                 throw new Exception('This action does not support ' . $this->transaction->type . ' operations', 1);
             }
 
@@ -87,8 +90,12 @@ class Confirmation
 
                 $this->transaction->forceFill([
                     'confirmed' => true,
-                    'confirmed_at' => now()
+                    'confirmed_at' => now(),
+                    'status' => 'completed'
                 ])->save();
+                App::make('events')->dispatch(new ConfirmedTransaction(
+                    $this->transaction
+                ));
             }
 
             if ($shouldInitiateTransaction) {
