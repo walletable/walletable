@@ -3,9 +3,12 @@
 namespace Walletable\Transaction;
 
 use Exception;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
+use Walletable\Events\ConfirmedTransaction;
+use Walletable\Events\CreatedTransaction;
 use Walletable\Internals\Actions\ActionInterface;
 use Walletable\Exceptions\InsufficientBalanceException;
 use Walletable\Facades\Walletable;
@@ -145,7 +148,7 @@ class CreditDebit
             $method = $this->type . 'Lock';
             $action = $this->action ?? Walletable::action('credit_debit');
 
-            if (!$action->{'support' . ucfirst($this->type) }()) {
+            if (!$action->{'support' . ucfirst($this->type)}()) {
                 throw new Exception('This action does not support ' . $this->type . ' operations', 1);
             }
 
@@ -159,7 +162,7 @@ class CreditDebit
                 Walletable::applyAction(
                     $action,
                     $this->bag,
-                    $this->actionData ??  new ActionData(
+                    $this->actionData ?? new ActionData(
                         $this->wallet,
                         $this->title
                     )
@@ -172,6 +175,12 @@ class CreditDebit
                         'created_at' => now(),
                     ])->save();
                 });
+                App::make('events')->dispatch(new ConfirmedTransaction(
+                    $transaction
+                ));
+                App::make('events')->dispatch(new CreatedTransaction(
+                    $transaction
+                ));
             }
 
             if ($shouldInitiateTransaction) {
