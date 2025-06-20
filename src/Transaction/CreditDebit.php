@@ -173,14 +173,15 @@ class CreditDebit
                         'confirmed' => true,
                         'confirmed_at' => now(),
                         'created_at' => now(),
+                        'status' => 'completed'
                     ])->save();
+                    App::make('events')->dispatch(new ConfirmedTransaction(
+                        $item
+                    ));
+                    App::make('events')->dispatch(new CreatedTransaction(
+                        $item
+                    ));
                 });
-                App::make('events')->dispatch(new ConfirmedTransaction(
-                    $transaction
-                ));
-                App::make('events')->dispatch(new CreatedTransaction(
-                    $transaction
-                ));
             }
 
             if ($shouldInitiateTransaction) {

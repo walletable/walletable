@@ -37,7 +37,8 @@ class TransactionBag
     {
         $trasanction = App::make(Config::get('walletable.models.transaction'))->forceFill([
             'wallet_id' => $wallet->getKey(),
-            'currency' => $wallet->getRawOriginal('currency')
+            'currency' => $wallet->getRawOriginal('currency'),
+            'status' => 'pending'
         ] + $data);
         App::make('events')->dispatch(new CreatingTransaction(
             $wallet,

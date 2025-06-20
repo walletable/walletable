@@ -90,11 +90,9 @@ class Confirmation
 
                 $this->transaction->forceFill([
                     'confirmed' => true,
-                    'confirmed_at' => now()
+                    'confirmed_at' => now(),
+                    'status' => 'completed'
                 ])->save();
-                App::make('events')->dispatch(new ConfirmedTransaction(
-                    $this->transaction
-                ));
                 App::make('events')->dispatch(new ConfirmedTransaction(
                     $this->transaction
                 ));

@@ -2,8 +2,10 @@
 
 namespace Walletable\Transaction;
 
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
+use Walletable\Events\CreatedTransaction;
 use Walletable\Internals\Actions\ActionInterface;
 use Walletable\Facades\Walletable;
 use Walletable\Internals\Actions\ActionData;
@@ -125,8 +127,12 @@ class UnconfirmedCreditDebit
         $this->bag->each(function ($item) {
             $item->forceFill([
                 'confirmed' => false,
-                'created_at' => now()
+                'created_at' => now(),
+                'status' => 'unconfirmed'
             ])->save();
+            App::make('events')->dispatch(new CreatedTransaction(
+                $item
+            ));
         });
 
         return $this;
