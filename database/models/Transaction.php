@@ -22,7 +22,8 @@ class Transaction extends Model
         'currency',
         'action',
         'remarks',
-        'confirmed_at'
+        'confirmed_at',
+        'status'
     ];
 
     /**
