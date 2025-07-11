@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Walletable\Models\Wallet as Model;
+use Walletable\Traits\BatchTransactionable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Wallet extends Model
 {
+    use BatchTransactionable;
+
     /**
      * The attributes that are mass assignable.
      *

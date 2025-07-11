@@ -197,6 +197,47 @@ $pendingTransactions = $wallet->transactions()
 
 ### Advanced Usage
 
+### Batch Transactions
+
+```php
+// Perform multiple credit transactions atomically
+$wallet->batchCredit([
+    [
+        'amount' => 1000,
+        'data' => new ActionData('payment'),
+        'remarks' => 'Payment 1',
+        'meta' => ['reference' => 'REF001']
+    ],
+    [
+        'amount' => 2000,
+        'data' => new ActionData('payment'),
+        'remarks' => 'Payment 2',
+        'meta' => ['reference' => 'REF002']
+    ]
+]);
+
+// Perform multiple debit transactions atomically
+$wallet->batchDebit([
+    [
+        'amount' => 500,
+        'data' => new ActionData('withdrawal'),
+        'remarks' => 'Withdrawal 1'
+    ],
+    [
+        'amount' => 1500,
+        'data' => new ActionData('withdrawal'),
+        'remarks' => 'Withdrawal 2'
+    ]
+]);
+
+// Custom batch operations
+$wallet->batchTransaction(function($wallet) {
+    $wallet->action('credit_debit')->credit(1000, new ActionData('deposit'));
+    $wallet->action('transfer')->transfer($otherWallet, 500);
+    return true;
+});
+```
+
 ## Custom Transaction Actions
 
 ```php
