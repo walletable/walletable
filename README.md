@@ -35,6 +35,7 @@
 - Event-driven architecture
 - Support for both auto-increment and UUID primary keys
 - Comprehensive exception handling
+- Transaction status tracking and management
 - Transaction history and balance tracking
 - Detailed meta information for transactions
 - Transaction reversal capabilities
@@ -162,7 +163,80 @@ $isEnough = $wallet->money()->greaterThanOrEqual(
 );
 ```
 
+### Transaction Status Management
+
+```php
+// Create a transaction with pending status
+$wallet->action('credit_debit')->credit(
+    1000,
+    new ActionData('payment'),
+    'Payment received',
+    ['status' => 'pending'] // Initial status
+);
+
+// Update transaction status
+$transaction->updateStatus('completed');
+
+// Check transaction status
+if ($transaction->status === 'completed') {
+    // Process completed transaction
+}
+
+// List transactions by status
+$pendingTransactions = $wallet->transactions()
+    ->where('status', 'pending')
+    ->get();
+
+// Available statuses:
+// - pending: Transaction is awaiting processing or confirmation
+// - completed: Transaction has been successfully processed
+// - failed: Transaction has failed
+// - reversed: Transaction has been reversed
+// - cancelled: Transaction was cancelled before processing
+```
+
 ### Advanced Usage
+
+### Batch Transactions
+
+```php
+// Perform multiple credit transactions atomically
+$wallet->batchCredit([
+    [
+        'amount' => 1000,
+        'data' => new ActionData('payment'),
+        'remarks' => 'Payment 1',
+        'meta' => ['reference' => 'REF001']
+    ],
+    [
+        'amount' => 2000,
+        'data' => new ActionData('payment'),
+        'remarks' => 'Payment 2',
+        'meta' => ['reference' => 'REF002']
+    ]
+]);
+
+// Perform multiple debit transactions atomically
+$wallet->batchDebit([
+    [
+        'amount' => 500,
+        'data' => new ActionData('withdrawal'),
+        'remarks' => 'Withdrawal 1'
+    ],
+    [
+        'amount' => 1500,
+        'data' => new ActionData('withdrawal'),
+        'remarks' => 'Withdrawal 2'
+    ]
+]);
+
+// Custom batch operations
+$wallet->batchTransaction(function($wallet) {
+    $wallet->action('credit_debit')->credit(1000, new ActionData('deposit'));
+    $wallet->action('transfer')->transfer($otherWallet, 500);
+    return true;
+});
+```
 
 ## Custom Transaction Actions
 

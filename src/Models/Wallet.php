@@ -22,6 +22,7 @@ use Illuminate\Support\Str;
 use Walletable\Transaction\Confirmation;
 use Walletable\Transaction\UnconfirmedCreditDebit;
 use Walletable\WalletableManager;
+use Walletable\Traits\BatchTransactionable;
 
 /**
  * @property-read \Walletable\Money\Money $balance
@@ -37,6 +38,7 @@ class Wallet extends Model implements WalletInterface
         __call as macroCall;
         __callStatic as macroCallStatic;
     }
+    use BatchTransactionable;
 
     /**
      * Hold object for the wallet
