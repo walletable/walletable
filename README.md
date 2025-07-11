@@ -35,6 +35,7 @@
 - Event-driven architecture
 - Support for both auto-increment and UUID primary keys
 - Comprehensive exception handling
+- Transaction status tracking and management
 - Transaction history and balance tracking
 - Detailed meta information for transactions
 - Transaction reversal capabilities
@@ -160,6 +161,38 @@ $formatted = $wallet->money()->format(); // "$100.00"
 $isEnough = $wallet->money()->greaterThanOrEqual(
     Money::USD(1000)
 );
+```
+
+### Transaction Status Management
+
+```php
+// Create a transaction with pending status
+$wallet->action('credit_debit')->credit(
+    1000,
+    new ActionData('payment'),
+    'Payment received',
+    ['status' => 'pending'] // Initial status
+);
+
+// Update transaction status
+$transaction->updateStatus('completed');
+
+// Check transaction status
+if ($transaction->status === 'completed') {
+    // Process completed transaction
+}
+
+// List transactions by status
+$pendingTransactions = $wallet->transactions()
+    ->where('status', 'pending')
+    ->get();
+
+// Available statuses:
+// - pending: Transaction is awaiting processing or confirmation
+// - completed: Transaction has been successfully processed
+// - failed: Transaction has failed
+// - reversed: Transaction has been reversed
+// - cancelled: Transaction was cancelled before processing
 ```
 
 ### Advanced Usage
