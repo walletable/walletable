@@ -15,14 +15,12 @@ trait ConditionalID
         parent::boot();
 
         static::creating(function ($model) {
-            
             $model_id = config('walletable.model_id');
 
             if ($model_id !== 'default' && empty($model->{$model->getKeyName()})) {
-                
-                $modelId = ($model_id === 'uuid') ? (string) config('walletable.uuid_driver') : strtolower((string) Str::ulid());
-
-                $model->{$model->getKeyName()} = $modelId;
+                $model->{$model->getKeyName()} = $model_id === 'uuid'
+                    ? (string) Str::orderedUuid()
+                    : strtolower((string) Str::ulid());
             }
         });
     }

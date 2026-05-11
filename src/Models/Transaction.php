@@ -10,7 +10,6 @@ use Walletable\Models\Traits\TransactionRelations;
 use Walletable\Models\Traits\WorkWithMeta;
 use Walletable\Money\Currency;
 use Walletable\Money\Money;
-use Walletable\Traits\ConditionalID;
 use Walletable\WalletableManager;
 
 /**
@@ -24,7 +23,6 @@ use Walletable\WalletableManager;
  */
 class Transaction extends Model
 {
-    use ConditionalID;
     use TransactionRelations;
     use WorkWithMeta;
     use Macroable {

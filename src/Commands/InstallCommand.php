@@ -93,38 +93,38 @@ class InstallCommand extends Command
      */
     private function configureUuid(string $modelID)
     {
-        if ($modelID !== 'default') {
-
-            // Replace in file for config
-            $this->replaceInFile(config_path('walletable.php'), '\'model_id\' => \'default\'', '\'model_id\' => \'' . $modelID . '\'');
-
-            if ($modelID === 'uuid') {
-                $table = ['$table->uuid(\'id\')->primary();', '$table->uuid(\'wallet_id\')->index();'];
-            } else if ($modelID === 'ulid') {
-                $table = ['$table->ulid(\'id\')->primary();', '$table->ulid(\'wallet_id\')->index();'];
-            } else {
-                $table = ['$table->id();', '$table->unsignedBigInteger(\'wallet_id\')->index();'];
-            }
-
-            // Replace in file for Wallet migration
-            $this->replaceInFile(
-                database_path('migrations/2020_12_25_001500_create_wallets_table.php'),
-                '$table->id();',
-                $table[0]
-            );
-
-            // Replace in file for Transaction migration
-            $this->replaceInFile(
-                database_path('migrations/2020_12_25_001600_create_transactions_table.php'),
-                '$table->id();',
-                $table[0]
-            );
-            $this->replaceInFile(
-                database_path('migrations/2020_12_25_001600_create_transactions_table.php'),
-                '$table->unsignedBigInteger(\'wallet_id\')->index();',
-                $table[1]
-            );
+        if ($modelID === 'default') {
+            return;
         }
+
+        $this->replaceInFile(
+            config_path('walletable.php'),
+            '\'model_id\' => \'default\'',
+            '\'model_id\' => \'' . $modelID . '\''
+        );
+
+        // Transactions PK stays bigint regardless of choice; only wallets.id and the matching wallet_id FK change.
+        if ($modelID === 'uuid') {
+            $walletId = '$table->uuid(\'id\')->primary();';
+            $walletFk = '$table->uuid(\'wallet_id\')->index();';
+        } else {
+            $walletId = '$table->ulid(\'id\')->primary();';
+            $walletFk = '$table->ulid(\'wallet_id\')->index();';
+        }
+
+        // Replace in file for Wallet migration
+        $this->replaceInFile(
+            database_path('migrations/2020_12_25_001500_create_wallets_table.php'),
+            '$table->id();',
+            $walletId
+        );
+
+        // Replace wallet_id FK in Transaction migration to match the wallet PK type
+        $this->replaceInFile(
+            database_path('migrations/2020_12_25_001600_create_transactions_table.php'),
+            '$table->unsignedBigInteger(\'wallet_id\')->index();',
+            $walletFk
+        );
     }
 
     /**

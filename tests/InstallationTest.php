@@ -10,7 +10,7 @@ class InstallationTest extends TestBench
     {
         $this->confirmInstallation('default');
 
-        // Assert that the original contents are present
+        // 'default' is the shipped default — install is a no-op, published files match the package files.
         $this->assertEquals(
             file_get_contents(__DIR__ . '/../config/walletable.php'),
             file_get_contents(config_path('walletable.php'))
@@ -75,8 +75,9 @@ class InstallationTest extends TestBench
             file_get_contents(database_path('migrations/2020_12_25_001500_create_wallets_table.php'))
         );
 
+        // Transactions PK stays bigint regardless of the model_id choice.
         $this->assertStringContainsString(
-            '$table->uuid(\'id\')->primary();',
+            '$table->id();',
             file_get_contents(database_path('migrations/2020_12_25_001600_create_transactions_table.php'))
         );
 
@@ -92,7 +93,6 @@ class InstallationTest extends TestBench
     {
         $this->confirmInstallation('ulid');
 
-        // Assert that the original contents are present
         $this->assertNotEquals(
             file_get_contents(__DIR__ . '/../config/walletable.php'),
             file_get_contents(config_path('walletable.php'))
@@ -128,8 +128,9 @@ class InstallationTest extends TestBench
             file_get_contents(database_path('migrations/2020_12_25_001500_create_wallets_table.php'))
         );
 
+        // Transactions PK stays bigint regardless of the model_id choice.
         $this->assertStringContainsString(
-            '$table->ulid(\'id\')->primary();',
+            '$table->id();',
             file_get_contents(database_path('migrations/2020_12_25_001600_create_transactions_table.php'))
         );
 
