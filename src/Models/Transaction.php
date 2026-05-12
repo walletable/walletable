@@ -3,115 +3,138 @@
 namespace Walletable\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Traits\Macroable;
-use Walletable\Internals\Actions\ActionManager;
-use Walletable\Models\Traits\TransactionRelations;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Walletable\Ledger\LedgerImmutableException;
 use Walletable\Models\Traits\WorkWithMeta;
 use Walletable\Money\Currency;
 use Walletable\Money\Money;
-use Walletable\WalletableManager;
+use Walletable\Traits\ConditionalID;
 
 /**
- * @property-read \Walletable\Money\Money $balance
- * @property-read \Walletable\Money\Money $amount
- * @property-read \Walletable\Money\Currency $currency
- * @property-read \Walletable\Internals\Actions\ActionManager $action
- * @property-read string $title
- * @property-read string $image
- * @property-read string $remarks
+ * A business event in the ledger: the append-only header for a balanced
+ * set of postings. The transaction is the source of truth; wallet balances
+ * are a materialised projection of the postings under it.
+ *
+ * Allowed mutations after initial insert:
+ *   pending  -> posted  (sets posted_at; draft_postings is cleared)
+ *   pending  -> voided  (draft_postings is cleared)
+ * Any other field change throws LedgerImmutableException.
+ *
+ * @property int $id
+ * @property string $currency
+ * @property string $status            pending | posted | voided
+ * @property \Illuminate\Support\Carbon|null $posted_at
+ * @property string|null $narration
+ * @property string|null $reference_type
+ * @property string|null $reference_id
+ * @property int|null $reverses_id
+ * @property array|null $meta
+ * @property array|null $draft_postings
  */
 class Transaction extends Model
 {
-    use TransactionRelations;
+    use ConditionalID;
     use WorkWithMeta;
-    use Macroable {
-        __call as macroCall;
-        __callStatic as macroCallStatic;
-    }
+
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_POSTED = 'posted';
+    public const STATUS_VOIDED = 'voided';
 
     public $timestamps = false;
 
-    protected $transactionCache = [];
+    protected $fillable = [
+        'currency',
+        'status',
+        'posted_at',
+        'narration',
+        'reference_type',
+        'reference_id',
+        'reverses_id',
+        'meta',
+        'draft_postings',
+        'created_at',
+    ];
 
-    public function getAmountAttribute(): Money
+    protected $casts = [
+        'meta' => 'array',
+        'draft_postings' => 'array',
+        'posted_at' => 'datetime',
+        'created_at' => 'datetime',
+    ];
+
+    /**
+     * Columns that may legitimately change while transitioning out of pending.
+     */
+    protected const TRANSITION_FIELDS = ['status', 'posted_at', 'draft_postings'];
+
+    public function postings(): HasMany
     {
-        return new Money(
-            $this->getRawOriginal('amount'),
-            $this->currency
-        );
+        return $this->hasMany(config('walletable.models.posting'));
     }
 
-    public function getBalanceAttribute(): Money
+    public function reversesTransaction(): BelongsTo
     {
-        return new Money(
-            $this->getRawOriginal('balance'),
-            $this->currency
-        );
+        return $this->belongsTo(static::class, 'reverses_id');
     }
 
-    public function getActionAttribute(): ActionManager
+    public function isPending(): bool
     {
-        if (isset($this->transactionCache['action'])) {
-            return $this->transactionCache['action'];
-        }
-
-        return $this->transactionCache['action'] = new ActionManager(
-            $this,
-            App::make(WalletableManager::class)
-                ->action($this->getRawOriginal('action'))
-        );
+        return $this->getRawOriginal('status') === self::STATUS_PENDING;
     }
 
-    public function getTitleAttribute(): ?string
+    public function isPosted(): bool
     {
-        return $this->action->title();
+        return $this->getRawOriginal('status') === self::STATUS_POSTED;
     }
 
-    public function getImageAttribute(): ?string
+    public function isVoided(): bool
     {
-        return $this->action->image();
+        return $this->getRawOriginal('status') === self::STATUS_VOIDED;
     }
 
-    public function getCurrencyAttribute(): Currency
+    public function getCurrencyObjectAttribute(): Currency
     {
         return Money::currency($this->getRawOriginal('currency'));
     }
 
-    public function getMethodResource()
-    {
-        return $this->action->resource();
-    }
-
     /**
-     * Handle dynamic calls into macros or pass missing methods to the parrent.
-     *
-     * @param  string  $method
-     * @param  array  $parameters
-     * @return mixed
+     * Enforce append-only semantics. Only the documented transitions are allowed.
      */
-    public function __call($method, $parameters)
+    public function save(array $options = [])
     {
-        if (static::hasMacro($method)) {
-            return $this->macroCall($method, $parameters);
+        if ($this->exists) {
+            $original = $this->getRawOriginal('status');
+            $next = $this->getAttribute('status');
+
+            $dirty = array_keys($this->getDirty());
+            $disallowed = array_diff($dirty, self::TRANSITION_FIELDS);
+            if (!empty($disallowed)) {
+                throw new LedgerImmutableException(sprintf(
+                    'Cannot modify immutable transaction fields: %s',
+                    implode(', ', $disallowed)
+                ));
+            }
+
+            if ($original !== $next) {
+                if (
+                    !($original === self::STATUS_PENDING && $next === self::STATUS_POSTED)
+                    && !($original === self::STATUS_PENDING && $next === self::STATUS_VOIDED)
+                ) {
+                    throw new LedgerImmutableException(sprintf(
+                        'Illegal transaction status transition: %s -> %s',
+                        $original,
+                        $next
+                    ));
+                }
+            }
         }
 
-        return parent::__call($method, $parameters);
+        return parent::save($options);
     }
 
-    /**
-     * Handle dynamic static calls into macros or pass missing methods to the parrent.
-     *
-     * @param  string  $method
-     * @param  array  $parameters
-     * @return mixed
-     */
-    public static function __callStatic($method, $parameters)
+    public function delete()
     {
-        if (static::hasMacro($method)) {
-            return static::macroCallStatic($method, $parameters);
-        }
-
-        return parent::__callStatic($method, $parameters);
+        throw new LedgerImmutableException('Transactions cannot be deleted.');
     }
 }

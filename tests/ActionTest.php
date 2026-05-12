@@ -3,144 +3,111 @@
 namespace Walletable\Tests;
 
 use Illuminate\Support\Facades\Event;
-use Walletable\Events\ConfirmedTransaction;
-use Walletable\Events\CreatedTransaction;
+use Walletable\Events\TransactionPending;
+use Walletable\Events\TransactionPosted;
 use Walletable\Internals\Actions\Action;
 use Walletable\Internals\Actions\ActionData;
 use Walletable\Internals\Actions\ActionManager;
 use Walletable\Internals\Argument;
-use Walletable\Tests\Models\Transaction;
 use Walletable\Tests\Models\Walletable;
 use Walletable\Transaction\CreditDebitAction;
-use Walletable\Transaction\Transfer;
 use Walletable\Transaction\TransferAction;
 
 class ActionTest extends TestBench
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->setUpCurrencies();
+    }
+
     public function testCredit()
     {
-        Event::fake([
-            CreatedTransaction::class,
-            ConfirmedTransaction::class,
-        ]);
-        $this->setUpCurrencies();
+        Event::fake([TransactionPosted::class]);
         $wallet = $this->createWallet();
 
         $action = new Action($wallet, $actionObj = new CreditDebitAction());
 
-        $action->credit(100000, new ActionData($wallet), 'Test Credit');
+        $entry = $action->credit(100000, new ActionData($wallet), 'Test Credit');
 
         $this->assertSame(100000, $wallet->refresh()->amount->integer());
-        $this->assertCount(1, $wallet->transactions);
-        $this->assertSame(100000, $wallet->transactions->first()->amount->integer());
-        $this->assertSame('Test Credit', $wallet->transactions->first()->remarks);
-        $this->assertSame('Credit', $wallet->transactions->first()->title);
-        $this->assertSame('credit', $wallet->transactions->first()->type);
+
+        $userPosting = $entry->postings()->where('wallet_id', $wallet->id)->first();
+        $this->assertSame(100000, $userPosting->amount->integer());
+        $this->assertSame('Credit', $userPosting->title);
+        $this->assertSame('credit', $userPosting->type);
+        $this->assertSame('Test Credit', $entry->narration);
 
         $this->assertTrue($actionObj->supportCredit());
         $this->assertTrue($actionObj->supportDebit());
 
-        Event::assertDispatchedTimes(CreatedTransaction::class, 1);
-        Event::assertDispatchedTimes(ConfirmedTransaction::class, 1);
+        Event::assertDispatchedTimes(TransactionPosted::class, 1);
     }
 
     public function testUnconfirmedCredit()
     {
-        Event::fake([
-            CreatedTransaction::class,
-            ConfirmedTransaction::class,
-        ]);
-        $this->setUpCurrencies();
+        Event::fake([TransactionPosted::class, TransactionPending::class]);
         $wallet = $this->createWallet();
 
-        $action = new Action($wallet, $actionObj = new CreditDebitAction());
+        $action = new Action($wallet, new CreditDebitAction());
 
-        $action->unconfirmedCredit(100000, new ActionData($wallet), 'Test Unconfirmed Credit');
-        $transaction = $wallet->transactions()->first();
+        $pending = $action->unconfirmedCredit(100000, new ActionData($wallet), 'Test Unconfirmed Credit');
 
         $this->assertSame(0, $wallet->refresh()->amount->integer());
-        $this->assertCount(1, $wallet->transactions);
-        $this->assertSame(100000, $transaction->amount->integer());
-        $this->assertSame(0, $transaction->balance->integer());
-        $this->assertSame('Test Unconfirmed Credit', $transaction->remarks);
-        $this->assertSame('Credit', $transaction->title);
-        $this->assertSame('credit', $transaction->type);
-        $this->assertNull($transaction->confirmed_at);
-        $this->assertFalse($transaction->confirmed);
+        $this->assertSame('pending', $pending->status);
+        $this->assertCount(0, $pending->postings()->get());
+        $this->assertSame('Test Unconfirmed Credit', $pending->narration);
 
-        $this->assertTrue($actionObj->supportCredit());
-        $this->assertTrue($actionObj->supportDebit());
+        Event::assertDispatchedTimes(TransactionPending::class, 1);
+        Event::assertDispatchedTimes(TransactionPosted::class, 0);
 
-        Event::assertDispatchedTimes(CreatedTransaction::class, 1);
-        Event::assertDispatchedTimes(ConfirmedTransaction::class, 0);
+        $confirmed = $wallet->confirm($pending->refresh());
 
-        $wallet->confirm($transaction);
         $this->assertSame(100000, $wallet->refresh()->amount->integer());
-        $this->assertCount(1, $wallet->transactions()->get());
-        $transaction = $wallet->transactions()->first();
-        $this->assertSame(100000, $transaction->amount->integer());
-        $this->assertSame(100000, $transaction->balance->integer());
-        $this->assertNotNull($transaction->confirmed_at);
-        $this->assertTrue($transaction->confirmed);
-        Event::assertDispatchedTimes(ConfirmedTransaction::class, 1);
+        $this->assertSame('posted', $confirmed->status);
+        $this->assertCount(2, $confirmed->postings()->get());
+
+        Event::assertDispatchedTimes(TransactionPosted::class, 1);
     }
 
     public function testUnconfirmedDebit()
     {
-        Event::fake([
-            CreatedTransaction::class,
-            ConfirmedTransaction::class,
-        ]);
-        $this->setUpCurrencies();
+        Event::fake([TransactionPosted::class, TransactionPending::class]);
         $wallet = $this->createWallet(1000000);
+        $house = \Walletable\Models\HouseAccount::walletFor('NGN');
+        $house->forceFill(['amount' => -1000000])->save();
 
-        $action = new Action($wallet, $actionObj = new CreditDebitAction());
+        $action = new Action($wallet, new CreditDebitAction());
 
-        $action->unconfirmedDebit(500000, new ActionData($wallet), 'Test Unconfirmed Debit');
-        $transaction = $wallet->transactions()->first();
+        $pending = $action->unconfirmedDebit(500000, new ActionData($wallet), 'Test Unconfirmed Debit');
 
         $this->assertSame(1000000, $wallet->refresh()->amount->integer());
-        $this->assertCount(1, $wallet->transactions);
-        $this->assertSame(500000, $transaction->amount->integer());
-        $this->assertSame(1000000, $transaction->balance->integer());
-        $this->assertSame('Test Unconfirmed Debit', $transaction->remarks);
-        $this->assertSame('Debit', $transaction->title);
-        $this->assertSame('debit', $transaction->type);
-        $this->assertFalse($transaction->confirmed);
-        $this->assertNull($transaction->confirmed_at);
+        $this->assertSame('pending', $pending->status);
 
-        $this->assertTrue($actionObj->supportCredit());
-        $this->assertTrue($actionObj->supportDebit());
+        Event::assertDispatchedTimes(TransactionPending::class, 1);
+        Event::assertDispatchedTimes(TransactionPosted::class, 0);
 
-        Event::assertDispatchedTimes(CreatedTransaction::class, 1);
-        Event::assertDispatchedTimes(ConfirmedTransaction::class, 0);
+        $wallet->confirm($pending->refresh());
 
-        $wallet->confirm($transaction);
         $this->assertSame(500000, $wallet->refresh()->amount->integer());
-        $this->assertCount(1, $wallet->transactions()->get());
-        $transaction = $wallet->transactions()->first();
-        $this->assertSame(500000, $transaction->amount->integer());
-        $this->assertSame(500000, $transaction->balance->integer());
-        $this->assertNotNull($transaction->confirmed_at);
-        $this->assertTrue($transaction->confirmed);
-        Event::assertDispatchedTimes(ConfirmedTransaction::class, 1);
+        Event::assertDispatchedTimes(TransactionPosted::class, 1);
     }
 
     public function testDebit()
     {
-        $this->setUpCurrencies();
         $wallet = $this->createWallet(100000);
+        $house = \Walletable\Models\HouseAccount::walletFor('NGN');
+        $house->forceFill(['amount' => -100000])->save();
 
         $action = new Action($wallet, new CreditDebitAction());
 
-        $action->debit(100000, new ActionData($wallet), 'Test Debit');
+        $entry = $action->debit(100000, new ActionData($wallet), 'Test Debit');
 
         $this->assertSame(0, $wallet->refresh()->amount->integer());
-        $this->assertCount(1, $wallet->transactions);
-        $this->assertSame(100000, $wallet->transactions->first()->amount->integer());
-        $this->assertSame('Test Debit', $wallet->transactions->first()->remarks);
-        $this->assertSame('Debit', $wallet->transactions->first()->title);
-        $this->assertSame('debit', $wallet->transactions->first()->type);
+        $userPosting = $entry->postings()->where('wallet_id', $wallet->id)->first();
+        $this->assertSame(100000, $userPosting->amount->integer());
+        $this->assertSame('Debit', $userPosting->title);
+        $this->assertSame('debit', $userPosting->type);
     }
 
     public function testActionData()
@@ -163,26 +130,11 @@ class ActionTest extends TestBench
 
     public function testActionManager()
     {
-
         $wallet = $this->createWallet(100000);
+        $entry = $wallet->credit(50000, 'Test Credit');
 
-        ($transaction = new Transaction())->forceFill([
-            'wallet_id' => $wallet->id,
-            'session' => 'fhfherdfhfdhdfidhdfidfjfd',
-            'type' => 'credit',
-            'amount' => 100000,
-            'balance' => 100000,
-            'currency' => 'NGN',
-            'action' => 'test',
-            'remarks' => 'This is a test transaction',
-            'meta' => '[]',
-            'created_at' => now(),
-        ])->save();
-
-        $manager = new ActionManager(
-            $transaction,
-            new TestAction()
-        );
+        $posting = $entry->postings()->where('wallet_id', $wallet->id)->first();
+        $manager = new ActionManager($posting, new TestAction());
 
         $this->assertSame('Test Transaction', $manager->title());
         $this->assertSame('/image/test/transaction.jpg', $manager->image());
@@ -190,26 +142,22 @@ class ActionTest extends TestBench
 
     public function testTransactionGetMethodResource()
     {
-
         $wallet = $this->createWallet(100000);
         $wallet2 = $this->createWallet(0, 'NGN', Walletable::create([
             'name' => 'Abisade Ilesanmi',
             'email' => 'bisade@bisade.com',
         ]));
 
-        $transfer = $wallet->transfer($wallet2, 50000, 'Test transfer');
+        $entry = $wallet->transfer($wallet2, 50000, 'Test transfer');
+        $creditPosting = $entry->postings()->where('direction', 'C')->first();
 
-        $transaction = $transfer->in();
-
-        $this->assertSame($transaction->getMethodResource()->id, $wallet->walletable->id);
+        $this->assertSame($wallet->walletable->id, $creditPosting->getMethodResource()->id);
     }
 
     public function testTransfer()
     {
-        TransferAction::methodResourceUsing(function ($action, $transaction) {
-            return [
-                'resource'
-            ];
+        TransferAction::methodResourceUsing(function ($action, $posting) {
+            return ['resource'];
         });
 
         $wallet = $this->createWallet(100000);
@@ -218,12 +166,14 @@ class ActionTest extends TestBench
             'email' => 'bisade@bisade.com',
         ]));
 
-        $transfer = $wallet->transfer($wallet2, 50000, 'Test transfer');
+        $entry = $wallet->transfer($wallet2, 50000, 'Test transfer');
+        $creditPosting = $entry->postings()->where('direction', 'C')->first();
 
-        $transaction = $transfer->in();
+        $this->assertSame(['resource'], $creditPosting->getMethodResource());
 
-        $this->assertSame($transaction->getMethodResource(), [
-            'resource'
-        ]);
+        // Reset to avoid bleeding into other tests.
+        TransferAction::methodResourceUsing(function ($action, $posting) {
+            return $posting->method;
+        });
     }
 }

@@ -1,54 +1,35 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateTransactionsTable extends Migration
 {
-    /**
-     * Schema table name to migrate
-     * @var string
-     */
     public $tableName = 'transactions';
 
-    /**
-     * Run the migrations.
-     * @table transactions
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::create($this->tableName, function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('wallet_id')->index();
-            $table->string('session', 100)->index();
-            $table->enum('type', ['credit', 'debit'])->index();
-            $table->unsignedBigInteger('amount');
-            $table->bigInteger('balance');
             $table->string('currency', 10);
-            $table->string('action', 45)->index();
-            $table->string('method_id', 100)->nullable();
-            $table->string('method_type', 45)->nullable();
-            $table->string('remarks', 200)->nullable()->index();
+            $table->enum('status', ['pending', 'posted', 'voided'])->default('pending');
+            $table->dateTime('posted_at')->nullable();
+            $table->string('narration', 200)->nullable();
+            $table->string('reference_type', 45)->nullable();
+            $table->string('reference_id', 100)->nullable();
+            $table->unsignedBigInteger('reverses_id')->nullable();
             $table->json('meta')->nullable();
+            $table->json('draft_postings')->nullable();
             $table->dateTime('created_at')->nullable();
 
-            $table->index(['method_id', 'method_type']);
-
-
-            $table->foreign('wallet_id')
-                ->references('id')->on('wallets');
+            $table->index(['currency', 'status']);
+            $table->index(['reference_type', 'reference_id']);
+            $table->index('reverses_id');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists($this->tableName);
     }

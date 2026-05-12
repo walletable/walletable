@@ -2,41 +2,15 @@
 
 namespace Walletable\Commands;
 
-use Walletable\Enums\ModelID;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
 class InstallCommand extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'walletable:install';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Prepares Walletable for use';
 
-    /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
-     * Execute the console command.
-     *
-     * @return mixed
-     */
     public function handle()
     {
         $this->line('<info>Setting up Walletable</info>');
@@ -63,79 +37,99 @@ class InstallCommand extends Command
             '--force' => $overwrite,
         ]);
 
-        $this->configureUuid(ModelID::from($this->choice('Choose your model ID for Walletable primary key', ['default', 'uuid', 'ulid'], 'default')));
+        $modelId = $this->choice(
+            'Choose your model ID for Walletable primary key',
+            ['default', 'uuid', 'ulid'],
+            'default'
+        );
+        $this->configureModelId($modelId);
 
         $this->line('<info>Walletable installed sucessfully!!!</info>');
 
         return;
     }
 
-    /**
-     * Check if Walletable was already installed
-     *
-     * @return bool
-     */
     private function checkIfAlreadyInstalled(): bool
     {
-        return File::exists(config_path('walletable.php')) ||
-                File::exists(app_path('Models/Wallet.php')) ||
-                File::exists(app_path('Models/Transaction.php')) ||
-                File::exists(database_path('migrations/2020_12_25_001500_create_wallets_table.php')) ||
-                File::exists(database_path('migrations/2020_12_25_001600_create_transactions_table.php'));
+        return File::exists(config_path('walletable.php'))
+            || File::exists(app_path('Models/Wallet.php'))
+            || File::exists(app_path('Models/Transaction.php'))
+            || File::exists(app_path('Models/Posting.php'))
+            || File::exists(database_path('migrations/2020_12_25_001500_create_wallets_table.php'))
+            || File::exists(database_path('migrations/2020_12_25_001600_create_transactions_table.php'))
+            || File::exists(database_path('migrations/2020_12_25_001700_create_postings_table.php'));
     }
 
     /**
-     * Configure Walletable migration to use uuid primary keys.
-     *
-     * @param string $modelID
-     * 
-     * @return void
+     * Rewrite published migrations to use the chosen PK strategy. UUID/ULID is
+     * applied uniformly to wallets, house_accounts, transactions, and postings
+     * (and to the FK columns that reference them).
      */
-    private function configureUuid(string $modelID)
+    private function configureModelId(string $modelId): void
     {
-        if ($modelID === 'default') {
+        if ($modelId === 'default') {
             return;
         }
 
         $this->replaceInFile(
             config_path('walletable.php'),
             '\'model_id\' => \'default\'',
-            '\'model_id\' => \'' . $modelID . '\''
+            '\'model_id\' => \'' . $modelId . '\''
         );
 
-        // Transactions PK stays bigint regardless of choice; only wallets.id and the matching wallet_id FK change.
-        if ($modelID === 'uuid') {
-            $walletId = '$table->uuid(\'id\')->primary();';
-            $walletFk = '$table->uuid(\'wallet_id\')->index();';
-        } else {
-            $walletId = '$table->ulid(\'id\')->primary();';
-            $walletFk = '$table->ulid(\'wallet_id\')->index();';
+        [$id, $walletFk, $txFk] = $modelId === 'uuid'
+            ? [
+                '$table->uuid(\'id\')->primary();',
+                '$table->uuid(\'wallet_id\')->index();',
+                '$table->uuid(\'transaction_id\')->index();',
+            ]
+            : [
+                '$table->ulid(\'id\')->primary();',
+                '$table->ulid(\'wallet_id\')->index();',
+                '$table->ulid(\'transaction_id\')->index();',
+            ];
+
+        $migrations = [
+            'migrations/2020_12_25_001500_create_wallets_table.php',
+            'migrations/2020_12_25_001550_create_house_accounts_table.php',
+            'migrations/2020_12_25_001600_create_transactions_table.php',
+            'migrations/2020_12_25_001700_create_postings_table.php',
+        ];
+        foreach ($migrations as $m) {
+            $path = database_path($m);
+            if (!File::exists($path)) {
+                continue;
+            }
+            $this->replaceInFile($path, '$table->id();', $id);
         }
 
-        // Replace in file for Wallet migration
-        $this->replaceInFile(
-            database_path('migrations/2020_12_25_001500_create_wallets_table.php'),
-            '$table->id();',
-            $walletId
-        );
+        $postings = database_path('migrations/2020_12_25_001700_create_postings_table.php');
+        if (File::exists($postings)) {
+            $this->replaceInFile(
+                $postings,
+                '$table->unsignedBigInteger(\'wallet_id\')->index();',
+                $walletFk
+            );
+            $this->replaceInFile(
+                $postings,
+                '$table->unsignedBigInteger(\'transaction_id\')->index();',
+                $txFk
+            );
+        }
 
-        // Replace wallet_id FK in Transaction migration to match the wallet PK type
-        $this->replaceInFile(
-            database_path('migrations/2020_12_25_001600_create_transactions_table.php'),
-            '$table->unsignedBigInteger(\'wallet_id\')->index();',
-            $walletFk
-        );
+        $transactions = database_path('migrations/2020_12_25_001600_create_transactions_table.php');
+        if (File::exists($transactions)) {
+            $this->replaceInFile(
+                $transactions,
+                '$table->unsignedBigInteger(\'reverses_id\')->nullable();',
+                $modelId === 'uuid'
+                    ? '$table->uuid(\'reverses_id\')->nullable();'
+                    : '$table->ulid(\'reverses_id\')->nullable();'
+            );
+        }
     }
 
-    /**
-     * Replace a given string in a given file.
-     *
-     * @param  string  $path
-     * @param  string  $search
-     * @param  string  $replace
-     * @return void
-     */
-    protected function replaceInFile(string $path, string $search, string $replace)
+    protected function replaceInFile(string $path, string $search, string $replace): void
     {
         file_put_contents(
             $path,

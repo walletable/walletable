@@ -2,65 +2,48 @@
 
 namespace Walletable\Internals\Lockers;
 
-use Walletable\Models\Transaction;
+use Walletable\Exceptions\InsufficientBalanceException;
+use Walletable\Models\Posting;
 use Walletable\Models\Wallet;
 use Walletable\Money\Money;
 
+/**
+ * Compare-and-swap balance update on the wallets row. The CAS uses the
+ * wallet's last-seen amount as a guard; a contended writer loops with a
+ * refreshed read until it wins.
+ *
+ * Note: retry is unbounded here (P1-1 follow-up). Concurrency-correct
+ * but not yet hardened against starvation.
+ */
 class OptimisticLocker implements LockerInterface
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function creditLock(Wallet $wallet, Money $amount, Transaction $transaction)
-    {
+    public function apply(
+        Wallet $wallet,
+        string $direction,
+        Money $amount,
+        bool $allowNegative = false
+    ): int {
         $updated = false;
+        $newBalance = null;
+
         do {
             $wallet->refresh();
-            $query = config('walletable.models.wallet')::whereId($wallet->getKey())
-                ->whereAmount($wallet->amount->value());
+            $current = $wallet->amount;
+            $newBalance = $direction === Posting::DIRECTION_CREDIT
+                ? $current->add($amount)
+                : $current->subtract($amount);
 
-            $updated = $query->update([
-                'amount' => ($balance = $wallet->amount->add($amount))->integer()
-            ]);
-            $transaction->forceFill([
-                'amount' => $amount->value(),
-                'balance' => $balance->value(),
-            ]);
+            if (!$allowNegative && $newBalance->integer() < 0) {
+                throw new InsufficientBalanceException($wallet, $amount);
+            }
+
+            $updated = config('walletable.models.wallet')::whereId($wallet->getKey())
+                ->whereAmount($current->value())
+                ->update(['amount' => $newBalance->integer()]);
         } while (!$updated);
-        $wallet->amount = $balance->integer();
 
-        return $updated;
-    }
+        $wallet->amount = $newBalance->integer();
 
-    /**
-     * {@inheritdoc}
-     */
-    public function debitLock(Wallet $wallet, Money $amount, Transaction $transaction)
-    {
-        $updated = false;
-        do {
-            $wallet->refresh();
-            $query = config('walletable.models.wallet')::whereId($wallet->getKey())
-                ->whereAmount($wallet->amount->value());
-
-            $updated = $query->update([
-                'amount' => ($balance = $wallet->amount->subtract($amount))->integer()
-            ]);
-            $transaction->forceFill([
-                'amount' => $amount->value(),
-                'balance' => $balance->value(),
-            ]);
-        } while (!$updated);
-        $wallet->amount = $balance->integer();
-
-        return $updated;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function shouldInitiateTransaction(Wallet $wallet, Money $amount, Transaction $transaction)
-    {
-        return false;
+        return $newBalance->integer();
     }
 }

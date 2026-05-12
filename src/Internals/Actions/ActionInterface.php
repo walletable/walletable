@@ -2,70 +2,51 @@
 
 namespace Walletable\Internals\Actions;
 
-use Walletable\Models\Transaction;
+use Walletable\Ledger\PostingDraft;
+use Walletable\Models\Posting;
 
 interface ActionInterface
 {
     /**
-     * Apply the action to the transaction before saving
+     * Decorate a posting draft before it is persisted: set the action tag,
+     * fill method_id/method_type, stash per-leg meta, etc.
      *
-     * @param \Walletable\Models\Transaction $transaction The transaction
-     * @param \Walletable\Internals\Actions\ActionData $data Data from the Operation
+     * @param PostingDraft $posting The mutable posting draft.
+     * @param ActionData $data Caller-supplied data (variadic ArgumentBag).
      */
-    public function apply(Transaction $transaction, ActionData $data);
+    public function apply(PostingDraft $posting, ActionData $data);
 
     /**
-     * Returns the title of the transaction
-     *
-     * @param \Walletable\Models\Transaction $transaction The transaction
+     * Human-readable title of a persisted posting.
      */
-    public function title(Transaction $transaction);
+    public function title(Posting $posting);
 
     /**
-     * Returns the title of the transaction
+     * Image URL or asset reference for a persisted posting.
      *
-     * @param \Walletable\Models\Transaction $transaction The transaction
-     *
-     * @return string
+     * @return string|null
      */
-    public function image(Transaction $transaction);
+    public function image(Posting $posting);
 
-    /**
-     * Check if the action supports debit
-     *
-     * @return bool
-     */
     public function supportDebit(): bool;
 
-    /**
-     * Check if the action supports credit
-     *
-     * @return bool
-     */
     public function supportCredit(): bool;
 
     /**
-     * Check if the action reversal
-     *
-     * @param Transaction $transaction
-     * @return bool
+     * Whether a posting is eligible to be reversed by this action.
      */
-    public function reversable(Transaction $transaction): bool;
+    public function reversable(Posting $posting): bool;
 
     /**
-     * Hook to the reversal to perform extra tasks
-     *
-     * @param Transaction $transaction
-     * @param Transaction $new
-     * @return self
+     * Hook into a reversal to perform extra work; called by the executor
+     * with the original posting and the freshly-written opposite leg.
      */
-    public function reverse(Transaction $transaction, Transaction $new): ActionInterface;
+    public function reverse(Posting $posting, Posting $new): ActionInterface;
 
     /**
-     * Get the resource or a transaction method
+     * Optional resource (e.g. counter-party model) attached to a posting.
      *
-     * @param Transaction $transaction
      * @return mixed
      */
-    public function methodResource(Transaction $transaction);
+    public function methodResource(Posting $posting);
 }

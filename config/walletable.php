@@ -7,8 +7,7 @@ return [
     | Locker
     |--------------------------------------------------------------------------
     |
-    | Here you may specify which of the locking mechanism to us when altering
-    | wallet balance to avoid race condition
+    | Which locking strategy to use when applying postings to wallet balances.
     |
     */
     'locker' => env('WALLETABLE_LOCKER', 'optimistic'),
@@ -18,13 +17,16 @@ return [
     | Model class names
     |--------------------------------------------------------------------------
     |
-    | You can set model class names here, so walletable and other
-    | related packages can use the correct class names
+    | App-level Eloquent classes that extend the package's base models. Lets
+    | you add fillables, casts, factories, and relations without forking the
+    | package.
     |
     */
     'models' => [
         'wallet' => \App\Models\Wallet::class,
         'transaction' => \App\Models\Transaction::class,
+        'posting' => \App\Models\Posting::class,
+        'house_account' => \Walletable\Models\HouseAccount::class,
     ],
 
     /*
@@ -32,10 +34,8 @@ return [
     | Model primary key strategy
     |--------------------------------------------------------------------------
     |
-    | Controls how primary keys are generated for Walletable models.
-    | Accepted values: 'default' (auto-incrementing bigint), 'ulid', 'uuid'.
-    | ULID and UUID are opt-in alternatives — compact, lexicographically
-    | sortable, and useful when IDs are exposed in URLs or webhooks.
+    | 'default' (auto-increment bigint), 'ulid', or 'uuid'. Applies to wallets,
+    | transactions, postings, and house accounts uniformly.
     |
     */
     'model_id' => 'default',

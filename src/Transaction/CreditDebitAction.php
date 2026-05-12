@@ -4,79 +4,55 @@ namespace Walletable\Transaction;
 
 use Walletable\Internals\Actions\ActionData;
 use Walletable\Internals\Actions\ActionInterface;
-use Walletable\Models\Transaction;
+use Walletable\Ledger\PostingDraft;
+use Walletable\Models\Posting;
 use Walletable\Models\Wallet;
 
 class CreditDebitAction implements ActionInterface
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function apply(Transaction $transaction, ActionData $data)
+    public function apply(PostingDraft $posting, ActionData $data)
     {
         $data->argument(0)->isA(Wallet::class);
 
         $title = $data->argument(1)->type('string')->value(
-            $transaction->type === 'credit' ? 'Credit' : 'Debit'
+            $posting->isCredit() ? 'Credit' : 'Debit'
         );
 
-        $transaction->forceFill([
-            'action' => 'credit_debit'
-        ])->meta('title', $title);
+        $posting->setAction('credit_debit');
+        $posting->setMeta('title', $title);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function title(Transaction $transaction)
+    public function title(Posting $posting)
     {
-        return $transaction->meta('title');
+        return $posting->meta('title');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function image(Transaction $transaction)
+    public function image(Posting $posting)
     {
         return null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function supportDebit(): bool
     {
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function supportCredit(): bool
     {
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function reversable(Transaction $transaction): bool
+    public function reversable(Posting $posting): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function reverse(Transaction $transaction, Transaction $new): ActionInterface
+    public function reverse(Posting $posting, Posting $new): ActionInterface
     {
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function methodResource(Transaction $transaction)
+    public function methodResource(Posting $posting)
     {
         return null;
     }

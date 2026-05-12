@@ -3,23 +3,22 @@
 namespace Walletable\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
-use Walletable\Internals\Actions\Action;
 use Walletable\Contracts\WalletInterface;
 use Walletable\Facades\Mutator;
 use Walletable\Facades\Walletable;
+use Walletable\Internals\Actions\Action;
 use Walletable\Internals\Mutation\System\WalletBalanceMutation;
-use Walletable\Models\Traits\WalletRelations;
 use Walletable\Models\Traits\WorkWithMeta;
 use Walletable\Money\Money;
+use Walletable\Traits\ConditionalID;
+use Walletable\Transaction\Confirmation;
 use Walletable\Transaction\CreditDebit;
 use Walletable\Transaction\Transfer;
-use Walletable\Traits\ConditionalID;
-use Walletable\Transaction\TransactionBag;
-use Illuminate\Support\Str;
-use Walletable\Transaction\Confirmation;
 use Walletable\Transaction\UnconfirmedCreditDebit;
 use Walletable\WalletableManager;
 
@@ -31,38 +30,30 @@ use Walletable\WalletableManager;
 class Wallet extends Model implements WalletInterface
 {
     use ConditionalID;
-    use WalletRelations;
     use WorkWithMeta;
     use Macroable {
         __call as macroCall;
         __callStatic as macroCallStatic;
     }
 
-    /**
-     * Hold object for the wallet
-     * @var array
-     */
     protected $instanceCache = [];
 
-    /**
-     * Get the real balance object of a wallet
-     *
-     * @return \Walletable\Money\Money
-     */
-    public function getAmountAttribute($value)
+    public function postings(): HasMany
     {
-        return new Money(
-            $value,
-            $this->currency
-        );
+        return $this->hasMany(config('walletable.models.posting'));
     }
 
-    /**
-     * Get the real balance object of a wallet
-     *
-     * @return \Walletable\Money\Money
-     */
-    public function getBalanceAttribute()
+    public function walletable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    public function getAmountAttribute($value): Money
+    {
+        return new Money($value, $this->currency);
+    }
+
+    public function getBalanceAttribute(): Money
     {
         return Mutator::mutate(new WalletBalanceMutation(
             'wallet.balance',
@@ -71,166 +62,80 @@ class Wallet extends Model implements WalletInterface
                 $this->currency
             ),
             [
-                'wallet' => $this
+                'wallet' => $this,
             ]
         ))->value();
     }
 
-    /**
-     * Get the currency object of the wallet
-     *
-     * @return \Walletable\Money\Currency
-     */
     public function getCurrencyAttribute()
     {
         return Money::currency($this->getRawOriginal('currency'));
     }
 
-    /**
-     * Check if this wallet is compactible with another wallet
-     *
-     * @param self $wallet
-     */
     public function compactible(self $wallet): bool
     {
         return Walletable::compactible($this, $wallet);
     }
 
     /**
-     * Transfer money to another wallet
-     *
-     * @param self $wallet
-     * @param int|\Walletable\Money\Money $amount
-     * @param string|null $remarks
+     * Transfer to another wallet. Posts a balanced transaction; returns it.
      */
-    public function transfer(self $wallet, $amount, string|null $remarks = null): Transfer
+    public function transfer(self $wallet, $amount, ?string $remarks = null): Transaction
     {
-        if (!is_int($amount) && !($amount instanceof Money)) {
-            throw new InvalidArgumentException('Argument 2 must be of type ' . Money::class . ' or Integer');
-        }
-
-        if (is_int($amount)) {
-            $amount = $this->money($amount);
-        }
-
+        $amount = $this->normaliseAmount($amount);
         return (new Transfer($this, $amount, $wallet, $remarks))->execute();
     }
 
     /**
-     * Confirmation
-     *
-     * @param int|\Walletable\Models\Transaction $amount
+     * Confirm a pending transaction that targets this wallet.
      */
-    public function confirm(Transaction $transaction): Confirmation
+    public function confirm(Transaction $transaction): Transaction
     {
-        if ($this->getKey() != $transaction->wallet_id) {
-            throw new InvalidArgumentException('The transaction can only be confirmed from the same wallet.');
+        if (!$transaction->isPending()) {
+            throw new InvalidArgumentException('Only pending transactions can be confirmed.');
+        }
+
+        // Sanity: at least one posting on this transaction must touch this wallet.
+        $raw = $transaction->getRawOriginal('draft_postings');
+        $drafts = is_array($raw) ? $raw : (is_string($raw) ? json_decode($raw, true) : []);
+        $touchesThis = collect($drafts ?? [])
+            ->contains(fn($d) => (string)($d['wallet_id'] ?? '') === (string)$this->getKey());
+        if (!$touchesThis) {
+            throw new InvalidArgumentException('Transaction does not affect this wallet.');
         }
 
         return (new Confirmation($this, $transaction))->execute();
     }
 
-    /**
-     * Unconfirmed Credit the wallet
-     *
-     * @param int|\Walletable\Money\Money $amount
-     * @param string|null $title
-     * @param string|null $remarks
-     */
-    public function unconfirmedCredit($amount, string|null $title = null, string|null $remarks = null): UnconfirmedCreditDebit
+    public function unconfirmedCredit($amount, ?string $title = null, ?string $remarks = null): Transaction
     {
-        if (!is_int($amount) && !($amount instanceof Money)) {
-            throw new InvalidArgumentException('Argument 1 must be of type ' . Money::class . ' or Integer');
-        }
-
-        if (is_int($amount)) {
-            $amount = $this->money($amount);
-        }
-
+        $amount = $this->normaliseAmount($amount);
         return (new UnconfirmedCreditDebit('credit', $this, $amount, $title, $remarks))->execute();
     }
 
-    /**
-     * Unconfirmed Debit the wallet
-     *
-     * @param int|\Walletable\Money\Money $amount
-     * @param string|null $title
-     * @param string|null $remarks
-     */
-    public function unconfirmedDebit($amount, string|null $title = null, string|null $remarks = null): UnconfirmedCreditDebit
+    public function unconfirmedDebit($amount, ?string $title = null, ?string $remarks = null): Transaction
     {
-        if (!is_int($amount) && !($amount instanceof Money)) {
-            throw new InvalidArgumentException('Argument 1 must be of type ' . Money::class . ' or Integer');
-        }
-
-        if (is_int($amount)) {
-            $amount = $this->money($amount);
-        }
-
+        $amount = $this->normaliseAmount($amount);
         return (new UnconfirmedCreditDebit('debit', $this, $amount, $title, $remarks))->execute();
     }
 
-    /**
-     * Credit the wallet
-     *
-     * @param int|\Walletable\Money\Money $amount
-     * @param string|null $title
-     * @param string|null $remarks
-     */
-    public function credit($amount, string|null $title = null, string|null $remarks = null): CreditDebit
+    public function credit($amount, ?string $title = null, ?string $remarks = null): Transaction
     {
-        if (!is_int($amount) && !($amount instanceof Money)) {
-            throw new InvalidArgumentException('Argument 1 must be of type ' . Money::class . ' or Integer');
-        }
-
-        if (is_int($amount)) {
-            $amount = $this->money($amount);
-        }
-
+        $amount = $this->normaliseAmount($amount);
         return (new CreditDebit('credit', $this, $amount, $title, $remarks))->execute();
     }
 
-    /**
-     * Debit the wallet
-     *
-     * @param int|\Walletable\Money\Money $amount
-     * @param string|null $title
-     * @param string|null $remarks
-     */
-    public function debit($amount, string|null $title = null, string|null $remarks = null): CreditDebit
+    public function debit($amount, ?string $title = null, ?string $remarks = null): Transaction
     {
-        if (!is_int($amount) && !($amount instanceof Money)) {
-            throw new InvalidArgumentException('Argument 1 must be of type ' . Money::class . ' or Integer');
-        }
-
-        if (is_int($amount)) {
-            $amount = $this->money($amount);
-        }
-
+        $amount = $this->normaliseAmount($amount);
         return (new CreditDebit('debit', $this, $amount, $title, $remarks))->execute();
     }
 
-    /**
-     * Return money object of thesame currency
-     *
-     * @param int $amount
-     *
-     * @return \Walletable\Money\Money
-     */
-    public function money(int $amount)
+    public function money(int $amount): Money
     {
-        return new Money(
-            $amount,
-            $this->currency
-        );
+        return new Money($amount, $this->currency);
     }
 
-    /**
-     * Create action for the wallet
-     *
-     * @param string $action the name of the action
-     * @return \Walletable\Internals\Actions\Action
-     */
     public function action(string $action): Action
     {
         if (isset($this->instanceCache['actions'][$action])) {
@@ -239,18 +144,20 @@ class Wallet extends Model implements WalletInterface
 
         return $this->instanceCache['actions'][$action] = new Action(
             $this,
-            App::make(WalletableManager::class)
-                ->action($action)
+            App::make(WalletableManager::class)->action($action)
         );
     }
 
-    /**
-     * Handle dynamic calls into macros or pass missing methods to the parrent.
-     *
-     * @param  string  $method
-     * @param  array  $parameters
-     * @return mixed
-     */
+    protected function normaliseAmount($amount): Money
+    {
+        if (!is_int($amount) && !($amount instanceof Money)) {
+            throw new InvalidArgumentException(
+                'Amount must be of type ' . Money::class . ' or Integer'
+            );
+        }
+        return is_int($amount) ? $this->money($amount) : $amount;
+    }
+
     public function __call($method, $parameters)
     {
         if (static::hasMacro($method)) {
@@ -260,13 +167,6 @@ class Wallet extends Model implements WalletInterface
         return parent::__call($method, $parameters);
     }
 
-    /**
-     * Handle dynamic static calls into macros or pass missing methods to the parrent.
-     *
-     * @param  string  $method
-     * @param  array  $parameters
-     * @return mixed
-     */
     public static function __callStatic($method, $parameters)
     {
         if (static::hasMacro($method)) {

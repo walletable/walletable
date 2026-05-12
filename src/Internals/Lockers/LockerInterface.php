@@ -2,42 +2,30 @@
 
 namespace Walletable\Internals\Lockers;
 
-use Walletable\Models\Transaction;
 use Walletable\Models\Wallet;
 use Walletable\Money\Money;
 
 interface LockerInterface
 {
     /**
-     * Increase the balance of wallet model using a lock mechanism
+     * Apply a posting amount to a wallet's materialised balance and return
+     * the new balance. Implementations must guarantee that concurrent
+     * applications stay correct (no lost updates).
      *
-     * @param \Walletable\Models\Wallet $wallet
-     * @param \Walletable\Money\Money $amount
-     * @param \Walletable\Models\Transaction $transaction
+     * @param Wallet $wallet         The wallet whose balance changes.
+     * @param string $direction      'C' for credit (add) or 'D' for debit (subtract).
+     * @param Money  $amount         A positive amount in the wallet's currency.
+     * @param bool   $allowNegative  When false, a debit that would push the
+     *                               balance below zero must throw
+     *                               InsufficientBalanceException. House
+     *                               accounts pass true.
      *
-     * @return bool
+     * @return int The new signed balance after the application.
      */
-    public function creditLock(Wallet $wallet, Money $amount, Transaction $transaction);
-
-    /**
-     * Decrease the balance of wallet model using a lock machnism
-     *
-     * @param \Walletable\Models\Wallet $wallet
-     * @param \Walletable\Money\Money $amount
-     * @param \Walletable\Models\Transaction $transaction
-     *
-     * @return bool
-     */
-    public function debitLock(Wallet $wallet, Money $amount, Transaction $transaction);
-
-    /**
-     * Determine if database transaction should be initiated
-     *
-     * @param \Walletable\Models\Wallet $wallet
-     * @param \Walletable\Money\Money $amount
-     * @param \Walletable\Models\Transaction $transaction
-     *
-     * @return bool
-     */
-    public function shouldInitiateTransaction(Wallet $wallet, Money $amount, Transaction $transaction);
+    public function apply(
+        Wallet $wallet,
+        string $direction,
+        Money $amount,
+        bool $allowNegative = false
+    ): int;
 }

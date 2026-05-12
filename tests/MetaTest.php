@@ -2,26 +2,23 @@
 
 namespace Walletable\Tests;
 
-use Walletable\Tests\Models\Transaction;
+use Walletable\Tests\Models\Posting;
 use Walletable\Tests\Models\Wallet;
 
 class MetaTest extends TestBench
 {
-    public function testSetTransactionMeta()
+    public function testSetPostingMeta()
     {
-        $wallet = $this->createWallet(100000);
+        $posting = new Posting();
+        $posting->forceFill(['meta' => []]);
 
-        ($transaction = new Transaction())->forceFill([
-            'meta' => '[]'
-        ]);
+        $posting->meta('test', 'This is a test arbitrary data');
+        $posting->meta('extra.test', 'This is a test nested arbitrary data');
+        $posting->meta('extra.sub.test', 'This is a test sub nested arbitrary data');
 
-        $transaction->meta('test', 'This is a test arbitrary data');
-        $transaction->meta('extra.test', 'This is a test nested arbitrary data');
-        $transaction->meta('extra.sub.test', 'This is a test sub nested arbitrary data');
-
-        $this->assertSame($transaction->meta('test'), 'This is a test arbitrary data');
-        $this->assertSame($transaction->meta('extra.test'), 'This is a test nested arbitrary data');
-        $this->assertSame($transaction->meta('extra.sub.test'), 'This is a test sub nested arbitrary data');
+        $this->assertSame('This is a test arbitrary data', $posting->meta('test'));
+        $this->assertSame('This is a test nested arbitrary data', $posting->meta('extra.test'));
+        $this->assertSame('This is a test sub nested arbitrary data', $posting->meta('extra.sub.test'));
     }
 
     public function testSetWalletMeta()
@@ -32,8 +29,8 @@ class MetaTest extends TestBench
         $wallet->meta('extra.test', 'This is a test nested arbitrary data');
         $wallet->meta('extra.sub.test', 'This is a test sub nested arbitrary data');
 
-        $this->assertSame($wallet->meta('test'), 'This is a test arbitrary data');
-        $this->assertSame($wallet->meta('extra.test'), 'This is a test nested arbitrary data');
-        $this->assertSame($wallet->meta('extra.sub.test'), 'This is a test sub nested arbitrary data');
+        $this->assertSame('This is a test arbitrary data', $wallet->meta('test'));
+        $this->assertSame('This is a test nested arbitrary data', $wallet->meta('extra.test'));
+        $this->assertSame('This is a test sub nested arbitrary data', $wallet->meta('extra.sub.test'));
     }
 }

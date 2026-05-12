@@ -3,12 +3,13 @@
 namespace Walletable\Tests;
 
 use Illuminate\Support\Facades\Event;
-use Walletable\Events\ConfirmedTransaction;
-use Walletable\Events\CreatedTransaction;
+use Walletable\Events\TransactionConfirmed;
+use Walletable\Events\TransactionPosted;
 use Walletable\Exceptions\IncompactibleWalletsException;
 use Walletable\Exceptions\InsufficientBalanceException;
 use Walletable\Facades\Mutator;
 use Walletable\Internals\Actions\Action;
+use Walletable\Models\HouseAccount;
 use Walletable\Money\Money;
 use Walletable\Tests\Models\Wallet;
 use Walletable\Tests\Models\Walletable;
@@ -17,9 +18,14 @@ use Walletable\Transaction\TransferAction;
 
 class WalletTest extends TestBench
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->setUpCurrencies();
+    }
+
     public function testCompactable()
     {
-
         $wallet = $this->createWallet(100000);
         $wallet2 = $this->createWallet(100000);
         $wallet3 = $this->createWallet(100000, 'USD');
@@ -31,7 +37,6 @@ class WalletTest extends TestBench
 
     public function testMoney()
     {
-
         $wallet = $this->createWallet(100000);
         $wallet2 = $this->createWallet(100000, 'USD');
 
@@ -41,65 +46,35 @@ class WalletTest extends TestBench
 
     public function testTransfer()
     {
-        Event::fake([
-            CreatedTransaction::class,
-            ConfirmedTransaction::class,
-        ]);
+        Event::fake([TransactionPosted::class]);
+
         $wallet = $this->createWallet(100000);
         $wallet2 = $this->createWallet(0, 'NGN', Walletable::create([
             'name' => 'Abisade Ilesanmi',
             'email' => 'bisade@bisade.com',
         ]));
 
-        $transfer = $wallet->transfer($wallet2, 50000, 'Test transfer');
-
-        $this->assertSame(2, $transfer->getTransactions()->count());
-        $this->assertSame(50000, $transfer->getAmount()->integer());
-        $this->assertTrue($transfer->successful());
+        $entry = $wallet->transfer($wallet2, 50000, 'Test transfer');
 
         $this->assertSame(50000, $wallet->refresh()->amount->integer());
         $this->assertSame(50000, $wallet2->refresh()->amount->integer());
+        $this->assertCount(2, $entry->postings()->get());
 
-        $this->assertSame(1, $wallet->transactions()->count());
-        $this->assertSame(1, $wallet2->transactions()->count());
+        $debit = $entry->postings()->where('direction', 'D')->first();
+        $credit = $entry->postings()->where('direction', 'C')->first();
 
-        $trx1 = $wallet->transactions->first();
-        $trx2 = $wallet2->transactions->first();
+        $this->assertSame($wallet->id, $debit->wallet_id);
+        $this->assertSame($wallet2->id, $credit->wallet_id);
+        $this->assertSame('Abisade Ilesanmi', $debit->title);
+        $this->assertSame('Olawale Ilesanmi', $credit->title);
+        $this->assertSame('Test transfer', $entry->narration);
 
-        $this->assertSame('Abisade Ilesanmi', $trx1->title);
-        $this->assertSame('Olawale Ilesanmi', $trx2->title);
-
-        $this->assertSame('Test transfer', $trx1->remarks);
-        $this->assertSame('Test transfer', $trx2->remarks);
-
-        $this->assertSame('debit', $trx1->type);
-        $this->assertSame('credit', $trx2->type);
-
-        $trx1 = $transfer->out();
-        $trx2 = $transfer->in();
-
-        $this->assertSame('Abisade Ilesanmi', $trx1->title);
-        $this->assertSame('Olawale Ilesanmi', $trx2->title);
-
-        $this->assertSame('Test transfer', $trx1->remarks);
-        $this->assertSame('Test transfer', $trx2->remarks);
-
-        $this->assertSame('debit', $trx1->type);
-        $this->assertSame('credit', $trx2->type);
-
-        $this->assertSame($wallet->walletable->id, $trx2->method->id);
-        $this->assertSame($wallet2->walletable->id, $trx1->method->id);
-
-        Event::assertDispatchedTimes(CreatedTransaction::class, 2);
-        Event::assertDispatchedTimes(ConfirmedTransaction::class, 2);
+        Event::assertDispatchedTimes(TransactionPosted::class, 1);
     }
 
     public function testTransferInsuficientFund()
     {
-        Event::fake([
-            CreatedTransaction::class,
-            ConfirmedTransaction::class,
-        ]);
+        Event::fake([TransactionPosted::class]);
         $this->expectException(InsufficientBalanceException::class);
         $this->expectExceptionMessage(
             "Insufficient wallet balance, The wallet ballance is less than ₦5,000"
@@ -109,17 +84,11 @@ class WalletTest extends TestBench
         $wallet2 = $this->createWallet();
 
         $wallet->transfer($wallet2, 500000, 'Test transfer');
-
-        Event::assertDispatchedTimes(CreatedTransaction::class, 0);
-        Event::assertDispatchedTimes(ConfirmedTransaction::class, 0);
     }
 
     public function testTransferIncompactable()
     {
-        Event::fake([
-            CreatedTransaction::class,
-            ConfirmedTransaction::class,
-        ]);
+        Event::fake([TransactionPosted::class]);
         $this->expectException(IncompactibleWalletsException::class);
         $this->expectExceptionMessage(
             'Can`t perform any operations between two incompactible wallets'
@@ -129,65 +98,54 @@ class WalletTest extends TestBench
         $wallet2 = $this->createWallet(0, 'USD');
 
         $wallet->transfer($wallet2, 50000, 'Test transfer');
-
-        Event::assertDispatchedTimes(CreatedTransaction::class, 0);
-        Event::assertDispatchedTimes(ConfirmedTransaction::class, 0);
     }
 
     public function testCredit()
     {
-        Event::fake([
-            CreatedTransaction::class,
-            ConfirmedTransaction::class,
-        ]);
+        Event::fake([TransactionPosted::class]);
         $wallet = $this->createWallet(0);
 
-        $credit = $wallet->credit(50000, 'Test Credit', 'Crediting in test runtime');
-
-        $this->assertSame(1, $credit->getTransactions()->count());
-        $this->assertSame(50000, $credit->getAmount()->integer());
+        $entry = $wallet->credit(50000, 'Test Credit', 'Crediting in test runtime');
 
         $this->assertSame(50000, $wallet->refresh()->amount->integer());
+        $this->assertCount(2, $entry->postings()->get());
 
-        $this->assertSame(1, $wallet->transactions()->count());
+        $userPosting = $entry->postings()->where('wallet_id', $wallet->id)->first();
+        $this->assertSame('Test Credit', $userPosting->title);
+        $this->assertSame('credit', $userPosting->type);
 
-        $trx = $wallet->transactions->first();
+        $this->assertSame('Crediting in test runtime', $entry->narration);
 
-        $this->assertSame('Test Credit', $trx->title);
-        $this->assertSame('Crediting in test runtime', $trx->remarks);
+        // House wallet is the mirror: negative balance equal to the credit.
+        $house = HouseAccount::walletFor('NGN');
+        $this->assertSame(-50000, $house->refresh()->amount->integer());
 
-        $this->assertSame('credit', $trx->type);
-
-        Event::assertDispatchedTimes(CreatedTransaction::class, 1);
-        Event::assertDispatchedTimes(ConfirmedTransaction::class, 1);
+        Event::assertDispatchedTimes(TransactionPosted::class, 1);
     }
 
     public function testDebit()
     {
-        Event::fake([
-            CreatedTransaction::class,
-            ConfirmedTransaction::class,
-        ]);
+        Event::fake([TransactionPosted::class]);
         $wallet = $this->createWallet(50000);
+        $house = HouseAccount::walletFor('NGN');
 
-        $debit = $wallet->debit(50000, 'Test Debit', 'Debiting in test runtime');
+        // Seed house balance to mirror the user wallet's initial 50000:
+        // sum-to-zero invariant must hold from the start.
+        $house->forceFill(['amount' => -50000])->save();
 
-        $this->assertSame(1, $debit->getTransactions()->count());
-        $this->assertSame(50000, $debit->getAmount()->integer());
+        $entry = $wallet->debit(50000, 'Test Debit', 'Debiting in test runtime');
 
         $this->assertSame(0, $wallet->refresh()->amount->integer());
+        $this->assertCount(2, $entry->postings()->get());
 
-        $this->assertSame(1, $wallet->transactions()->count());
+        $userPosting = $entry->postings()->where('wallet_id', $wallet->id)->first();
+        $this->assertSame('Test Debit', $userPosting->title);
+        $this->assertSame('debit', $userPosting->type);
 
-        $trx = $wallet->transactions->first();
+        // House absorbed the debit: now back to 0.
+        $this->assertSame(0, $house->refresh()->amount->integer());
 
-        $this->assertSame('Test Debit', $trx->title);
-        $this->assertSame('Debiting in test runtime', $trx->remarks);
-
-        $this->assertSame('debit', $trx->type);
-
-        Event::assertDispatchedTimes(CreatedTransaction::class, 1);
-        Event::assertDispatchedTimes(ConfirmedTransaction::class, 1);
+        Event::assertDispatchedTimes(TransactionPosted::class, 1);
     }
 
     public function testDebitInsuficientBalance()
@@ -214,9 +172,7 @@ class WalletTest extends TestBench
     public function testMacroable()
     {
         Wallet::macro('testMacro', function () {
-            /**
-             * @var Wallet $this
-             */
+            /** @var Wallet $this */
             return $this->amount->value();
         });
 
@@ -263,5 +219,18 @@ class WalletTest extends TestBench
         );
 
         $this->assertNotSame($wallet->balance, $amount);
+    }
+
+    public function testTransactionConfirmedEventOnConfirm()
+    {
+        Event::fake([TransactionConfirmed::class]);
+        $wallet = $this->createWallet(0);
+
+        $pending = $wallet->unconfirmedCredit(1000, 'Pending');
+        $this->assertSame('pending', $pending->status);
+
+        $wallet->confirm($pending->refresh());
+
+        Event::assertDispatchedTimes(TransactionConfirmed::class, 1);
     }
 }

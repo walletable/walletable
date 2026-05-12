@@ -2,55 +2,61 @@
 
 namespace Walletable\Tests;
 
+use Walletable\Exceptions\InsufficientBalanceException;
 use Walletable\Internals\Lockers\OptimisticLocker;
+use Walletable\Models\Posting;
 use Walletable\Money\Money;
-use Walletable\Tests\Models\Transaction;
 
 class LockerTest extends TestBench
 {
-    public function testOptimisticLockerCredit()
+    protected function setUp(): void
     {
+        parent::setUp();
         $this->setUpCurrencies();
+    }
+
+    public function testApplyCredit()
+    {
         $locker = new OptimisticLocker();
         $wallet = $this->createWallet();
 
-        ($transaction = new Transaction())->forceFill([
-            'wallet_id' => $wallet->id,
-            'type' => 'credit',
-            'currency' => 'NGN',
-        ]);
-
         $this->assertSame(0, $wallet->refresh()->amount->integer());
 
-        $locker->creditLock($wallet, Money::NGN(100000), $transaction);
+        $balanceAfter = $locker->apply($wallet, Posting::DIRECTION_CREDIT, Money::NGN(100000));
 
-        $transaction->syncOriginal();
-
+        $this->assertSame(100000, $balanceAfter);
         $this->assertSame(100000, $wallet->refresh()->amount->integer());
-        $this->assertSame(100000, $transaction->amount->integer());
-        $this->assertSame(100000, $transaction->balance->integer());
     }
 
-    public function testOptimisticLockerDebit()
+    public function testApplyDebit()
     {
-        $this->setUpCurrencies();
         $locker = new OptimisticLocker();
         $wallet = $this->createWallet(100000);
 
-        ($transaction = new Transaction())->forceFill([
-            'wallet_id' => $wallet->id,
-            'type' => 'debit',
-            'currency' => 'NGN',
-        ]);
+        $balanceAfter = $locker->apply($wallet, Posting::DIRECTION_DEBIT, Money::NGN(100000));
 
-        $this->assertSame(100000, $wallet->refresh()->amount->integer());
-
-        $locker->debitLock($wallet, Money::NGN(100000), $transaction);
-
-        $transaction->syncOriginal();
-
+        $this->assertSame(0, $balanceAfter);
         $this->assertSame(0, $wallet->refresh()->amount->integer());
-        $this->assertSame(100000, $transaction->amount->integer());
-        $this->assertSame(0, $transaction->balance->integer());
+    }
+
+    public function testApplyDebitGuardsAgainstNegative()
+    {
+        $this->expectException(InsufficientBalanceException::class);
+
+        $locker = new OptimisticLocker();
+        $wallet = $this->createWallet(0);
+
+        $locker->apply($wallet, Posting::DIRECTION_DEBIT, Money::NGN(1));
+    }
+
+    public function testApplyDebitAllowsNegativeForHouseWallets()
+    {
+        $locker = new OptimisticLocker();
+        $wallet = $this->createWallet(0);
+
+        $balanceAfter = $locker->apply($wallet, Posting::DIRECTION_DEBIT, Money::NGN(1000), true);
+
+        $this->assertSame(-1000, $balanceAfter);
+        $this->assertSame(-1000, $wallet->refresh()->amount->integer());
     }
 }

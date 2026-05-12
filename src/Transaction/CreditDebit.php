@@ -2,117 +2,43 @@
 
 namespace Walletable\Transaction;
 
-use Exception;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use InvalidArgumentException;
-use Walletable\Events\ConfirmedTransaction;
-use Walletable\Events\CreatedTransaction;
-use Walletable\Internals\Actions\ActionInterface;
 use Walletable\Exceptions\InsufficientBalanceException;
 use Walletable\Facades\Walletable;
 use Walletable\Internals\Actions\ActionData;
-use Walletable\Internals\Lockers\LockerInterface;
+use Walletable\Internals\Actions\ActionInterface;
+use Walletable\Ledger\PostTransaction;
+use Walletable\Ledger\TransactionDraft;
+use Walletable\Models\HouseAccount;
+use Walletable\Models\Posting;
+use Walletable\Models\Transaction;
 use Walletable\Models\Wallet;
 use Walletable\Money\Money;
 
+/**
+ * Single-leg credit or debit. Posts a 2-line transaction: one against the
+ * user wallet, the matching opposite-direction leg against the house wallet
+ * for that currency.
+ */
 class CreditDebit
 {
-    /**
-     * Transaction type
-     *
-     * @var string
-     */
-    protected $type;
+    protected string $type;
+    protected Wallet $wallet;
+    protected Money $amount;
+    protected ?string $title;
+    protected ?string $remarks;
 
-    /**
-     * Sender wallet
-     *
-     * @var \Walletable\Models\Wallet
-     */
-    protected $wallet;
-
-    /**
-     * Amount to transfer
-     *
-     * @var \Walletable\Money\Money
-     */
-    protected $amount;
-
-    /**
-     * Trasanction bads
-     *
-     * @var \Walletable\Transaction\TransactionBag
-     */
-    protected $bag;
-
-    /**
-     * Transfer status
-     *
-     * @var bool
-     */
-    protected $successful = false;
-
-    /**
-     * Title of the
-     *
-     * @var string|null
-     */
-    protected $title;
-
-    /**
-     * Note added to the transfer
-     *
-     * @var string|null
-     */
-    protected $remarks;
-
-    /**
-     * The session id of the transfer
-     *
-     * @var bool
-     */
-    protected $session;
-
-    /**
-     * The transfer locker
-     *
-     * @var \Walletable\Internals\Lockers\OptimisticLocker
-     */
-    protected $locker;
-
-    /**
-     * Action of the transaction
-     *
-     * @var \Walletable\Internals\Actions\ActionInterface
-     */
-    protected $action;
-
-    /**
-     * Action of the transaction
-     *
-     * @var \Walletable\Internals\Actions\ActionData
-     */
-    protected $actionData;
-
-    /**
-     * Execution Options
-     *
-     * @var array
-     */
-    protected $options;
+    protected ?ActionInterface $action = null;
+    protected ?ActionData $actionData = null;
 
     public function __construct(
         string $type,
         Wallet $wallet,
         Money $amount,
-        string|null $title = null,
-        string|null $remarks = null,
-        LockerInterface|null $locker = null,
-        array $options = []
+        ?string $title = null,
+        ?string $remarks = null
     ) {
-        if (!in_array($type, ['credit', 'debit'])) {
+        if (!in_array($type, ['credit', 'debit'], true)) {
             throw new InvalidArgumentException('Argument 1 value can only be "credit" or "debit"');
         }
 
@@ -121,125 +47,8 @@ class CreditDebit
         $this->amount = $amount;
         $this->title = $title;
         $this->remarks = $remarks;
-        $this->locker = $locker;
-        $this->options = $options;
-        $this->session = Str::uuid();
-        $this->bag = new TransactionBag();
     }
 
-    /**
-     * Execute the transfer
-     *
-     * @return self
-     */
-    public function execute(): self
-    {
-        $this->checks();
-        $locker = $this->locker();
-        $transaction = $this->bag->new($this->wallet, [
-            'type' => $this->type,
-            'session' => $this->session,
-            'remarks' => $this->remarks
-        ]);
-        $shouldInitiateTransaction = $locker->shouldInitiateTransaction($this->wallet, $this->amount, $transaction) ||
-            ($this->options['should_initiate_transaction'] ?? false);
-
-        try {
-            $method = $this->type . 'Lock';
-            $action = $this->action ?? Walletable::action('credit_debit');
-
-            if (!$action->{'support' . ucfirst($this->type)}()) {
-                throw new Exception('This action does not support ' . $this->type . ' operations', 1);
-            }
-
-            if ($shouldInitiateTransaction) {
-                DB::beginTransaction();
-            }
-
-            if ($this->locker()->$method($this->wallet, $this->amount, $transaction)) {
-                $this->successful = true;
-
-                Walletable::applyAction(
-                    $action,
-                    $this->bag,
-                    $this->actionData ?? new ActionData(
-                        $this->wallet,
-                        $this->title
-                    )
-                );
-
-                $this->bag->each(function ($item) {
-                    $item->forceFill([
-                        'confirmed' => true,
-                        'confirmed_at' => now(),
-                        'created_at' => now(),
-                        'status' => 'completed'
-                    ])->save();
-                    App::make('events')->dispatch(new ConfirmedTransaction(
-                        $item
-                    ));
-                    App::make('events')->dispatch(new CreatedTransaction(
-                        $item
-                    ));
-                });
-            }
-
-            if ($shouldInitiateTransaction) {
-                DB::commit();
-            }
-        } catch (\Throwable $th) {
-            if ($shouldInitiateTransaction) {
-                DB::rollBack();
-            }
-            throw $th;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Run some compulsory checks
-     *
-     * @return void
-     */
-    protected function checks()
-    {
-        if (
-            $this->type === 'debit' &&
-            $this->wallet->amount->lessThan($this->amount)
-        ) {
-            throw new InsufficientBalanceException($this->wallet, $this->amount);
-        }
-    }
-
-    /**
-     * Get transaction bag
-     *
-     * @return \Walletable\Transaction\TransactionBag
-     */
-    public function getTransactions(): TransactionBag
-    {
-        return $this->bag;
-    }
-
-    /**
-     * Get amount
-     *
-     * @return \Walletable\Money\Money
-     */
-    public function getAmount(): Money
-    {
-        return $this->amount;
-    }
-
-    /**
-     * Set the action for the transaction
-     *
-     * @param \Walletable\Internals\Actions\ActionInterface|string $action
-     * @param \Walletable\Internals\Actions\ActionData $actionData
-     *
-     * @return self
-     */
     public function setAction($action, ActionData $actionData): self
     {
         if (!is_string($action) && !($action instanceof ActionInterface)) {
@@ -258,14 +67,46 @@ class CreditDebit
         return $this;
     }
 
-    /**
-     * Get the locker for the transfer
-     */
-    protected function locker(): LockerInterface
+    public function execute(): Transaction
     {
-        if ($this->locker) {
-            return $this->locker;
+        if ($this->type === 'debit' && $this->wallet->amount->lessThan($this->amount)) {
+            throw new InsufficientBalanceException($this->wallet, $this->amount);
         }
-        return $this->locker = Walletable::locker(config('walletable.locker'));
+
+        $action = $this->action ?? Walletable::action('credit_debit');
+
+        if (!$action->{'support' . ucfirst($this->type)}()) {
+            throw new \RuntimeException(sprintf(
+                'Action %s does not support %s operations',
+                get_class($action),
+                $this->type
+            ));
+        }
+
+        $currency = $this->wallet->getRawOriginal('currency');
+        $house = HouseAccount::walletFor($currency);
+
+        $direction = $this->type === 'credit'
+            ? Posting::DIRECTION_CREDIT
+            : Posting::DIRECTION_DEBIT;
+
+        $draft = TransactionDraft::singleLeg(
+            $this->wallet,
+            $house,
+            $direction,
+            $this->amount,
+            'credit_debit',
+            $this->remarks
+        );
+
+        // The user-wallet leg is the first posting; let the action customise it.
+        $action->apply($draft->postings[0], $this->actionData ?? new ActionData(
+            $this->wallet,
+            $this->title
+        ));
+        // Mirror the action tag onto the house leg for consistent reporting.
+        $draft->postings[1]->setAction($draft->postings[0]->action);
+
+        return (new PostTransaction())->execute($draft);
     }
 }
