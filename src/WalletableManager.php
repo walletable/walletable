@@ -11,6 +11,7 @@ use Walletable\Internals\Actions\Traits\HasActions;
 use Walletable\Internals\Creator;
 use Walletable\Internals\Lockers\Traits\HasLockers;
 use Walletable\Ledger\PostingDraft;
+use Walletable\Ledger\Traits\HasTransactionColumns;
 use Walletable\Models\Wallet;
 
 class WalletableManager
@@ -18,6 +19,7 @@ class WalletableManager
     use Macroable;
     use HasLockers;
     use HasActions;
+    use HasTransactionColumns;
 
     /**
      * Map of resolved class names back to their registered key. Populated by

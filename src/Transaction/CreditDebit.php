@@ -7,6 +7,7 @@ use Walletable\Exceptions\InsufficientBalanceException;
 use Walletable\Facades\Walletable;
 use Walletable\Internals\Actions\ActionData;
 use Walletable\Internals\Actions\ActionInterface;
+use Walletable\Internals\Actions\AppliesToTransaction;
 use Walletable\Ledger\PostTransaction;
 use Walletable\Ledger\TransactionDraft;
 use Walletable\Models\HouseAccount;
@@ -99,13 +100,16 @@ class CreditDebit
             $this->remarks
         );
 
+        $data = $this->actionData ?? new ActionData($this->wallet, $this->title);
+
         // The user-wallet leg is the first posting; let the action customise it.
-        $action->apply($draft->postings[0], $this->actionData ?? new ActionData(
-            $this->wallet,
-            $this->title
-        ));
+        $action->apply($draft->postings[0], $data);
         // Mirror the action tag onto the house leg for consistent reporting.
         $draft->postings[1]->setAction($draft->postings[0]->action);
+
+        if ($action instanceof AppliesToTransaction) {
+            $action->applyToTransaction($draft, $data);
+        }
 
         return (new PostTransaction())->execute($draft);
     }

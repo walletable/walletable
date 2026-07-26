@@ -21,6 +21,15 @@ class TransactionDraft
     public ?string $referenceId = null;
     public ?array $meta = null;
 
+    /**
+     * Extra top-level columns for the transaction row, keyed by column name.
+     * Held as-is: the application declares which columns are legal through
+     * Walletable::extendTransaction(), and PostTransaction enforces it.
+     *
+     * @var array<string,mixed>
+     */
+    public array $attributes = [];
+
     /** @var PostingDraft[] */
     public array $postings = [];
 
@@ -93,6 +102,31 @@ class TransactionDraft
         $this->referenceType = $type;
         $this->referenceId = $id;
         return $this;
+    }
+
+    /**
+     * Stage an application-defined column for the transaction row.
+     */
+    public function set(string $column, $value): self
+    {
+        $this->attributes[$column] = $value;
+        return $this;
+    }
+
+    /**
+     * @param array<string,mixed> $attributes
+     */
+    public function setMany(array $attributes): self
+    {
+        foreach ($attributes as $column => $value) {
+            $this->set($column, $value);
+        }
+        return $this;
+    }
+
+    public function get(string $column, $default = null)
+    {
+        return $this->attributes[$column] ?? $default;
     }
 
     /** @return PostingDraft[] */

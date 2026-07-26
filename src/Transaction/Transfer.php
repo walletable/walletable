@@ -6,6 +6,7 @@ use Walletable\Exceptions\IncompactibleWalletsException;
 use Walletable\Exceptions\InsufficientBalanceException;
 use Walletable\Facades\Walletable;
 use Walletable\Internals\Actions\ActionData;
+use Walletable\Internals\Actions\AppliesToTransaction;
 use Walletable\Ledger\PostTransaction;
 use Walletable\Ledger\TransactionDraft;
 use Walletable\Models\Transaction;
@@ -52,10 +53,16 @@ class Transfer
 
         $action = Walletable::action('transfer');
 
+        $data = new ActionData($this->sender, $this->receiver);
+
         // Both legs get the same action; apply() decorates each with the
         // opposite wallet's owner as the "method".
-        $action->apply($draft->postings[0], new ActionData($this->sender, $this->receiver));
-        $action->apply($draft->postings[1], new ActionData($this->sender, $this->receiver));
+        $action->apply($draft->postings[0], $data);
+        $action->apply($draft->postings[1], $data);
+
+        if ($action instanceof AppliesToTransaction) {
+            $action->applyToTransaction($draft, $data);
+        }
 
         return (new PostTransaction())->execute($draft);
     }

@@ -6,6 +6,7 @@ use InvalidArgumentException;
 use Walletable\Facades\Walletable;
 use Walletable\Internals\Actions\ActionData;
 use Walletable\Internals\Actions\ActionInterface;
+use Walletable\Internals\Actions\AppliesToTransaction;
 use Walletable\Ledger\PostTransaction;
 use Walletable\Ledger\TransactionDraft;
 use Walletable\Models\HouseAccount;
@@ -85,11 +86,14 @@ class UnconfirmedCreditDebit
             $this->remarks
         )->pending();
 
-        $action->apply($draft->postings[0], $this->actionData ?? new ActionData(
-            $this->wallet,
-            $this->title
-        ));
+        $data = $this->actionData ?? new ActionData($this->wallet, $this->title);
+
+        $action->apply($draft->postings[0], $data);
         $draft->postings[1]->setAction($draft->postings[0]->action);
+
+        if ($action instanceof AppliesToTransaction) {
+            $action->applyToTransaction($draft, $data);
+        }
 
         return (new PostTransaction())->execute($draft);
     }

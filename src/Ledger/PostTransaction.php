@@ -124,7 +124,7 @@ class PostTransaction
         /** @var Transaction $tx */
         $tx = App::make(config('walletable.models.transaction'));
 
-        $tx->forceFill([
+        $tx->forceFill(array_merge([
             'currency' => $draft->currency,
             'status' => $draft->status,
             'posted_at' => $draft->status === Transaction::STATUS_POSTED ? now() : null,
@@ -136,9 +136,36 @@ class PostTransaction
                 ? $draft->postingsToArray()
                 : null,
             'created_at' => now(),
-        ]);
+        ], $this->extraAttributes($draft)));
 
         return $tx;
+    }
+
+    /**
+     * Extra columns staged on the draft by the caller or an action. Only the
+     * columns the application declared through Walletable::extendTransaction()
+     * are written; anything else is a programming error.
+     *
+     * @return array<string,mixed>
+     */
+    protected function extraAttributes(TransactionDraft $draft): array
+    {
+        if (empty($draft->attributes)) {
+            return [];
+        }
+
+        $unknown = array_diff(array_keys($draft->attributes), Walletable::transactionColumns());
+
+        if (!empty($unknown)) {
+            throw new UnregisteredTransactionColumnException(sprintf(
+                'Undeclared transaction column(s): %s. Declare them with ' .
+                'Walletable::extendTransaction([...]) in a service provider and add ' .
+                'them to your transactions table.',
+                implode(', ', $unknown)
+            ));
+        }
+
+        return $draft->attributes;
     }
 
     /**

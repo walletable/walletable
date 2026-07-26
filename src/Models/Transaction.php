@@ -41,6 +41,24 @@ class Transaction extends Model
     public const STATUS_POSTED = 'posted';
     public const STATUS_VOIDED = 'voided';
 
+    /**
+     * Columns owned by the package. Applications cannot declare these as
+     * extra columns through Walletable::extendTransaction().
+     */
+    public const RESERVED_COLUMNS = [
+        'id',
+        'currency',
+        'status',
+        'posted_at',
+        'narration',
+        'reference_type',
+        'reference_id',
+        'reverses_id',
+        'meta',
+        'draft_postings',
+        'created_at',
+    ];
+
     public $timestamps = false;
 
     protected $fillable = [
