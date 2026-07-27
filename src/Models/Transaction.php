@@ -86,6 +86,11 @@ class Transaction extends Model
      */
     protected const TRANSITION_FIELDS = ['status', 'posted_at', 'draft_postings'];
 
+    protected function walletableKeys(): array
+    {
+        return ['reverses_id'];
+    }
+
     public function postings(): HasMany
     {
         return $this->hasMany(config('walletable.models.posting'));

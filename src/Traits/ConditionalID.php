@@ -26,6 +26,29 @@ trait ConditionalID
     }
 
     /**
+     * Foreign keys referencing walletable's own tables, which follow the same
+     * key strategy as the primary keys.
+     *
+     * @return array<int, string>
+     */
+    protected function walletableKeys(): array
+    {
+        return [];
+    }
+
+    /**
+     * Cast the walletable foreign keys to the configured key type. Uncast, their
+     * PHP type is decided by the driver: PHP 8.0 and emulated prepares return
+     * strings where later versions return integers.
+     */
+    public function initializeConditionalID(): void
+    {
+        $this->mergeCasts(
+            array_fill_keys($this->walletableKeys(), $this->getKeyType())
+        );
+    }
+
+    /**
      * Get the value indicating whether the IDs are incrementing.
      *
      * @return bool

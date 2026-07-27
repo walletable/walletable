@@ -71,6 +71,11 @@ class Posting extends Model
 
     protected $postingCache = [];
 
+    protected function walletableKeys(): array
+    {
+        return ['transaction_id', 'wallet_id'];
+    }
+
     public function wallet(): BelongsTo
     {
         return $this->belongsTo(config('walletable.models.wallet'));
