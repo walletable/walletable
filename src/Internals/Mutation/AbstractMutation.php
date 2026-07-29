@@ -76,7 +76,7 @@ abstract class AbstractMutation implements MutationInterface
     }
 
     /**
-     * Set the mutation ectras.
+     * Set the mutation extras.
      *
      * @param array $extras
      * @return $this
@@ -88,7 +88,7 @@ abstract class AbstractMutation implements MutationInterface
     }
 
     /**
-     * Check if the mutation has ectras.
+     * Check if the mutation has extras.
      *
      * @param array $extras
      * @return $this

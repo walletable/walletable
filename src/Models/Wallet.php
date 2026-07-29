@@ -72,9 +72,19 @@ class Wallet extends Model implements WalletInterface
         return Money::currency($this->getRawOriginal('currency'));
     }
 
+    public function compatible(self $wallet): bool
+    {
+        return Walletable::compatible($this, $wallet);
+    }
+
+    /**
+     * @deprecated Misspelling of compatible(); removed in the next major.
+     */
     public function compactible(self $wallet): bool
     {
-        return Walletable::compactible($this, $wallet);
+        trigger_error('Wallet::compactible() is deprecated; use Wallet::compatible().', E_USER_DEPRECATED);
+
+        return $this->compatible($wallet);
     }
 
     /**

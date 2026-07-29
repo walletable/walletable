@@ -45,9 +45,22 @@ class WalletableManager
             ->currency($currency)->create();
     }
 
-    public function compactible(Wallet $wallet, Wallet $against): bool
+    public function compatible(Wallet $wallet, Wallet $against): bool
     {
         return $wallet->currency->getCode() === $against->currency->getCode();
+    }
+
+    /**
+     * @deprecated Misspelling of compatible(); removed in the next major.
+     */
+    public function compactible(Wallet $wallet, Wallet $against): bool
+    {
+        trigger_error(
+            'WalletableManager::compactible() is deprecated; use WalletableManager::compatible().',
+            E_USER_DEPRECATED
+        );
+
+        return $this->compatible($wallet, $against);
     }
 
     /**

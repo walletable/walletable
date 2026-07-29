@@ -5,7 +5,7 @@ namespace Walletable\Tests;
 use Illuminate\Support\Facades\Event;
 use Walletable\Events\TransactionConfirmed;
 use Walletable\Events\TransactionPosted;
-use Walletable\Exceptions\IncompactibleWalletsException;
+use Walletable\Exceptions\IncompatibleWalletsException;
 use Walletable\Exceptions\InsufficientBalanceException;
 use Walletable\Facades\Mutator;
 use Walletable\Internals\Actions\Action;
@@ -24,15 +24,36 @@ class WalletTest extends TestBench
         $this->setUpCurrencies();
     }
 
-    public function testCompactable()
+    public function testCompatible()
     {
         $wallet = $this->createWallet(100000);
         $wallet2 = $this->createWallet(100000);
         $wallet3 = $this->createWallet(100000, 'USD');
 
-        $this->assertTrue($wallet->compactible($wallet2));
-        $this->assertFalse($wallet->compactible($wallet3));
-        $this->assertFalse($wallet2->compactible($wallet3));
+        $this->assertTrue($wallet->compatible($wallet2));
+        $this->assertFalse($wallet->compatible($wallet3));
+        $this->assertFalse($wallet2->compatible($wallet3));
+    }
+
+    public function testCompactibleStillWorksButIsDeprecated()
+    {
+        $wallet = $this->createWallet(100000);
+        $wallet2 = $this->createWallet(100000);
+
+        $deprecations = [];
+        set_error_handler(function ($severity, $message) use (&$deprecations) {
+            $deprecations[] = $message;
+            return true;
+        }, E_USER_DEPRECATED);
+
+        try {
+            $this->assertTrue($wallet->compactible($wallet2));
+        } finally {
+            restore_error_handler();
+        }
+
+        $this->assertCount(1, $deprecations);
+        $this->assertStringContainsString('use Wallet::compatible()', $deprecations[0]);
     }
 
     public function testMoney()
@@ -77,7 +98,7 @@ class WalletTest extends TestBench
         Event::fake([TransactionPosted::class]);
         $this->expectException(InsufficientBalanceException::class);
         $this->expectExceptionMessage(
-            "Insufficient wallet balance, The wallet ballance is less than ₦5,000"
+            "Insufficient wallet balance, The wallet balance is less than ₦5,000"
         );
 
         $wallet = $this->createWallet(100000);
@@ -86,12 +107,12 @@ class WalletTest extends TestBench
         $wallet->transfer($wallet2, 500000, 'Test transfer');
     }
 
-    public function testTransferIncompactable()
+    public function testTransferIncompatible()
     {
         Event::fake([TransactionPosted::class]);
-        $this->expectException(IncompactibleWalletsException::class);
+        $this->expectException(IncompatibleWalletsException::class);
         $this->expectExceptionMessage(
-            'Can`t perform any operations between two incompactible wallets'
+            'Can`t perform any operations between two incompatible wallets'
         );
 
         $wallet = $this->createWallet(100000);
@@ -152,7 +173,7 @@ class WalletTest extends TestBench
     {
         $this->expectException(InsufficientBalanceException::class);
         $this->expectExceptionMessage(
-            "Insufficient wallet balance, The wallet ballance is less than ₦500"
+            "Insufficient wallet balance, The wallet balance is less than ₦500"
         );
 
         $wallet = $this->createWallet(0);

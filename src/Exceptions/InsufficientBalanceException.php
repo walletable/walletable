@@ -2,11 +2,10 @@
 
 namespace Walletable\Exceptions;
 
-use AssertionError;
 use Walletable\Models\Wallet;
 use Walletable\Money\Money;
 
-class InsufficientBalanceException extends AssertionError
+class InsufficientBalanceException extends WalletableException
 {
     /**
      * Wallet model
@@ -24,15 +23,14 @@ class InsufficientBalanceException extends AssertionError
 
     public function __construct(Wallet $wallet, Money $amount)
     {
+        parent::__construct('Insufficient wallet balance, The wallet balance is less than ' . $amount);
+
         $this->wallet = $wallet;
         $this->amount = $amount;
-        $this->message = 'Insufficient wallet balance, The wallet ballance is less than '  .  $amount;
     }
 
     /**
      * Get wallet property
-     *
-     * @return string
      */
     public function getWallet(): Wallet
     {
@@ -41,8 +39,6 @@ class InsufficientBalanceException extends AssertionError
 
     /**
      * Get amount property
-     *
-     * @return string
      */
     public function getAmount(): Money
     {

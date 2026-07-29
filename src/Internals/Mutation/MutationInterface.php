@@ -27,7 +27,7 @@ interface MutationInterface
     public function extras(): array;
 
     /**
-     * Set the mutation ectras.
+     * Set the mutation extras.
      *
      * @param array $extras
      * @return $this
@@ -35,7 +35,7 @@ interface MutationInterface
     public function setExtras(array $extras);
 
     /**
-     * Check if the mutation has ectras.
+     * Check if the mutation has extras.
      *
      * @param array $extras
      * @return bool

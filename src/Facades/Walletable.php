@@ -7,7 +7,8 @@ use Walletable\WalletableManager;
 
 /**
  * @method static \Walletable\Models\Wallet create(\Walletable\Contracts\Walletable $walletable, string $label, string $tag, string $currency)
- * @method static bool compactible(Wallet $wallet, Wallet $against)
+ * @method static bool compatible(\Walletable\Models\Wallet $wallet, \Walletable\Models\Wallet $against)
+ * @method static bool compactible(\Walletable\Models\Wallet $wallet, \Walletable\Models\Wallet $against) @deprecated use compatible()
  * @method static mixed applyAction($action, object $transactions, \Walletable\Internals\Actions\ActionData $data)
  * @method static void macro($name, $macro)
  * @method static void flushMacros()

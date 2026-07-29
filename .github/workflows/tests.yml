@@ -11,17 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php: ['8.0', 8.1, 8.2]
+        php: [8.1, 8.2]
         laravel: [8, 9, 10, 11]
         exclude:
-          # Laravel 9 pulls in symfony/process ^6, whose only releases without an
-          # open advisory require PHP 8.1, so this pair can no longer be installed.
-          - php: '8.0'
-            laravel: 9
-          - php: '8.0'
-            laravel: 10
-          - php: '8.0'
-            laravel: 11
           - php: 8.1
             laravel: 11
 

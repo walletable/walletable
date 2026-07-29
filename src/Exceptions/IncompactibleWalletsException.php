@@ -2,50 +2,13 @@
 
 namespace Walletable\Exceptions;
 
-use AssertionError;
-use Walletable\Models\Wallet;
-use Walletable\Money\Money;
-
-class IncompactibleWalletsException extends AssertionError
-{
-    /**
-     * Wallet model
-     *
-     * @var \Walletable\Models\Wallet
-     */
-    protected $wallet;
-
-    /**
-     * The wallet you are checking
-     *
-     * @var \Walletable\Models\Wallet
-     */
-    protected $against;
-
-    public function __construct(Wallet $wallet, Wallet $against)
-    {
-        $this->wallet = $wallet;
-        $this->against = $against;
-        $this->message = 'Can`t perform any operations between two incompactible wallets';
-    }
-
-    /**
-     * Get wallet property
-     *
-     * @return string
-     */
-    public function getWallet(): Wallet
-    {
-        return $this->wallet;
-    }
-
-    /**
-     * Get against property
-     *
-     * @return string
-     */
-    public function getAgainst(): Wallet
-    {
-        return $this->against;
-    }
-}
+/**
+ * Deprecated misspelling of {@see IncompatibleWalletsException}.
+ *
+ * This is an alias rather than a subclass, so the two names resolve to the
+ * same class: existing `catch (IncompactibleWalletsException $e)` blocks keep
+ * working even though the package now throws the correctly spelled name.
+ *
+ * @deprecated Use \Walletable\Exceptions\IncompatibleWalletsException. Removed in the next major.
+ */
+class_alias(IncompatibleWalletsException::class, IncompactibleWalletsException::class);

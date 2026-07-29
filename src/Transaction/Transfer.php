@@ -2,7 +2,7 @@
 
 namespace Walletable\Transaction;
 
-use Walletable\Exceptions\IncompactibleWalletsException;
+use Walletable\Exceptions\IncompatibleWalletsException;
 use Walletable\Exceptions\InsufficientBalanceException;
 use Walletable\Facades\Walletable;
 use Walletable\Internals\Actions\ActionData;
@@ -39,8 +39,8 @@ class Transfer
             throw new InsufficientBalanceException($this->sender, $this->amount);
         }
 
-        if (!$this->sender->compactible($this->receiver)) {
-            throw new IncompactibleWalletsException($this->sender, $this->receiver);
+        if (!$this->sender->compatible($this->receiver)) {
+            throw new IncompatibleWalletsException($this->sender, $this->receiver);
         }
 
         $draft = TransactionDraft::transfer(
