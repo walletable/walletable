@@ -4,77 +4,47 @@ namespace Walletable\Tests;
 
 use Walletable\Internals\Actions\ActionData;
 use Walletable\Internals\Actions\ActionInterface;
-use Walletable\Models\Transaction;
+use Walletable\Ledger\PostingDraft;
+use Walletable\Models\Posting;
 
 class TestAction implements ActionInterface
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function apply(Transaction $transaction, ActionData $data)
+    public function apply(PostingDraft $posting, ActionData $data)
     {
-        //
+        $posting->setAction('test');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function title(Transaction $transaction)
+    public function title(Posting $posting)
     {
         return 'Test Transaction';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function image(Transaction $transaction)
+    public function image(Posting $posting)
     {
         return '/image/test/transaction.jpg';
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function supportDebit(): bool
     {
         return true;
     }
 
-
-    /**
-     * {@inheritdoc}
-     */
     public function supportCredit(): bool
     {
         return true;
     }
 
-    /**
-     * Check if the action reversal
-     *
-     * @return bool
-     */
-    public function reversable(Transaction $transaction): bool
+    public function reversable(Posting $posting): bool
     {
         return false;
     }
 
-    /**
-     * Hook to the reversal to perform extra tasks
-     *
-     * @return self
-     */
-    public function reverse(Transaction $transaction, Transaction $new): ActionInterface
+    public function reverse(Posting $posting, Posting $new): ActionInterface
     {
         return $this;
     }
 
-    /**
-     * Get the resource or a transaction method
-     *
-     * @return mixed
-     */
-    public function methodResource(Transaction $transaction)
+    public function methodResource(Posting $posting)
     {
         return null;
     }

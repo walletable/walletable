@@ -5,111 +5,75 @@ namespace Walletable\Transaction;
 use Closure;
 use Walletable\Internals\Actions\ActionData;
 use Walletable\Internals\Actions\ActionInterface;
-use Walletable\Models\Transaction;
+use Walletable\Ledger\PostingDraft;
+use Walletable\Models\Posting;
 use Walletable\Models\Wallet;
 
 class TransferAction implements ActionInterface
 {
     /**
-     * Custom closure to get resource of a transaction method
-     *
-     * @var \Closure
+     * Optional resolver for the posting's method resource (overrides the
+     * default of returning the persisted morph target).
      */
-    protected static $methodResourceUsing;
+    protected static ?Closure $methodResourceUsing = null;
 
-    /**
-     * {@inheritdoc}
-     */
-    public function apply(Transaction $transaction, ActionData $data)
+    public function apply(PostingDraft $posting, ActionData $data)
     {
         $sender = $data->argument(0)->isA(Wallet::class)->value();
         $receiver = $data->argument(1)->isA(Wallet::class)->value();
 
-        if ($transaction->type == 'credit') {
-            $transaction->forceFill([
-                'action' => 'transfer',
-                'method_id' => $sender->walletable->getKey(),
-                'method_type' => $sender->walletable->getMorphClass()
-            ]);
-        }
+        $counterparty = $posting->isCredit() ? $sender : $receiver;
 
-        if ($transaction->type == 'debit') {
-            $transaction->forceFill([
-                'action' => 'transfer',
-                'method_id' => $receiver->walletable->getKey(),
-                'method_type' => $receiver->walletable->getMorphClass()
-            ]);
-        }
+        $posting->setAction('transfer');
+        $posting->method(
+            $counterparty->walletable->getMorphClass(),
+            (string) $counterparty->walletable->getKey()
+        );
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function title(Transaction $transaction)
+    public function title(Posting $posting)
     {
-        return $transaction->method->getOwnerName();
+        return $posting->method ? $posting->method->getOwnerName() : null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function image(Transaction $transaction)
+    public function image(Posting $posting)
     {
-        return $transaction->method->getOwnerImage();
+        return $posting->method ? $posting->method->getOwnerImage() : null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function supportDebit(): bool
     {
         return true;
     }
 
-
-    /**
-     * {@inheritdoc}
-     */
     public function supportCredit(): bool
     {
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function reversable(Transaction $transaction): bool
+    public function reversable(Posting $posting): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function reverse(Transaction $transaction, Transaction $new): ActionInterface
+    public function reverse(Posting $posting, Posting $new): ActionInterface
     {
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function methodResource(Transaction $transaction)
+    public function methodResource(Posting $posting)
     {
         if (static::$methodResourceUsing) {
-            return call_user_func_array(static::$methodResourceUsing, [$this, $transaction]);
+            return call_user_func_array(static::$methodResourceUsing, [$this, $posting]);
         }
 
-        return $transaction->method;
+        return $posting->method;
     }
 
     /**
-     * Get the resource of a transaction method using closure
-     *
-     * @param Closure $closure
-     * @return void
+     * Override how methodResource() resolves the resource for a posting.
      */
-    public static function methodResourceUsing(Closure $closure)
+    public static function methodResourceUsing(Closure $closure): void
     {
         static::$methodResourceUsing = $closure;
     }

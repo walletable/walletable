@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Walletable\Models\Wallet as Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Wallet extends Model
 {
@@ -18,10 +17,9 @@ class Wallet extends Model
         'amount',
         'currency',
         'meta',
-        'driver',
         'status',
         'walletable_id',
-        'walletable_type'
+        'walletable_type',
     ];
 
     /**
@@ -30,6 +28,6 @@ class Wallet extends Model
      * @var array
      */
     protected $casts = [
-        'meta' => 'array'
+        'meta' => 'array',
     ];
 }

@@ -1,30 +1,33 @@
 <?php
 
-namespace Walletable\Transaction;
+namespace Walletable\Tests;
 
 use Walletable\Internals\Actions\ActionData;
 use Walletable\Internals\Actions\ActionInterface;
+use Walletable\Internals\Actions\AppliesToTransaction;
 use Walletable\Ledger\PostingDraft;
+use Walletable\Ledger\TransactionDraft;
 use Walletable\Models\Posting;
-use Walletable\Models\Wallet;
 
-class CreditDebitAction implements ActionInterface
+/**
+ * Action that decorates both the posting legs and the transaction header,
+ * writing an application-declared column.
+ */
+class TestColumnAction implements ActionInterface, AppliesToTransaction
 {
     public function apply(PostingDraft $posting, ActionData $data)
     {
-        $data->argument(0)->isA(Wallet::class);
+        $posting->setAction('test_column');
+    }
 
-        $title = $data->argument(1)->type('string')->value(
-            $posting->isCredit() ? 'Credit' : 'Debit'
-        );
-
-        $posting->setAction('credit_debit');
-        $posting->setMeta('title', $title);
+    public function applyToTransaction(TransactionDraft $draft, ActionData $data): void
+    {
+        $draft->set('channel', $data->argument(1)->type('string')->value('web'));
     }
 
     public function title(Posting $posting)
     {
-        return $posting->meta('title');
+        return 'Test Column Transaction';
     }
 
     public function image(Posting $posting)

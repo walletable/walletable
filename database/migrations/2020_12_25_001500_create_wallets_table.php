@@ -26,13 +26,14 @@ class CreateWalletsTable extends Migration
             $table->string('walletable_type', 45);
             $table->string('label', 45);
             $table->string('tag', 45)->index();
-            $table->unsignedBigInteger('amount');
+            $table->bigInteger('amount')->default(0);
             $table->string('currency', 10);
             $table->enum('status', ['active', 'blocked'])->default('active')->index();
             $table->json('meta')->nullable();
             $table->timestamps();
 
             $table->index(['walletable_id', 'walletable_type']);
+            $table->index(['currency']);
         });
     }
 

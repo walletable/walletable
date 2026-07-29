@@ -2,59 +2,34 @@
 
 namespace Walletable\Internals\Actions;
 
-use Walletable\Models\Transaction;
+use Walletable\Models\Posting;
 
 class ActionManager
 {
-    /**
-     * The transaction
-     *
-     * @var \Walletable\Models\Transaction
-     */
-    protected $transaction;
+    protected Posting $posting;
+    protected ActionInterface $action;
 
-    /**
-     * The transaction
-     *
-     * @var \Walletable\Internals\Actions\ActionInterface
-     */
-    protected $action;
-
-    public function __construct(Transaction $transaction, ActionInterface $action)
+    public function __construct(Posting $posting, ActionInterface $action)
     {
-        $this->transaction = $transaction;
+        $this->posting = $posting;
         $this->action = $action;
     }
 
-    /**
-     * Returns the title
-     */
     public function title()
     {
-        return $this->action->title($this->transaction);
+        return $this->action->title($this->posting);
     }
 
-    /**
-     * Returns the image
-     */
     public function image()
     {
-        return $this->action->image($this->transaction);
+        return $this->action->image($this->posting);
     }
 
-    /**
-     * Returns the method resource
-     */
     public function resource()
     {
-        return $this->action->methodResource($this->transaction);
+        return $this->action->methodResource($this->posting);
     }
 
-    /**
-     * Get the raw action object
-     *
-     * @return ActionInterface
-     */
     public function getAction(): ActionInterface
     {
         return $this->action;

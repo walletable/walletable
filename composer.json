@@ -41,6 +41,19 @@
      "scripts": {
          "test": "./vendor/bin/phpunit"
      },
+    "config": {
+        "policy": {
+            "advisories": {
+                "ignore": {
+                    "laravel/framework": {
+                        "constraint": "<12",
+                        "on-audit": false,
+                        "reason": "The test matrix covers EOL Laravel branches, which no longer receive advisory fixes. Blocking them leaves no installable version; audit still reports them."
+                    }
+                }
+            }
+        }
+    },
     "extra": {
         "laravel": {
             "providers": [

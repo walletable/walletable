@@ -15,6 +15,10 @@ use Walletable\WalletableManager;
  * @method static void mixin($mixin, $replace = true)
  * @method static \Walletable\Internals\Lockers\LockerInterface|void locker(string $name, $locker = null)
  * @method static \Walletable\Internals\Actions\ActionInterface|void action(string $name, $action = null)
+ * @method static \Walletable\WalletableManager extendTransaction(array|string $columns)
+ * @method static array transactionColumns()
+ * @method static bool allowsTransactionColumn(string $column)
+ * @method static void flushTransactionColumns()
  */
 class Walletable extends Facade
 {

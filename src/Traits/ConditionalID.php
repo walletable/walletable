@@ -15,16 +15,37 @@ trait ConditionalID
         parent::boot();
 
         static::creating(function ($model) {
-            
             $model_id = config('walletable.model_id');
 
             if ($model_id !== 'default' && empty($model->{$model->getKeyName()})) {
-                
-                $modelId = ($model_id === 'uuid') ? (string) config('walletable.uuid_driver') : strtolower((string) Str::ulid());
-
-                $model->{$model->getKeyName()} = $modelId;
+                $model->{$model->getKeyName()} = $model_id === 'uuid'
+                    ? (string) Str::orderedUuid()
+                    : strtolower((string) Str::ulid());
             }
         });
+    }
+
+    /**
+     * Foreign keys referencing walletable's own tables, which follow the same
+     * key strategy as the primary keys.
+     *
+     * @return array<int, string>
+     */
+    protected function walletableKeys(): array
+    {
+        return [];
+    }
+
+    /**
+     * Cast the walletable foreign keys to the configured key type. Uncast, their
+     * PHP type is decided by the driver: PHP 8.0 and emulated prepares return
+     * strings where later versions return integers.
+     */
+    public function initializeConditionalID(): void
+    {
+        $this->mergeCasts(
+            array_fill_keys($this->walletableKeys(), $this->getKeyType())
+        );
     }
 
     /**

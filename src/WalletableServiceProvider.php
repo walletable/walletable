@@ -2,12 +2,15 @@
 
 namespace Walletable;
 
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
-use Walletable\WalletableManager;
 use Walletable\Commands\InstallCommand;
+use Walletable\Commands\ReconcileCommand;
+use Walletable\Commands\SyncHouseAccountsCommand;
 use Walletable\Facades\Walletable;
 use Walletable\Internals\Lockers\OptimisticLocker;
 use Walletable\Internals\Mutation\MutatorManager;
+use Walletable\Models\HouseAccount;
 use Walletable\Money\Formatter\IntlMoneyFormatter;
 use Walletable\Money\Money;
 use Walletable\Transaction\CreditDebitAction;
@@ -15,22 +18,12 @@ use Walletable\Transaction\TransferAction;
 
 class WalletableServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     *
-     * @return void
-     */
     public function register()
     {
         $this->app->singleton(WalletableManager::class);
         $this->app->singleton(MutatorManager::class);
     }
 
-    /**
-     * Bootstrap any application services.
-     *
-     * @return void
-     */
     public function boot()
     {
         Money::formatter('intl', function () {
@@ -38,6 +31,10 @@ class WalletableServiceProvider extends ServiceProvider
                 new \NumberFormatter('en_US', \NumberFormatter::CURRENCY)
             );
         });
+
+        Relation::morphMap([
+            'house_account' => HouseAccount::class,
+        ]);
 
         Walletable::locker('optimistic', OptimisticLocker::class);
 
@@ -48,15 +45,10 @@ class WalletableServiceProvider extends ServiceProvider
         $this->addCommands();
     }
 
-    /**
-     * Register Walletable's publishable files.
-     *
-     * @return void
-     */
     public function addPublishes()
     {
         $this->publishes([
-            __DIR__ . '/../config/walletable.php' => config_path('walletable.php')
+            __DIR__ . '/../config/walletable.php' => config_path('walletable.php'),
         ], 'walletable.config');
 
         $this->publishes([
@@ -68,16 +60,13 @@ class WalletableServiceProvider extends ServiceProvider
         ], 'walletable.models');
     }
 
-    /**
-     * Register Walletable's commands.
-     *
-     * @return void
-     */
     protected function addCommands()
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
                 InstallCommand::class,
+                ReconcileCommand::class,
+                SyncHouseAccountsCommand::class,
             ]);
         }
     }
