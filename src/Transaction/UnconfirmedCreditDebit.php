@@ -29,6 +29,7 @@ class UnconfirmedCreditDebit
 
     protected ?ActionInterface $action = null;
     protected ?ActionData $actionData = null;
+    protected ?string $idempotencyKey = null;
 
     public function __construct(
         string $type,
@@ -66,6 +67,17 @@ class UnconfirmedCreditDebit
         return $this;
     }
 
+    /**
+     * De-duplicate this operation under the given key: a repeat call returns the
+     * transaction parked by the first one instead of parking a second one.
+     */
+    public function idempotent(?string $key): self
+    {
+        $this->idempotencyKey = $key;
+
+        return $this;
+    }
+
     public function execute(): Transaction
     {
         $action = $this->action ?? Walletable::action('credit_debit');
@@ -84,7 +96,7 @@ class UnconfirmedCreditDebit
             $this->amount,
             'credit_debit',
             $this->remarks
-        )->pending();
+        )->pending()->idempotent($this->idempotencyKey);
 
         $data = $this->actionData ?? new ActionData($this->wallet, $this->title);
 

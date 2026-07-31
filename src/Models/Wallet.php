@@ -89,56 +89,110 @@ class Wallet extends Model implements WalletInterface
 
     /**
      * Transfer to another wallet. Posts a balanced transaction; returns it.
+     *
+     * Pass $idempotencyKey to make retries safe: a repeat call with the same key
+     * returns the original transaction instead of transferring again.
      */
-    public function transfer(self $wallet, $amount, ?string $remarks = null): Transaction
-    {
+    public function transfer(
+        self $wallet,
+        $amount,
+        ?string $remarks = null,
+        ?string $idempotencyKey = null
+    ): Transaction {
         $amount = $this->normaliseAmount($amount);
-        return (new Transfer($this, $amount, $wallet, $remarks))->execute();
+        return (new Transfer($this, $amount, $wallet, $remarks))
+            ->idempotent($idempotencyKey)
+            ->execute();
     }
 
     /**
-     * Confirm a pending transaction that targets this wallet.
+     * Confirm a pending transaction that targets this wallet. Retrying a
+     * confirmation is safe: an already-posted transaction is returned as-is.
      */
     public function confirm(Transaction $transaction): Transaction
     {
-        if (!$transaction->isPending()) {
+        if (!$transaction->isPending() && !$transaction->isPosted()) {
             throw new InvalidArgumentException('Only pending transactions can be confirmed.');
         }
 
-        // Sanity: at least one posting on this transaction must touch this wallet.
-        $raw = $transaction->getRawOriginal('draft_postings');
-        $drafts = is_array($raw) ? $raw : (is_string($raw) ? json_decode($raw, true) : []);
-        $touchesThis = collect($drafts ?? [])
-            ->contains(fn($d) => (string)($d['wallet_id'] ?? '') === (string)$this->getKey());
-        if (!$touchesThis) {
+        if (!$this->isALegOf($transaction)) {
             throw new InvalidArgumentException('Transaction does not affect this wallet.');
         }
 
         return (new Confirmation($this, $transaction))->execute();
     }
 
-    public function unconfirmedCredit($amount, ?string $title = null, ?string $remarks = null): Transaction
+    /**
+     * Whether this wallet is one of the transaction's legs: read from the parked
+     * drafts while it is pending, and from the written postings once it is not.
+     */
+    protected function isALegOf(Transaction $transaction): bool
     {
-        $amount = $this->normaliseAmount($amount);
-        return (new UnconfirmedCreditDebit('credit', $this, $amount, $title, $remarks))->execute();
+        if (!$transaction->isPending()) {
+            return $transaction->postings()->where('wallet_id', $this->getKey())->exists();
+        }
+
+        $raw = $transaction->getRawOriginal('draft_postings');
+        $drafts = is_array($raw) ? $raw : (is_string($raw) ? json_decode($raw, true) : []);
+
+        return collect($drafts ?? [])
+            ->contains(fn($d) => (string)($d['wallet_id'] ?? '') === (string)$this->getKey());
     }
 
-    public function unconfirmedDebit($amount, ?string $title = null, ?string $remarks = null): Transaction
-    {
+    public function unconfirmedCredit(
+        $amount,
+        ?string $title = null,
+        ?string $remarks = null,
+        ?string $idempotencyKey = null
+    ): Transaction {
         $amount = $this->normaliseAmount($amount);
-        return (new UnconfirmedCreditDebit('debit', $this, $amount, $title, $remarks))->execute();
+        return (new UnconfirmedCreditDebit('credit', $this, $amount, $title, $remarks))
+            ->idempotent($idempotencyKey)
+            ->execute();
     }
 
-    public function credit($amount, ?string $title = null, ?string $remarks = null): Transaction
-    {
+    public function unconfirmedDebit(
+        $amount,
+        ?string $title = null,
+        ?string $remarks = null,
+        ?string $idempotencyKey = null
+    ): Transaction {
         $amount = $this->normaliseAmount($amount);
-        return (new CreditDebit('credit', $this, $amount, $title, $remarks))->execute();
+        return (new UnconfirmedCreditDebit('debit', $this, $amount, $title, $remarks))
+            ->idempotent($idempotencyKey)
+            ->execute();
     }
 
-    public function debit($amount, ?string $title = null, ?string $remarks = null): Transaction
-    {
+    /**
+     * Pass $idempotencyKey to make retries safe: a repeat call with the same key
+     * returns the original transaction instead of crediting again.
+     */
+    public function credit(
+        $amount,
+        ?string $title = null,
+        ?string $remarks = null,
+        ?string $idempotencyKey = null
+    ): Transaction {
         $amount = $this->normaliseAmount($amount);
-        return (new CreditDebit('debit', $this, $amount, $title, $remarks))->execute();
+        return (new CreditDebit('credit', $this, $amount, $title, $remarks))
+            ->idempotent($idempotencyKey)
+            ->execute();
+    }
+
+    /**
+     * Pass $idempotencyKey to make retries safe: a repeat call with the same key
+     * returns the original transaction instead of debiting again.
+     */
+    public function debit(
+        $amount,
+        ?string $title = null,
+        ?string $remarks = null,
+        ?string $idempotencyKey = null
+    ): Transaction {
+        $amount = $this->normaliseAmount($amount);
+        return (new CreditDebit('debit', $this, $amount, $title, $remarks))
+            ->idempotent($idempotencyKey)
+            ->execute();
     }
 
     public function money(int $amount): Money

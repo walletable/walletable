@@ -3,7 +3,6 @@
 namespace Walletable\Transaction;
 
 use Walletable\Exceptions\IncompatibleWalletsException;
-use Walletable\Exceptions\InsufficientBalanceException;
 use Walletable\Facades\Walletable;
 use Walletable\Internals\Actions\ActionData;
 use Walletable\Internals\Actions\AppliesToTransaction;
@@ -24,6 +23,7 @@ class Transfer
     protected Wallet $receiver;
     protected Money $amount;
     protected ?string $remarks;
+    protected ?string $idempotencyKey = null;
 
     public function __construct(Wallet $sender, Money $amount, Wallet $receiver, ?string $remarks = null)
     {
@@ -33,12 +33,19 @@ class Transfer
         $this->remarks = $remarks;
     }
 
+    /**
+     * De-duplicate this transfer under the given key: a repeat call returns the
+     * transaction posted by the first one instead of moving money again.
+     */
+    public function idempotent(?string $key): self
+    {
+        $this->idempotencyKey = $key;
+
+        return $this;
+    }
+
     public function execute(): Transaction
     {
-        if ($this->sender->amount->lessThan($this->amount)) {
-            throw new InsufficientBalanceException($this->sender, $this->amount);
-        }
-
         if (!$this->sender->compatible($this->receiver)) {
             throw new IncompatibleWalletsException($this->sender, $this->receiver);
         }
@@ -49,7 +56,7 @@ class Transfer
             $this->amount,
             'transfer',
             $this->remarks
-        );
+        )->idempotent($this->idempotencyKey);
 
         $action = Walletable::action('transfer');
 

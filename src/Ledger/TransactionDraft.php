@@ -22,6 +22,12 @@ class TransactionDraft
     public ?array $meta = null;
 
     /**
+     * Caller-supplied de-duplication key. When set, PostTransaction returns the
+     * transaction already written under this key instead of posting a second one.
+     */
+    public ?string $idempotencyKey = null;
+
+    /**
      * Extra top-level columns for the transaction row, keyed by column name.
      * Held as-is: the application declares which columns are legal through
      * Walletable::extendTransaction(), and PostTransaction enforces it.
@@ -102,6 +108,69 @@ class TransactionDraft
         $this->referenceType = $type;
         $this->referenceId = $id;
         return $this;
+    }
+
+    /**
+     * De-duplicate this draft under the given key. Passing null or an empty
+     * string leaves the draft non-idempotent.
+     */
+    public function idempotent(?string $key): self
+    {
+        $this->idempotencyKey = ($key === null || $key === '') ? null : $key;
+        return $this;
+    }
+
+    /**
+     * Digest of everything that makes this draft financially distinct: the
+     * currency, whether it posts immediately, its external reference, the
+     * application-declared columns, and each leg's wallet, direction, amount,
+     * action and method.
+     *
+     * Take the fingerprint after the action has decorated the draft, so that
+     * whatever the ActionData resolved to — the counterparty on each leg, the
+     * staged columns — is covered. Reusing a key with a different counterparty
+     * is a conflict, not a replay.
+     *
+     * Narration and meta are deliberately excluded — they vary between retries
+     * of the same intent and are not worth rejecting a replay over.
+     *
+     * @throws \RuntimeException when a staged value cannot be encoded, and so
+     *                           cannot be told apart from any other such value.
+     */
+    public function fingerprint(): string
+    {
+        $attributes = $this->attributes;
+        ksort($attributes);
+
+        try {
+            $payload = json_encode([
+                'currency' => $this->currency,
+                'status' => $this->status,
+                'reference_type' => $this->referenceType,
+                'reference_id' => $this->referenceId,
+                'attributes' => $attributes,
+                'postings' => array_map(fn(PostingDraft $p) => [
+                    'wallet_id' => (string) $p->wallet->getKey(),
+                    'direction' => $p->direction,
+                    'amount' => $p->amount->integer(),
+                    'currency' => $p->amount->getCurrency()->getCode(),
+                    'action' => $p->action,
+                    'method_type' => $p->methodType,
+                    'method_id' => $p->methodId,
+                ], $this->postings),
+            ], JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            // Every unencodable payload would otherwise digest to the same
+            // value, and two drafts sharing a fingerprint replay as one another.
+            throw new \RuntimeException(
+                'Cannot fingerprint this transaction for idempotency: a staged value is not ' .
+                'JSON-encodable. Store an encodable representation, or drop the idempotency key.',
+                0,
+                $e
+            );
+        }
+
+        return hash('sha256', $payload);
     }
 
     /**

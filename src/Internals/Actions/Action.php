@@ -25,39 +25,59 @@ class Action
         $this->action = $action;
     }
 
-    public function unconfirmedCredit($amount, ActionData $data, ?string $remarks = null): Transaction
-    {
+    public function unconfirmedCredit(
+        $amount,
+        ActionData $data,
+        ?string $remarks = null,
+        ?string $idempotencyKey = null
+    ): Transaction {
         $amount = $this->normalise($amount);
 
         return (new UnconfirmedCreditDebit('credit', $this->wallet, $amount, null, $remarks))
             ->setAction($this->action, $data)
+            ->idempotent($idempotencyKey)
             ->execute();
     }
 
-    public function unconfirmedDebit($amount, ActionData $data, ?string $remarks = null): Transaction
-    {
+    public function unconfirmedDebit(
+        $amount,
+        ActionData $data,
+        ?string $remarks = null,
+        ?string $idempotencyKey = null
+    ): Transaction {
         $amount = $this->normalise($amount);
 
         return (new UnconfirmedCreditDebit('debit', $this->wallet, $amount, null, $remarks))
             ->setAction($this->action, $data)
+            ->idempotent($idempotencyKey)
             ->execute();
     }
 
-    public function credit($amount, ActionData $data, ?string $remarks = null): Transaction
-    {
+    public function credit(
+        $amount,
+        ActionData $data,
+        ?string $remarks = null,
+        ?string $idempotencyKey = null
+    ): Transaction {
         $amount = $this->normalise($amount);
 
         return (new CreditDebit('credit', $this->wallet, $amount, null, $remarks))
             ->setAction($this->action, $data)
+            ->idempotent($idempotencyKey)
             ->execute();
     }
 
-    public function debit($amount, ActionData $data, ?string $remarks = null): Transaction
-    {
+    public function debit(
+        $amount,
+        ActionData $data,
+        ?string $remarks = null,
+        ?string $idempotencyKey = null
+    ): Transaction {
         $amount = $this->normalise($amount);
 
         return (new CreditDebit('debit', $this->wallet, $amount, null, $remarks))
             ->setAction($this->action, $data)
+            ->idempotent($idempotencyKey)
             ->execute();
     }
 

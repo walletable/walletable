@@ -14,6 +14,8 @@ class CreateTransactionsTable extends Migration
             $table->id();
             $table->string('currency', 10);
             $table->enum('status', ['pending', 'posted', 'voided'])->default('pending');
+            $table->string('idempotency_key', 100)->nullable()->unique();
+            $table->string('idempotency_hash', 64)->nullable();
             $table->dateTime('posted_at')->nullable();
             $table->string('narration', 200)->nullable();
             $table->string('reference_type', 45)->nullable();

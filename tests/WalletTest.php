@@ -4,6 +4,7 @@ namespace Walletable\Tests;
 
 use Illuminate\Support\Facades\Event;
 use Walletable\Events\TransactionConfirmed;
+use Walletable\Events\TransactionCreating;
 use Walletable\Events\TransactionPosted;
 use Walletable\Exceptions\IncompatibleWalletsException;
 use Walletable\Exceptions\InsufficientBalanceException;
@@ -11,6 +12,8 @@ use Walletable\Facades\Mutator;
 use Walletable\Internals\Actions\Action;
 use Walletable\Models\HouseAccount;
 use Walletable\Money\Money;
+use Walletable\Tests\Models\Posting;
+use Walletable\Tests\Models\Transaction;
 use Walletable\Tests\Models\Wallet;
 use Walletable\Tests\Models\Walletable;
 use Walletable\Transaction\CreditDebitAction;
@@ -179,6 +182,29 @@ class WalletTest extends TestBench
         $wallet = $this->createWallet(0);
 
         $wallet->debit(50000, 'Test Debit', 'Debiting in test runtime');
+    }
+
+    /**
+     * An overdraft is refused before anything observable happens: no listener
+     * is told about a draft that is going to be rejected, and no row survives.
+     */
+    public function testOverdraftIsRefusedBeforeAnythingIsWritten()
+    {
+        Event::fake([TransactionCreating::class, TransactionPosted::class]);
+
+        $wallet = $this->createWallet(0);
+
+        try {
+            $wallet->debit(50000, 'Test Debit');
+            $this->fail('Expected an ' . InsufficientBalanceException::class);
+        } catch (InsufficientBalanceException $exception) {
+            //
+        }
+
+        Event::assertNotDispatched(TransactionCreating::class);
+        Event::assertNotDispatched(TransactionPosted::class);
+        $this->assertSame(0, Transaction::query()->count());
+        $this->assertSame(0, Posting::query()->count());
     }
 
     public function testActionObjects()

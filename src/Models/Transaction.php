@@ -24,6 +24,8 @@ use Walletable\Traits\ConditionalID;
  * @property int $id
  * @property string $currency
  * @property string $status            pending | posted | voided
+ * @property string|null $idempotency_key
+ * @property string|null $idempotency_hash
  * @property \Illuminate\Support\Carbon|null $posted_at
  * @property string|null $narration
  * @property string|null $reference_type
@@ -49,6 +51,8 @@ class Transaction extends Model
         'id',
         'currency',
         'status',
+        'idempotency_key',
+        'idempotency_hash',
         'posted_at',
         'narration',
         'reference_type',
@@ -64,6 +68,8 @@ class Transaction extends Model
     protected $fillable = [
         'currency',
         'status',
+        'idempotency_key',
+        'idempotency_hash',
         'posted_at',
         'narration',
         'reference_type',

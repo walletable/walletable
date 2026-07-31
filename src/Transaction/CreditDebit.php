@@ -3,7 +3,6 @@
 namespace Walletable\Transaction;
 
 use InvalidArgumentException;
-use Walletable\Exceptions\InsufficientBalanceException;
 use Walletable\Facades\Walletable;
 use Walletable\Internals\Actions\ActionData;
 use Walletable\Internals\Actions\ActionInterface;
@@ -31,6 +30,7 @@ class CreditDebit
 
     protected ?ActionInterface $action = null;
     protected ?ActionData $actionData = null;
+    protected ?string $idempotencyKey = null;
 
     public function __construct(
         string $type,
@@ -68,12 +68,19 @@ class CreditDebit
         return $this;
     }
 
+    /**
+     * De-duplicate this operation under the given key: a repeat call returns the
+     * transaction posted by the first one instead of moving money again.
+     */
+    public function idempotent(?string $key): self
+    {
+        $this->idempotencyKey = $key;
+
+        return $this;
+    }
+
     public function execute(): Transaction
     {
-        if ($this->type === 'debit' && $this->wallet->amount->lessThan($this->amount)) {
-            throw new InsufficientBalanceException($this->wallet, $this->amount);
-        }
-
         $action = $this->action ?? Walletable::action('credit_debit');
 
         if (!$action->{'support' . ucfirst($this->type)}()) {
@@ -98,7 +105,7 @@ class CreditDebit
             $this->amount,
             'credit_debit',
             $this->remarks
-        );
+        )->idempotent($this->idempotencyKey);
 
         $data = $this->actionData ?? new ActionData($this->wallet, $this->title);
 
