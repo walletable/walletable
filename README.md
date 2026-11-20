@@ -42,7 +42,7 @@
 ## Requirements
 
 - PHP 7.1+
-- Laravel 7.0+ | 8.0+ | 9.0+ | 10.0+ | 11.0+
+- Laravel 7.0+ | 8.0+ | 9.0+ | 10.0+ | 11.0+ | 12.0+ | 13.0+
 - PHP ext-intl extension
 
 ### Via Composer
